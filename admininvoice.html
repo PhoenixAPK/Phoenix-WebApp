@@ -11,34 +11,38 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-/* 1. Reset the base page */
+/* 1. Global Reset */
 html, body {
     margin: 0 !important;
     padding: 0 !important;
 }
 
-/* 2. Selection Screen: Keep this centered as it was */
+/* 2. Fix the Selection Screen (Client/Entrepreneur buttons) */
 #modePage {
     display: flex !important;
     justify-content: center !important;
-    align-items: flex-start !important;
-    padding-top: 100px !important; /* Adjust this to center the initial buttons vertically */
-    gap: 20px !important;
+    align-items: center !important;
+    height: 60vh !important; /* Keeps selection in the middle */
+    gap: 30px !important;
 }
 
-/* 3. Calculator Screen: Move this to the top (0 margin) */
+/* 3. SNAP the Calculator to the TOP (Absolute Position) */
 #calculatorPage {
-    margin-top: 0 !important;
-    padding-top: 20px !important; /* Matches your Overview alignment */
-    display: none; /* Your script handles showing/hiding this */
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding-top: 20px !important; /* Matches Overview alignment */
+    background: transparent;
+    z-index: 10;
 }
 
-/* 4. Align the Return and Mode buttons to the top edges */
+/* 4. Align the Return and Mode buttons */
 .buttons-container, .action-bar {
     display: flex !important;
     justify-content: space-between !important;
-    width: 100% !important;
-    padding: 0 40px !important;
+    padding: 0 50px !important;
     margin-bottom: 20px !important;
 }
  :root {
