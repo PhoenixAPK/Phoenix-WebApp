@@ -76,7 +76,9 @@
     };
 
     function handleRequestClick(id, mode) {
-      const target = `admininvoice.html?request_id=${id}`;
+      // FIX: Passes the creation mode to the invoice page
+      const target = `admininvoice.html?request_id=${id}&mode=${mode}`; 
+      
       try {
         window.supabaseClient
           .from('pps_queue')
@@ -85,6 +87,7 @@
           .then(({ error }) => { if (error) console.error('Status update failed:', error); })
           .catch(err => console.error('Update error:', err));
       } catch (e) { console.error(e); }
+      
       window.location.href = target;
     }
 
