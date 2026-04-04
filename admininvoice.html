@@ -11,36 +11,35 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-/* 1. Reset the base page to the very top */
+/* 1. Reset Body to the top */
 html, body {
     margin: 0 !important;
     padding: 0 !important;
-    height: 100%;
 }
 
-/* 2. Target the wrapper that holds the calculator */
+/* 2. Position the main selection screen (The buttons) */
 #modePage {
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: flex-start !important; /* Forces content to the TOP */
-    align-items: center !important;
-    padding-top: 20px !important; /* Matches your Overview alignment */
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 50px !important; /* Keep the initial buttons centered */
 }
 
-/* 3. Ensure the calculator container itself has no top push */
+/* 3. Position the calculator screen (The form) */
 #calculatorPage {
     margin-top: 0 !important;
+    padding-top: 20px !important; /* Moves the return/mode buttons to the top */
     width: 100%;
 }
 
-/* 4. Fix the Return/Mode button row position */
+/* 4. Fix the Return/Mode button alignment inside the calculator */
 .buttons-container, .action-bar {
-    margin-top: 0 !important;
-    margin-bottom: 10px !important;
-    width: 100%;
     display: flex;
     justify-content: space-between;
-    padding: 0 20px;
+    align-items: center;
+    padding: 0 10%; /* Matches form width */
+    margin-bottom: 10px;
 }
  :root {
  --glass: rgba(0, 0, 0, 0.6);
