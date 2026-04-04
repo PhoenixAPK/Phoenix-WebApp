@@ -700,39 +700,72 @@ async function downloadInvoice() {
 }
 </script>
 <script>
+<script>
 (function() {
+  // Use the global supabase object initialized in your external js files
+  const getClient = () => window.supabase || window.supabaseClient;
+
   async function getRequestFromSupabase(id) {
-    const { data, error } = await window.supabaseClient.from("pps_queue").select("*").eq("request_id", id).single();
+    const sb = getClient();
+    if (!sb) {
+      console.error("Supabase not initialized");
+      return null;
+    }
+    const { data, error } = await sb.from("pps_queue").select("*").eq("request_id", id).single();
     return error ? null : data;
   }
-  function getParam(name) { return new URL(window.location.href).searchParams.get(name); }
+
+  function getParam(name) { 
+    return new URL(window.location.href).searchParams.get(name); 
+  }
+
   async function prefill() {
     const id = getParam("request_id");
     if (!id) return;
+
     const req = await getRequestFromSupabase(id);
     if (!req) return;
-    const mode = (req.sourceMode || "client").toLowerCase();
-    mode === "entrepreneur" ? startEntrepreneurMode() : startClientMode();
-    document.getElementById("clientName").value = req.client?.name || "";
-    document.getElementById("clientContact").value = req.client?.contact || "";
-    document.getElementById("clientEmail").value = req.client?.email || "";
-    document.getElementById("clientAddress").value = req.client?.address || "";
+
+    // 1. Force the UI into the original mode
+    const mode = (req.sourceMode || "").toLowerCase();
+    if (mode === "entrepreneur") {
+      startEntrepreneurMode();
+    } else {
+      startClientMode();
+    }
+
+    // 2. Map Database fields to Form inputs
+    document.getElementById("clientName").value = req.client_name || "";
+    document.getElementById("clientContact").value = req.client_contact || "";
+    document.getElementById("clientEmail").value = req.client_email || "";
+    document.getElementById("clientAddress").value = req.client_address || "";
+    
+    // 3. Set City and trigger the automatic row generation
     const citySel = document.getElementById("clientCity");
-    if (citySel) { citySel.value = req.location?.city || ""; handleCity(); }
-    const need = (req.workspaces || []).length;
-    const have = document.querySelectorAll(".picture-row").length;
-    for (let i = have; i < need; i++) addPictureRow(false);
-    const rows = Array.from(document.querySelectorAll(".picture-row"));
-    (req.workspaces || []).forEach((w, idx) => {
-      const r = rows[idx];
-      if (!r) return;
-      r.querySelector(".height").value = w.height || 0;
-      r.querySelector(".width").value = w.width || 0;
-    });
-    calculateAreas();
+    if (citySel) { 
+      citySel.value = req.city || ""; 
+      handleCity(); 
+    }
+
+    // 4. Fill the generated rows with original dimensions
+    setTimeout(() => {
+      const workspaces = req.workspaces || [];
+      const rows = document.querySelectorAll(".picture-row");
+      
+      workspaces.forEach((w, idx) => {
+        if (rows[idx]) {
+          rows[idx].querySelector(".height").value = w.height || 0;
+          rows[idx].querySelector(".width").value = w.width || 0;
+        }
+      });
+      calculateAreas();
+    }, 100); 
   }
-  document.addEventListener("DOMContentLoaded", prefill);
+
+  // Run after everything (including cities) is loaded
+  window.addEventListener("load", prefill);
 })();
+</script>
 </script>
 </body>
 </html>
