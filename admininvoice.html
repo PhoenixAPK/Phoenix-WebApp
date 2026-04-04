@@ -11,31 +11,36 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-/* 1. Reset base page spacing */
+/* 1. Reset the base page to the very top */
 html, body {
     margin: 0 !important;
     padding: 0 !important;
+    height: 100%;
 }
 
-/* 2. Target ONLY the active calculator page to pull it up */
+/* 2. Target the wrapper that holds the calculator */
+#modePage {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important; /* Forces content to the TOP */
+    align-items: center !important;
+    padding-top: 20px !important; /* Matches your Overview alignment */
+}
+
+/* 3. Ensure the calculator container itself has no top push */
 #calculatorPage {
     margin-top: 0 !important;
-    padding-top: 20px !important; /* Standard alignment */
-    display: none; /* Keep hidden until selected by your script */
+    width: 100%;
 }
 
-/* 3. Ensure the selection buttons stay in their original layout */
-.mode-selection-vertical {
-    margin-top: 50px !important; /* Keeps the main selection centered/spaced */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* 4. Fix the Return button row specifically */
+/* 4. Fix the Return/Mode button row position */
 .buttons-container, .action-bar {
     margin-top: 0 !important;
-    margin-bottom: 15px !important;
+    margin-bottom: 10px !important;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
 }
  :root {
  --glass: rgba(0, 0, 0, 0.6);
