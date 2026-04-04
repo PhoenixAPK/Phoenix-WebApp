@@ -11,26 +11,27 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
- /* 1. Reset the base page spacing */
-body {
+/* 1. Force everything to the top of the browser */
+html, body {
     margin: 0 !important;
     padding: 0 !important;
 }
 
-/* 2. Remove the top gap from the main container */
-#calculatorPage, .mode-selection-vertical {
+/* 2. Target every possible container to kill the gap */
+#modePage, .container, .main-content, #calculatorPage, .mode-selection-vertical {
     margin-top: 0 !important;
-    padding-top: 20px !important; /* This matches the standard Overview alignment */
+    padding-top: 10px !important; 
+    display: block !important;
 }
 
-/* 3. Remove any extra margin from the button row */
-.buttons-container, .action-bar {
-    margin-top: 0 !important;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+/* 3. Disable any "Center" alignment that pushes content down */
+#modePage {
+    display: block !important;
+    height: auto !important;
+    min-height: unset !important;
+    align-items: flex-start !important;
 }
-:root {
+ :root {
  --glass: rgba(0, 0, 0, 0.6);
  --glass-border: rgba(255, 255, 255, 0.2);
  --electric-lime: #00FF87;
