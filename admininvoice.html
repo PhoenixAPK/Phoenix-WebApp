@@ -701,7 +701,7 @@ async function downloadInvoice() {
 </script>
 <script>
 (function() {
-  const getClient = () => window.supabase || window.supabaseClient;
+ const getClient = () => window.supabaseClient;
 
   async function getRequestFromSupabase(id) {
     const sb = getClient();
