@@ -11,32 +11,31 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-/* 1. Reset base elements */
+/* 1. Reset base page spacing */
 html, body {
     margin: 0 !important;
     padding: 0 !important;
-    height: 100% !important;
-}
-/* 2. Target the specific wrappers used in your project */
-#modePage, 
-#calculatorPage, 
-.mode-selection-vertical, 
-.container {
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: flex-start !important; /* Force to top */
-    align-items: stretch !important;
-    margin-top: 0 !important;
-    padding-top: 20px !important; /* Matches Overview alignment */
-    min-height: 0 !important; /* Prevents stretching to full screen */
 }
 
-/* 3. Kill any centering margins on the button row */
-.buttons-container, 
-.action-bar, 
-.top-nav-buttons {
+/* 2. Target ONLY the active calculator page to pull it up */
+#calculatorPage {
     margin-top: 0 !important;
-    margin-bottom: 20px !important;
+    padding-top: 20px !important; /* Standard alignment */
+    display: none; /* Keep hidden until selected by your script */
+}
+
+/* 3. Ensure the selection buttons stay in their original layout */
+.mode-selection-vertical {
+    margin-top: 50px !important; /* Keeps the main selection centered/spaced */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 4. Fix the Return button row specifically */
+.buttons-container, .action-bar {
+    margin-top: 0 !important;
+    margin-bottom: 15px !important;
 }
  :root {
  --glass: rgba(0, 0, 0, 0.6);
