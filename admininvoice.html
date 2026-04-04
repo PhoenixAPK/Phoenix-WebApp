@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Request an Invoice | Redefine Your Space</title>
  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
  <script src="../assets/js/supabase.js"></script>
  <script src="../assets/js/auth.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -699,17 +699,26 @@ async function downloadInvoice() {
   } catch (error) { console.error('PDF Error:', error); }
 }
 </script>
+
 <script>
 (function() {
   async function getRequestFromSupabase(id) {
+    if (!window.supabaseClient) return null;
     const { data, error } = await window.supabaseClient.from("pps_queue").select("*").eq("request_id", id).single();
     return error ? null : data;
   }
-  function getParam(name) { return new URL(window.location.href).searchParams.get(name); }
+  
+  function getParam(name) { 
+    return new URLSearchParams(window.location.search).get(name); 
+  }
+
   async function prefill() {
     const id = getParam("request_id");
-    const modeFromUrl = getParam("mode"); // Captures 'client' or 'entrepreneur' from URL
+    const modeFromUrl = getParam("mode");
     
+    // First: Populate cities so handleCity() works
+    populateCitySelect();
+
     if (!id && !modeFromUrl) return;
 
     if (id) {
@@ -717,30 +726,47 @@ async function downloadInvoice() {
       if (req) {
         const mode = (req.sourceMode || "client").toLowerCase();
         mode === "entrepreneur" ? startEntrepreneurMode() : startClientMode();
+        
         document.getElementById("clientName").value = req.client?.name || "";
         document.getElementById("clientContact").value = req.client?.contact || "";
         document.getElementById("clientEmail").value = req.client?.email || "";
         document.getElementById("clientAddress").value = req.client?.address || "";
+        
         const citySel = document.getElementById("clientCity");
-        if (citySel) { citySel.value = req.location?.city || ""; handleCity(); }
-        const need = (req.workspaces || []).length;
-        const have = document.querySelectorAll(".picture-row").length;
-        for (let i = have; i < need; i++) addPictureRow(false);
-        const rows = Array.from(document.querySelectorAll(".picture-row"));
-        (req.workspaces || []).forEach((w, idx) => {
-          const r = rows[idx];
-          if (!r) return;
-          r.querySelector(".height").value = w.height || 0;
-          r.querySelector(".width").value = w.width || 0;
-        });
-        calculateAreas();
+        if (citySel && req.location?.city) { 
+          citySel.value = req.location.city; 
+          handleCity(); // This generates the mandatory rows
+        }
+
+        // Wait a small bit for handleCity() to finish creating rows
+        setTimeout(() => {
+          const workspaceData = req.workspaces || [];
+          const currentRows = Array.from(document.querySelectorAll(".picture-row"));
+          
+          workspaceData.forEach((w, idx) => {
+            // If the saved data has more workspaces than the mandatory rows, add optional ones
+            if (idx >= currentRows.length) {
+              addPictureRow(false);
+            }
+            
+            // Re-select rows because the count might have changed
+            const rows = document.querySelectorAll(".picture-row");
+            const r = rows[idx];
+            if (r) {
+              r.querySelector(".height").value = w.height || 0;
+              r.querySelector(".width").value = w.width || 0;
+            }
+          });
+          calculateAreas();
+        }, 150);
       }
     } else if (modeFromUrl) {
-      // Logic for URL mode without request ID
       modeFromUrl.toLowerCase() === "entrepreneur" ? startEntrepreneurMode() : startClientMode();
     }
   }
-  document.addEventListener("DOMContentLoaded", prefill);
+
+  // Use load instead of DOMContentLoaded to ensure scripts are fully ready
+  window.addEventListener("load", prefill);
 })();
 </script>
 </body>
