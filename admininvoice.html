@@ -701,7 +701,6 @@ async function downloadInvoice() {
 </script>
 <script>
 (function() {
-  // Use the global supabase object initialized in your external js files
   const getClient = () => window.supabase || window.supabaseClient;
 
   async function getRequestFromSupabase(id) {
@@ -725,32 +724,38 @@ async function downloadInvoice() {
     const req = await getRequestFromSupabase(id);
     if (!req) return;
 
-    // 1. Force the UI into the original mode
-    const mode = (req.sourceMode || "").toLowerCase();
+    // 1. Set mode based on database sourceMode
+    const mode = (req.sourceMode || "client").toLowerCase();
     if (mode === "entrepreneur") {
       startEntrepreneurMode();
     } else {
       startClientMode();
     }
 
-    // 2. Map Database fields to Form inputs
-    document.getElementById("clientName").value = req.client_name || "";
-    document.getElementById("clientContact").value = req.client_contact || "";
-    document.getElementById("clientEmail").value = req.client_email || "";
-    document.getElementById("clientAddress").value = req.client_address || "";
+    // 2. Map fields using the nested 'client' and 'location' objects from your DB
+    document.getElementById("clientName").value = req.client?.name || "";
+    document.getElementById("clientContact").value = req.client?.contact || "";
+    document.getElementById("clientEmail").value = req.client?.email || "";
+    document.getElementById("clientAddress").value = req.client?.address || "";
     
-    // 3. Set City and trigger the automatic row generation
+    // 3. Set City and trigger row generation
     const citySel = document.getElementById("clientCity");
     if (citySel) { 
-      citySel.value = req.city || ""; 
+      citySel.value = req.location?.city || ""; 
       handleCity(); 
     }
 
-    // 4. Fill the generated rows with original dimensions
+    // 4. Populate measurements after rows are generated
     setTimeout(() => {
       const workspaces = req.workspaces || [];
-      const rows = document.querySelectorAll(".picture-row");
       
+      // Ensure enough rows exist for optional workspaces
+      const have = document.querySelectorAll(".picture-row").length;
+      for (let i = have; i < workspaces.length; i++) {
+        addPictureRow(false);
+      }
+
+      const rows = document.querySelectorAll(".picture-row");
       workspaces.forEach((w, idx) => {
         if (rows[idx]) {
           rows[idx].querySelector(".height").value = w.height || 0;
@@ -758,13 +763,11 @@ async function downloadInvoice() {
         }
       });
       calculateAreas();
-    }, 100); 
+    }, 300); // Increased delay to ensure handleCity() finishes DOM updates
   }
 
-  // Run after everything (including cities) is loaded
   window.addEventListener("load", prefill);
 })();
-</script>
 </script>
 </body>
 </html>
