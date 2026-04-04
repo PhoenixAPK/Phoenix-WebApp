@@ -349,6 +349,10 @@
  #calculatorPage .client-info{ grid-template-columns: repeat(3, 1fr) !important; }
  #calculatorPage .costs{ grid-template-columns: repeat(3, 1fr) !important; }
  #calculatorPage .client-info > div, #calculatorPage .costs > div{ min-width:0 !important; }
+ /* Reduce top margin only for client/entrepreneur mode */
+#invoiceDisplay .container {
+    margin-top: 24px !important; /* adjust 24px as needed */
+}
  </style>
 
 <style id="admininvoice-shell-normalization">
