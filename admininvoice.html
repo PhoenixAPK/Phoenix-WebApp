@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Request an Invoice | Redefine Your Space</title>
+<title>Phoenix Printing Solutions | Redefine Your Space</title>
  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
  <script src="../assets/js/supabase.js"></script>
  <script src="../assets/js/auth.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -20,7 +20,14 @@
  --pps-green: #046C4E;
  }
  * { margin: 0; padding: 0; box-sizing: border-box; }
- body { background: transparent; }
+ body {
+ font-family: 'Plus Jakarta Sans', sans-serif;
+ background: #020605 url('../assets/images/PPS Background.png') no-repeat center center fixed;
+ background-size: cover;
+ color: #fff;
+ overflow-x: hidden;
+ display: block !important;
+ }
  body::before {
  content: '';
  position: fixed;
@@ -350,88 +357,18 @@
  #calculatorPage .costs{ grid-template-columns: repeat(3, 1fr) !important; }
  #calculatorPage .client-info > div, #calculatorPage .costs > div{ min-width:0 !important; }
  </style>
-
-<style id="admininvoice-shell-normalization">
-/* ===== GLOBAL BASE ===== */
-html, body { background:#f2f3f5 !important; }
-* { box-shadow:none !important; text-shadow:none !important; animation:none !important; }
-
-/* ===== REMOVE HEADER / FOOTER / STANDALONE CHROME ===== */
-nav, header, footer, .header, .footer { display:none !important; }
-
-/* ===== REMOVE OVERLAYS / PANELS ===== */
-body::before { display:none !important; }
-.container, .main-content, .mode-selection-vertical,
-.queue-container, .invoice-container {
-  background:transparent !important;
-}
-
-/* ===== BUTTONS : COPY SHELL STYLE ===== */
-button, .btn, .mode-button, .nav-btn, .return-btn {
-  background:#e5e7eb !important;
-  color:#111827 !important;
-  border:none !important;
-}
-button:hover, .btn:hover, .mode-button:hover, .nav-btn:hover,
-button:focus, .btn:focus, .mode-button:focus, .nav-btn:focus,
-button:active, .btn:active, .mode-button:active, .nav-btn:active {
-  background:#d1d5db !important;
-  color:#111827 !important;
-}
-
-/* ===== MODE INDICATOR (NON-CLICKABLE) ===== */
-#modeLabel, .mode-label, .mode-badge {
-  background:#e5e7eb !important;
-  color:#111827 !important;
-  pointer-events:none !important;
-}
-
-/* ===== FORCE DARK TEXT EVERYWHERE ===== */
-body, h1,h2,h3,h4,h5,h6,p,span,div,label,th,td {
-  color:#111827 !important;
-}
-
-/* ===== REMOVE ALL GREEN / YELLOW ACCENTS ===== */
-*:where([
-  style*="#046C4E"],
-  style*="#066d44"],
-  style*="#2e7d32"],
-  style*="#00FF87"],
-  style*="#FFD700"],
-  style*="#FFA500"],
-  style*="#ffcc00"]
-) {
-  background:#e5e7eb !important;
-  color:#111827 !important;
-}
-
-/* ===== INVOICE DOCUMENT ITSELF ===== */
-.invoice-container,
-.invoice-table th,
-.invoice-table td.total,
-.invoice-grand-total,
-.invoice-additional-costs tr,
-.invoice-table th {
-  background:#e5e7eb !important;
-  color:#111827 !important;
-}
-
-.invoice-table td,
-.invoice-client-line,
-.invoice-footer {
-  color:#111827 !important;
-  background:transparent !important;
-}
-
-/* REMOVE GREEN TABLE HEADERS / BARS */
-.invoice-table th { border-color:#d1d5db !important; }
-
-</style>
-
-<style>.invoice-container{background: transparent !important;}.invoice-header{background: transparent !important;}.invoice-table{background: transparent !important;}.invoice-table th{background: transparent !important;}.invoice-table td{background: transparent !important;}.invoice-additional-costs{background: transparent !important;}.invoice-grand-total{background: transparent !important;}.invoice-footer{background: transparent !important;}</style>
 </head>
 <body>
- 
+ <nav>
+ <span class="brand-name">Phoenix Printing Solutions</span>
+ <div class="nav-buttons">
+ <a href="pendingqueue.html" class="nav-btn">PENDING QUEUE</a>
+ <a href="inprogress.html" class="nav-btn">IN PROGRESS</a>
+ <a href="admininvoice.html" class="nav-btn">INVOICE</a>
+ <a href="archive.html" class="nav-btn">ARCHIVE</a>
+ <a href="#" class="nav-btn" onclick="logoutAdmin()">LOGOUT</a>
+ </div>
+ </nav>
 <div id="modePage" class="mode-selection-vertical">
   <h1 class="mode-title">Phoenix Printing Solutions</h1>
   <div class="buttons-container">
@@ -489,7 +426,10 @@ body, h1,h2,h3,h4,h5,h6,p,span,div,label,th,td {
   </div>
   <div id="invoiceDisplay"></div>
 </div>
-    
+    <footer style="padding: 40px 8%; text-align: center; background: rgba(0,0,0,0.85);">
+        <img src="../assets/images/PPS logo.png" alt="Logo" style="height: 40px; margin-bottom: 10px;">
+        <p style="font-family: 'Syncopate'; font-size: 0.6rem; letter-spacing: 3px; opacity: 0.5;">&copy; 2026 PHOENIX PRINTING SOLUTIONS</p>
+    </footer>
  <script>
 function generateInvoiceID() {
     const now = new Date();
@@ -538,6 +478,7 @@ function startEntrepreneurMode() { isEntrepreneur = true; setModeLabel("Entrepre
 function returnToMode() { document.getElementById("calculatorPage").style.display = "none"; document.getElementById("modePage").style.display = "flex"; }
 function populateCitySelect() { 
   const clientCityEl = document.getElementById("clientCity"); 
+  if(!clientCityEl) return;
   clientCityEl.innerHTML = '<option value="">Select City</option>'; 
   cityData.sort((a, b) => a.city.localeCompare(b.city)).forEach(item => { 
     const option = document.createElement("option"); 
@@ -699,7 +640,6 @@ async function downloadInvoice() {
   } catch (error) { console.error('PDF Error:', error); }
 }
 </script>
-
 <script>
 (function() {
   async function getRequestFromSupabase(id) {
@@ -707,66 +647,63 @@ async function downloadInvoice() {
     const { data, error } = await window.supabaseClient.from("pps_queue").select("*").eq("request_id", id).single();
     return error ? null : data;
   }
+  function getParam(name) { return new URL(window.location.href).searchParams.get(name); }
   
-  function getParam(name) { 
-    return new URLSearchParams(window.location.search).get(name); 
-  }
-
   async function prefill() {
-    const id = getParam("request_id");
-    const modeFromUrl = getParam("mode");
-    
-    // First: Populate cities so handleCity() works
+    // 1. Initial setup of cities
     populateCitySelect();
 
-    if (!id && !modeFromUrl) return;
+    // 2. Check for incoming request ID
+    const id = getParam("request_id");
+    if (!id) return;
+    
+    const req = await getRequestFromSupabase(id);
+    if (!req) return;
 
-    if (id) {
-      const req = await getRequestFromSupabase(id);
-      if (req) {
-        const mode = (req.sourceMode || "client").toLowerCase();
-        mode === "entrepreneur" ? startEntrepreneurMode() : startClientMode();
-        
-        document.getElementById("clientName").value = req.client?.name || "";
-        document.getElementById("clientContact").value = req.client?.contact || "";
-        document.getElementById("clientEmail").value = req.client?.email || "";
-        document.getElementById("clientAddress").value = req.client?.address || "";
-        
-        const citySel = document.getElementById("clientCity");
-        if (citySel && req.location?.city) { 
-          citySel.value = req.location.city; 
-          handleCity(); // This generates the mandatory rows
-        }
-
-        // Wait a small bit for handleCity() to finish creating rows
-        setTimeout(() => {
-          const workspaceData = req.workspaces || [];
-          const currentRows = Array.from(document.querySelectorAll(".picture-row"));
-          
-          workspaceData.forEach((w, idx) => {
-            // If the saved data has more workspaces than the mandatory rows, add optional ones
-            if (idx >= currentRows.length) {
-              addPictureRow(false);
-            }
-            
-            // Re-select rows because the count might have changed
-            const rows = document.querySelectorAll(".picture-row");
-            const r = rows[idx];
-            if (r) {
-              r.querySelector(".height").value = w.height || 0;
-              r.querySelector(".width").value = w.width || 0;
-            }
-          });
-          calculateAreas();
-        }, 150);
-      }
-    } else if (modeFromUrl) {
-      modeFromUrl.toLowerCase() === "entrepreneur" ? startEntrepreneurMode() : startClientMode();
+    // 3. FIX: Trigger UI switch and mode immediately
+    const mode = (req.sourceMode || "client").toLowerCase();
+    if (mode === "entrepreneur") {
+        startEntrepreneurMode();
+    } else {
+        startClientMode();
     }
+
+    // 4. Populate core data
+    document.getElementById("clientName").value = req.client?.name || "";
+    document.getElementById("clientContact").value = req.client?.contact || "";
+    document.getElementById("clientEmail").value = req.client?.email || "";
+    document.getElementById("clientAddress").value = req.client?.address || "";
+    
+    // 5. Populate City and Trigger calculation logic
+    const citySel = document.getElementById("clientCity");
+    if (citySel && req.location?.city) { 
+        citySel.value = req.location.city; 
+        handleCity(); // This generates the mandatory rows
+    }
+
+    // 6. Add and fill workspaces
+    const incomingWorkspaces = req.workspaces || [];
+    const currentRows = document.querySelectorAll(".picture-row");
+    
+    // If the database has more workspaces than the city default, add rows
+    for (let i = currentRows.length; i < incomingWorkspaces.length; i++) {
+        addPictureRow(false);
+    }
+    
+    // Fill the heights and widths
+    const allRows = document.querySelectorAll(".picture-row");
+    incomingWorkspaces.forEach((w, idx) => {
+        const row = allRows[idx];
+        if (!row) return;
+        row.querySelector(".height").value = w.height || 0;
+        row.querySelector(".width").value = w.width || 0;
+    });
+
+    // Final refresh of numbers
+    calculateAreas();
   }
 
-  // Use load instead of DOMContentLoaded to ensure scripts are fully ready
-  window.addEventListener("load", prefill);
+  document.addEventListener("DOMContentLoaded", prefill);
 })();
 </script>
 </body>
