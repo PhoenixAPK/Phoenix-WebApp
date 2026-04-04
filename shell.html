@@ -7,110 +7,31 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
 body{height:100vh;background:#f2f3f5;overflow:hidden}
-/* APP STRUCTURE */
-.app{
- height:100vh;
- display:grid;
- grid-template-rows:60px 1fr 40px;
-}
-/* HEADER */
-header{
- background:#ffffff;
- border-bottom:1px solid #ddd;
- padding:0 24px;
- display:flex;
- align-items:center;
- justify-content:space-between;
- font-weight:bold;
-}
-
-/* ✅ ADDED */
-.header-right{
- display:none;
- align-items:center;
- gap:16px;
- font-size:14px;
- font-weight:normal;
-}
-
-.logout-btn{
- padding:6px 12px;
- border:none;
- border-radius:6px;
- cursor:pointer;
- background:#e5e7eb;
-}
+.app{height:100vh;display:grid;grid-template-rows:60px 1fr 40px}
+header{background:#ffffff;border-bottom:1px solid #ddd;padding:0 24px;display:flex;align-items:center;justify-content:space-between;font-weight:bold}
+.header-right{display:none;align-items:center;gap:16px;font-size:14px;font-weight:normal}
+.logout-btn{padding:6px 12px;border:none;border-radius:6px;cursor:pointer;background:#e5e7eb}
 .logout-btn:hover{background:#d1d5db}
-
-/* BODY */
-.body{
- display:flex;
- height:100%;
-}
-/* SIDEBAR (ALWAYS VISIBLE) */
-aside{
- width:260px;
- background:#e5e7eb;
- padding:16px;
- overflow-y:auto;
- flex-shrink:0;
- border-right:1px solid #d6d6d6;
-}
-/* MENU */
+.body{display:flex;height:100%}
+aside{width:260px;background:#e5e7eb;padding:16px;overflow-y:auto;flex-shrink:0;border-right:1px solid #d6d6d6}
 .menu-section{margin-bottom:16px}
-.menu-header{
- font-size:14px;
- font-weight:700;
- text-transform:uppercase;
- padding:6px 8px;
- cursor:pointer;
- color:#111827;
-}
-.menu-items{
- display:none;
- margin-top:6px;
-}
-.menu-item{
- padding:8px 14px;
- margin:4px 0;
- font-size:15px;
- color:#111827;
- border-radius:8px;
- cursor:pointer;
-}
+.menu-header{font-size:14px;font-weight:700;text-transform:uppercase;padding:6px 8px;cursor:pointer;color:#111827}
+.menu-items{display:none;margin-top:6px}
+.menu-item{padding:8px 14px;margin:4px 0;font-size:15px;color:#111827;border-radius:8px;cursor:pointer}
 .menu-item:hover{background:#d1d5db}
 .menu-item.active{background:#d1d5db;font-weight:700}
-/* CONTENT AREA */
-main{
- flex:1;
- background:#ffffff;
- overflow:auto;
-}
-#content-frame{
- width:100%;
- height:100%;
- border:none;
-}
-/* FOOTER */
-footer{
- background:#ffffff;
- border-top:1px solid #ddd;
- display:flex;
- align-items:center;
- justify-content:center;
- font-size:12px;
- color:#666;
-}
+main{flex:1;background:#ffffff;overflow:auto}
+#content-frame{width:100%;height:100%;border:none}
+footer{background:#ffffff;border-top:1px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:12px;color:#666}
 </style>
 </head>
 <body>
 <div class="app">
 
-<!-- HEADER -->
 <header>
- logo.png Phoenix Printing Solutions
-
- <!-- ✅ ADDED -->
+ <div>
+  logo.png <span id="main-header-title"></span>
+ </div>
  <div class="header-right" id="user-info">
    <span id="user-label"></span>
    <button class="logout-btn" onclick="logout()">Logout</button>
@@ -118,7 +39,6 @@ footer{
 </header>
 
 <div class="body">
-<!-- SIDEBAR -->
 <aside>
  <div class="menu-section">
   <div class="menu-header" onclick="toggleMenu(this)">Dashboard</div>
@@ -126,7 +46,6 @@ footer{
    <div class="menu-item" onclick="loadPage('overview.html',this)">Overview</div>
   </div>
  </div>
-
  <div class="menu-section">
   <div class="menu-header" onclick="toggleMenu(this)">Main</div>
   <div class="menu-items">
@@ -137,7 +56,6 @@ footer{
    <div class="menu-item" onclick="loadPage('incomplete.html',this)">Incomplete</div>
   </div>
  </div>
-
  <div class="menu-section">
   <div class="menu-header" onclick="toggleMenu(this)">Profiles</div>
   <div class="menu-items">
@@ -145,7 +63,6 @@ footer{
    <div class="menu-item" onclick="loadPage('businesses.html',this)">Businesses</div>
   </div>
  </div>
-
  <div class="menu-section">
   <div class="menu-header" onclick="toggleMenu(this)">Accounting</div>
   <div class="menu-items">
@@ -154,7 +71,6 @@ footer{
    <div class="menu-item" onclick="loadPage('monthlyRevenue.html',this)">Monthly Revenue</div>
   </div>
  </div>
-
  <div class="menu-section">
   <div class="menu-header" onclick="toggleMenu(this)">Admin Space</div>
   <div class="menu-items">
@@ -163,7 +79,6 @@ footer{
    <div class="menu-item" onclick="loadPage('carMaintenance.html',this)">Car Maintenance</div>
   </div>
  </div>
-
  <div class="menu-section">
   <div class="menu-header" onclick="toggleMenu(this)">System</div>
   <div class="menu-items">
@@ -173,16 +88,12 @@ footer{
  </div>
 </aside>
 
-<!-- CONTENT -->
 <main>
  <iframe id="content-frame" src="overview.html"></iframe>
 </main>
 </div>
 
-<!-- FOOTER -->
-<footer>
- © 2026 Phoenix Printing Solutions
-</footer>
+<footer>© 2026 Phoenix Printing Solutions</footer>
 </div>
 
 <script>
@@ -190,29 +101,53 @@ function toggleMenu(header){
  const items = header.nextElementSibling;
  items.style.display = items.style.display === "block" ? "none" : "block";
 }
+
 function loadPage(page, el){
- document.getElementById('content-frame').src = page;
+ const iframe = document.getElementById('content-frame');
+ iframe.src = page;
+ 
+ // Reset header text to empty whenever a new page starts loading
+ document.getElementById('main-header-title').textContent = "";
+
  document.querySelectorAll('.menu-item').forEach(i=>i.classList.remove('active'));
- el.classList.add('active');
+ if(el) el.classList.add('active');
 }
 
-/* ✅ ADDED AUTH LOGIC */
-const name = sessionStorage.getItem("displayName");
-const role = sessionStorage.getItem("userRole");
+// Automatically sync title from the page inside the iframe
+window.addEventListener('message', function(event) {
+  if (event.data.type === 'UPDATE_HEADER') {
+    document.getElementById('main-header-title').textContent = event.data.title;
+  }
+});
 
-if(name && role){
- document.getElementById("user-label").textContent =
-  `Logged in as: ${role} – ${name}`;
- document.getElementById("user-info").style.display = "flex";
-}else{
- window.location.href = "adminlogin.html";
-}
+window.onload = () => {
+  const iframe = document.getElementById('content-frame');
+  
+  // Attempt to pull <h1> text from sub-page if it exists
+  iframe.onload = function() {
+    try {
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      const h1 = doc.querySelector('h1');
+      document.getElementById('main-header-title').textContent = h1 ? h1.textContent : "";
+    } catch(e) {
+      document.getElementById('main-header-title').textContent = "";
+    }
+  };
+
+  const name = sessionStorage.getItem("displayName");
+  const role = sessionStorage.getItem("userRole");
+  if(name && role){
+   document.getElementById("user-label").textContent = `Logged in as: ${role} – ${name}`;
+   document.getElementById("user-info").style.display = "flex";
+  } else {
+   window.location.href = "adminlogin.html";
+  }
+};
 
 function logout(){
  sessionStorage.clear();
  window.location.href = "adminlogin.html";
 }
 </script>
-
 </body>
 </html>
