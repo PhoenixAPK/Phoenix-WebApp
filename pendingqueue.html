@@ -37,8 +37,6 @@
   </style>
 </head>
 <body>
-  
-
   <div class="container">
     <div class="table-title"><span><span class="status-dot"></span>PENDING REQUESTS</span></div>
     <table>
@@ -55,8 +53,6 @@
       <tbody id="queueBody"></tbody>
     </table>
   </div>
-
-  
 
   <script>
   (function(){
@@ -84,11 +80,19 @@
           .from('pps_queue')
           .update({ status: 'in-progress' })
           .eq('request_id', id)
-          .then(({ error }) => { if (error) console.error('Status update failed:', error); })
-          .catch(err => console.error('Update error:', err));
-      } catch (e) { console.error(e); }
-      
-      window.location.href = target;
+          .then(({ error }) => { 
+             if (error) console.error('Status update failed:', error); 
+             // Redirect after attempting update
+             window.location.href = target;
+          })
+          .catch(err => {
+             console.error('Update error:', err);
+             window.location.href = target;
+          });
+      } catch (e) { 
+        console.error(e); 
+        window.location.href = target;
+      }
     }
 
     async function fetchAndRender(){
@@ -112,7 +116,7 @@
       }
       items.forEach(req => {
         const tr = document.createElement('tr');
-        const mode = req.sourceMode;
+        const mode = req.sourceMode || 'client';
         tr.onclick = () => {
           handleRequestClick(req.request_id, mode);
           window.moveToInProgress(req.request_id);
@@ -133,10 +137,12 @@
     }
 
     function subscribeToChanges() {
-      window.supabaseClient
-        .channel('pps_queue_changes')
-        .on('postgres_changes', { event: '*', table: 'pps_queue' }, () => fetchAndRender())
-        .subscribe();
+      if (window.supabaseClient && window.supabaseClient.channel) {
+        window.supabaseClient
+          .channel('pps_queue_changes')
+          .on('postgres_changes', { event: '*', table: 'pps_queue' }, () => fetchAndRender())
+          .subscribe();
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => { 
