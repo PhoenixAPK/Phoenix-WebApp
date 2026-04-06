@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Incomplete</title>
 
-  <!-- ✅ Supabase SDK (FIXED) -->
+  <!-- ✅ THIS WAS THE MAIN BUG -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -71,48 +71,50 @@
 <div id="list"></div>
 
 <script>
-  /* ✅ Use existing Supabase from shell */
-  const supabaseClient =
-    window.supabaseClient ||
-    supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-  const list = document.getElementById('list');
-  const calendarLabel = document.getElementById('calendarLabel');
+  /* ✅ reuse shell Supabase */
+  const sb = window.supabaseClient
+    ? window.supabaseClient
+    : window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const now = new Date();
-  let activeMonth = now.getMonth();
-  let activeYear = now.getFullYear();
+  let month = now.getMonth();
+  let year = now.getFullYear();
 
-  function updateLabel() {
-    calendarLabel.textContent =
-      new Date(activeYear, activeMonth)
-        .toLocaleString('default', { month: 'long', year: 'numeric' });
+  const list = document.getElementById('list');
+  const label = document.getElementById('calendarLabel');
+
+  function updateLabel(){
+    label.textContent =
+      new Date(year, month).toLocaleString('default',{
+        month:'long',
+        year:'numeric'
+      });
   }
 
-  async function loadIncomplete() {
+  async function loadIncomplete(){
     updateLabel();
 
-    const start = new Date(activeYear, activeMonth, 1).toISOString();
-    const end   = new Date(activeYear, activeMonth + 1, 0, 23, 59, 59).toISOString();
+    const start = new Date(year, month, 1).toISOString();
+    const end   = new Date(year, month+1, 0, 23,59,59).toISOString();
 
-    const { data } = await supabaseClient
+    const { data, error } = await sb
       .from('interactions')
       .select('*')
-      .eq('status', 'Incomplete')
+      .eq('status','Incomplete')
       .gte('created_at', start)
       .lte('created_at', end)
-      .order('created_at', { ascending: false });
+      .order('created_at',{ascending:false});
 
     list.innerHTML = '';
 
-    if (!data) return;
+    if(error || !data) return;
 
-    data.forEach(r => {
+    data.forEach(r=>{
       const mode =
         r.request_type === 'Client' ? 'client' :
         r.request_type === 'Entrepreneur' ? 'entrepreneur' : '';
 
-      list.insertAdjacentHTML('beforeend', `
+      list.insertAdjacentHTML('beforeend',`
         <div class="item-row">
           <div>${r.reference || r.id}</div>
           <div>${r.client_name || r.business_name || ''}</div>
@@ -120,23 +122,23 @@
           <div>${r.units || 0}</div>
           <div>
             <button class="open-btn"
-              onclick="parent.document.getElementById('content-frame').src =
-                'admininvoice.html?mode=${mode}&id=${r.id}'ementById('monthlyBtn').onclick = () => {
-    activeMonth = now.getMonth();
-    activeYear = now.getFullYear();
+              onclick="parent.document.getElementById('content-frame').src=
+              'admininvoice.html?mode=${mode}&id=${r).onclick = () => {
+    month = now.getMonth();
+    year = now.getFullYear();
     loadIncomplete();
   };
 
   document.getElementById('yearlyBtn').onclick = () => {
-    activeYear = now.getFullYear();
-    activeMonth = 0; // January (year overview start)
+    month = 0;
+    year = now.getFullYear();
     loadIncomplete();
   };
 
   loadIncomplete();
 
   window.parent.postMessage(
-    { type: 'UPDATE_HEADER', title: 'Incomplete' },
+    {type:'UPDATE_HEADER',title:'Incomplete'},
     '*'
   );
 </script>
