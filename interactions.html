@@ -98,151 +98,146 @@
     </div>
 
     <script>
-        const SUPABASE_URL = "https://puymabrkwtpvhropcvqk.supabase.co";
-        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk";
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const SUPABASE_URL = "https://puymabrkwtpvhropcvqk.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        function showSection(id, btn) {
-            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-            document.querySelectorAll('.main-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).style.display = 'block';
-            btn.classList.add('active');
-            
-            document.getElementById('search-results').innerHTML = "";
-            if(id === 'search-section') {
-                ['s-name', 's-phone', 's-email', 's-address'].forEach(id => document.getElementById(id).value = "");
-            }
-        }
+    function showSection(id, btn) {
+        document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+        document.querySelectorAll('.main-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).style.display = 'block';
+        btn.classList.add('active');
+        document.getElementById('search-results').innerHTML = "";
+    }
 
-        function handleSourceChange() {
-            const val = document.getElementById('source').value;
-            document.getElementById('mode-div').classList.toggle('hidden', val === "");
-            if(val === "") { document.getElementById('mode').value = ""; handleModeChange(); }
-        }
-
-        function handleModeChange() {
-            const val = document.getElementById('mode').value;
-            document.getElementById('form-fields').classList.toggle('hidden', val === "");
-        }
-
-        async function saveData() {
-            const interaction = {
-                source: document.getElementById('source').value,
-                mode: document.getElementById('mode').value,
-                name: document.getElementById('name').value,
-                phone: document.getElementById('phone').value,
-                email: document.getElementById('email').value,
-                address: document.getElementById('address').value,
-                city: document.getElementById('city').value,
-                total_pictures: document.getElementById('pics').value || 0,
-                note: document.getElementById('note').value
-            };
-            const { error } = await supabaseClient.from('interactions').insert([interaction]);
-            if (error) alert("Error: " + error.message);
-            else { alert("Saved Successfully"); location.reload(); }
-        }
-
-        async function searchData() {
-            const name = document.getElementById('s-name').value.trim();
-            const phone = document.getElementById('s-phone').value.trim();
-            const email = document.getElementById('s-email').value.trim();
-            const address = document.getElementById('s-address').value.trim();
-            const resultsDiv = document.getElementById('search-results');
-
-            if (!name && !phone && !email && !address) {
-                resultsDiv.innerHTML = "";
-                return; 
-            }
-
-            let query = supabaseClient.from('interactions').select('*');
-            if(name) query = query.ilike('name', `%${name}%`);
-            if(phone) query = query.ilike('phone', `%${phone}%`);
-            if(email) query = query.ilike('email', `%${email}%`);
-            if(address) query = query.ilike('address', `%${address}%`);
-            
-            const { data } = await query.order('created_at', { ascending: false }).limit(10);
-            
-            if (!document.getElementById('s-name').value && !document.getElementById('s-phone').value && !document.getElementById('s-email').value && !document.getElementById('s-address').value) {
-                resultsDiv.innerHTML = "";
-                return;
-            }
-
-            if (data && data.length > 0) {
-                resultsDiv.innerHTML = data.map(i => `
-                    <div class="result-card" onclick="loadOriginal('${encodeURIComponent(JSON.stringify(i))}')">
-                        <strong>${i.name || 'N/A'}</strong> - ${i.phone || 'N/A'}<br>
-                        <small>Source: ${i.source} | ${new Date(i.created_at).toLocaleString()}</small>
-                    </div>
-                `).join('');
-            } else {
-                resultsDiv.innerHTML = "<p style='color:#999; margin-top:10px;'>No matches found.</p>";
-            }
-        }
-
-        function loadOriginal(encodedData) {
-            const item = JSON.parse(decodeURIComponent(encodedData));
-            showSection('new-section', document.querySelectorAll('.main-btn')[0]);
-            
-            document.getElementById('source').value = item.source;
-            handleSourceChange();
-            document.getElementById('mode').value = item.mode;
+    function handleSourceChange() {
+        const val = document.getElementById('source').value;
+        document.getElementById('mode-div').classList.toggle('hidden', val === "");
+        if (val === "") {
+            document.getElementById('mode').value = "";
             handleModeChange();
-            
-            document.getElementById('name').value = item.name || '';
-            document.getElementById('phone').value = item.phone || '';
-            document.getElementById('email').value = item.email || '';
-            document.getElementById('address').value = item.address || '';
-            document.getElementById('city').value = item.city || '';
-            document.getElementById('pics').value = item.total_pictures || 0;
-            
-            const savedTime = new Date(item.created_at).toLocaleString();
-            document.getElementById('note').value = item.note + "\n\n[Interaction Saved: " + savedTime + "]";
+        }
+    }
+
+    function handleModeChange() {
+        const val = document.getElementById('mode').value;
+        document.getElementById('form-fields').classList.toggle('hidden', val === "");
+    }
+
+    async function saveData() {
+        const interaction = {
+            source: source.value,
+            mode: mode.value,
+            name: name.value.trim(),
+            phone: phone.value.trim(),
+            email: email.value.trim(),
+            address: address.value.trim(),
+            city: city.value.trim(),
+            total_pictures: pics.value || 0,
+            note: note.value.trim()
+        };
+
+        const { data: existing } = await supabaseClient
+            .from('interactions')
+            .select('*')
+            .eq('name', interaction.name)
+            .eq('phone', interaction.phone)
+            .eq('email', interaction.email)
+            .eq('address', interaction.address)
+            .eq('city', interaction.city)
+            .order('created_at', { ascending: true })
+            .limit(1);
+
+        const now = new Date().toLocaleString();
+
+        if (existing && existing.length > 0) {
+            const original = existing[0];
+            const updatedNote =
+                (original.note || "") +
+                `\n\n[Repeated Interaction: ${now}]\n` +
+                interaction.note;
+
+            await supabaseClient
+                .from('interactions')
+                .update({ note: updatedNote })
+                .eq('id', original.id);
+
+            alert("Existing interaction updated. No duplicate created.");
+            location.reload();
+            return;
         }
 
-        function setQuickDate(range) {
-            const to = new Date().toISOString().split('T')[0];
-            let from = new Date();
-            if(range === 'week') from.setDate(from.getDate() - 7);
-            if(range === 'month') from.setMonth(from.getMonth() - 1);
-            document.getElementById('date-from').value = from.toISOString().split('T')[0];
-            document.getElementById('date-to').value = to;
+        const { error } = await supabaseClient
+            .from('interactions')
+            .insert([interaction]);
+
+        if (error) {
+            alert(error.message);
+        } else {
+            alert("Saved Successfully");
+            location.reload();
+        }
+    }
+
+    async function searchData() {
+        const n = document.getElementById('s-name').value.trim();
+        const p = document.getElementById('s-phone').value.trim();
+        const e = document.getElementById('s-email').value.trim();
+        const a = document.getElementById('s-address').value.trim();
+        const resultsDiv = document.getElementById('search-results');
+
+        if (!n && !p && !e && !a) {
+            resultsDiv.innerHTML = "";
+            return;
         }
 
-        async function exportCSV() {
-            const from = document.getElementById('date-from').value;
-            const to = document.getElementById('date-to').value;
-            if(!from || !to) return alert("Please select date range.");
+        let query = supabaseClient.from('interactions').select('*');
+        if (n) query = query.ilike('name', `%${n}%`);
+        if (p) query = query.ilike('phone', `%${p}%`);
+        if (e) query = query.ilike('email', `%${e}%`);
+        if (a) query = query.ilike('address', `%${a}%`);
 
-            // Get all data within range
-            const { data } = await supabaseClient.from('interactions')
-                .select('*')
-                .gte('created_at', from)
-                .lte('created_at', to + 'T23:59:59');
+        const { data } = await query.order('created_at', { ascending: false }).limit(10);
 
-            if(!data || data.length === 0) return alert("No data found for these dates.");
+        resultsDiv.innerHTML = "";
 
-            // Headers for ALL fields
-            let csv = "Date,Time,Source,Mode,Name,Phone,Email,Address,City,Pictures,Note\n";
-            
-            data.forEach(r => {
-                const dateObj = new Date(r.created_at);
-                const dateStr = dateObj.toLocaleDateString();
-                const timeStr = dateObj.toLocaleTimeString();
-                
-                // Escape quotes in notes to prevent CSV breaking
-                const cleanNote = (r.note || "").replace(/"/g, '""');
-                const cleanAddr = (r.address || "").replace(/"/g, '""');
-                
-                csv += `${dateStr},${timeStr},${r.source},${r.mode},${r.name},${r.phone},${r.email},"${cleanAddr}",${r.city},${r.total_pictures},"${cleanNote}"\n`;
-            });
+        for (const i of data || []) {
+            const { count } = await supabaseClient
+                .from('interactions')
+                .select('*', { count: 'exact', head: true })
+                .eq('name', i.name)
+                .eq('phone', i.phone)
+                .eq('email', i.email)
+                .eq('address', i.address)
+                .eq('city', i.city);
 
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `Phoenix_Interactions_${from}_to_${to}.csv`;
-            a.click();
+            resultsDiv.innerHTML += `
+                <div class="result-card" onclick="loadOriginal('${encodeURIComponent(JSON.stringify(i))}')">
+                    <strong>${i.name || 'N/A'}</strong> - ${i.phone || 'N/A'}
+                    <span style="float:right;font-size:12px;color:#555;">×${count || 1}</span><br>
+                    <small>Source: ${i.source} | ${new Date(i.created_at).toLocaleString()}</small>
+                </div>
+            `;
         }
+    }
+
+    function loadOriginal(encoded) {
+        const item = JSON.parse(decodeURIComponent(encoded));
+        showSection('new-section', document.querySelectorAll('.main-btn')[0]);
+
+        source.value = item.source;
+        handleSourceChange();
+        mode.value = item.mode;
+        handleModeChange();
+
+        name.value = item.name || '';
+        phone.value = item.phone || '';
+        email.value = item.email || '';
+        address.value = item.address || '';
+        city.value = item.city || '';
+        pics.value = item.total_pictures || 0;
+        note.value = item.note || '';
+    }
     </script>
 </body>
 </html>
