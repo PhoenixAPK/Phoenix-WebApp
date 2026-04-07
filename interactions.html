@@ -96,7 +96,7 @@
         </div>
         <button class="action-btn" onclick="exportCSV()">Download Complete CSV</button>
     </div>
-   <script>
+<script>
     const SUPABASE_URL = "https://puymabrkwtpvhropcvqk.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -106,16 +106,18 @@
         document.querySelectorAll('.main-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).style.display = 'block';
         btn.classList.add('active');
+
         document.getElementById('search-results').innerHTML = "";
+        if (id === 'search-section') {
+            ['s-name', 's-phone', 's-email', 's-address']
+                .forEach(i => document.getElementById(i).value = "");
+        }
     }
 
     function handleSourceChange() {
         const val = document.getElementById('source').value;
         document.getElementById('mode-div').classList.toggle('hidden', val === "");
-        if (val === "") {
-            document.getElementById('mode').value = "";
-            handleModeChange();
-        }
+        if (val === "") { document.getElementById('mode').value = ""; handleModeChange(); }
     }
 
     function handleModeChange() {
@@ -167,15 +169,9 @@
             return;
         }
 
-        const { error } = await supabaseClient
-            .from('interactions')
-            .insert([interaction]);
-
-        if (error) alert(error.message);
-        else {
-            alert("Saved Successfully");
-            location.reload();
-        }
+        const { error } = await supabaseClient.from('interactions').insert([interaction]);
+        if (error) alert("Error: " + error.message);
+        else { alert("Saved Successfully"); location.reload(); }
     }
 
     async function searchData() {
@@ -185,7 +181,6 @@
         const address = document.getElementById('s-address').value.trim();
         const resultsDiv = document.getElementById('search-results');
 
-        // ✅ RESTORED ORIGINAL BEHAVIOR
         if (!name && !phone && !email && !address) {
             resultsDiv.innerHTML = "";
             return;
@@ -230,7 +225,8 @@
         document.getElementById('address').value = item.address || '';
         document.getElementById('city').value = item.city || '';
         document.getElementById('pics').value = item.total_pictures || 0;
-        document.getElementById('note').value = item.note || '';
+
+        document.getElementById('note').value = item.note + "\n\n[Interaction Saved: " + new Date(item.created_at).toLocaleString() + "]";
     }
 </script>
     </body>
