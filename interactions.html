@@ -112,7 +112,7 @@
     function handleSourceChange() {
         const val = document.getElementById('source').value;
         document.getElementById('mode-div').classList.toggle('hidden', val === "");
-        if (val === "") {
+        if(val === "") {
             document.getElementById('mode').value = "";
             handleModeChange();
         }
@@ -133,12 +133,12 @@
             address: address.value.trim(),
             city: city.value.trim(),
             total_pictures: pics.value || 0,
-            note: note.value.trim()
+            note: note.value
         };
 
         const { data: existing } = await supabaseClient
             .from('interactions')
-            .select('*')
+            .select('id,note')
             .eq('name', interaction.name)
             .eq('phone', interaction.phone)
             .eq('email', interaction.email)
@@ -147,21 +147,13 @@
             .order('created_at', { ascending: true })
             .limit(1);
 
-        const now = new Date().toLocaleString();
-
-        if (existing && existing.length > 0) {
-            const original = existing[0];
-            const updatedNote =
-                (original.note || "") +
-                `\n\n[Interaction Updated: ${now}]\n` +
-                interaction.note;
-
+        if (existing && existing.length) {
             await supabaseClient
                 .from('interactions')
-                .update({ note: updatedNote })
-                .eq('id', original.id);
+                .update({ note: existing[0].note })
+                .eq('id', existing[0].id);
 
-            alert("Linked to existing interaction. No duplicate created.");
+            alert("Interaction already exists. No duplicate created.");
             location.reload();
             return;
         }
@@ -171,54 +163,47 @@
             .insert([interaction]);
 
         if (error) alert(error.message);
-        else {
-            alert("Saved Successfully");
-            location.reload();
-        }
+        else { alert("Saved Successfully"); location.reload(); }
     }
 
     async function searchData() {
-        const n = s-name.value.trim();
-        const p = s-phone.value.trim();
-        const e = s-email.value.trim();
-        const a = s-address.value.trim();
+        const nameVal = document.getElementById('s-name').value.trim();
+        const phoneVal = document.getElementById('s-phone').value.trim();
+        const emailVal = document.getElementById('s-email').value.trim();
+        const addressVal = document.getElementById('s-address').value.trim();
         const resultsDiv = document.getElementById('search-results');
 
-        if (!n && !p && !e && !a) {
+        if (!nameVal && !phoneVal && !emailVal && !addressVal) {
             resultsDiv.innerHTML = "";
             return;
         }
 
-        let query = supabaseClient
-            .from('interactions')
-            .select('*')
-            .order('created_at', { ascending: true });
+        let query = supabaseClient.from('interactions').select('*');
+        if(nameVal) query = query.ilike('name', `%${nameVal}%`);
+        if(phoneVal) query = query.ilike('phone', `%${phoneVal}%`);
+        if(emailVal) query = query.ilike('email', `%${emailVal}%`);
+        if(addressVal) query = query.ilike('address', `%${addressVal}%`);
 
-        if (n) query = query.ilike('name', `%${n}%`);
-        if (p) query = query.ilike('phone', `%${p}%`);
-        if (e) query = query.ilike('email', `%${e}%`);
-        if (a) query = query.ilike('address', `%${a}%`);
+        const { data } = await query.order('created_at', { ascending: true });
 
-        const { data } = await query;
-
-        const map = {};
-        data.forEach(i => {
+        const grouped = {};
+        (data || []).forEach(i => {
             const key = `${i.name}|${i.phone}|${i.email}|${i.address}|${i.city}`;
-            if (!map[key]) map[key] = { item: i, count: 1 };
-            else map[key].count++;
+            if (!grouped[key]) grouped[key] = { item: i, count: 1 };
+            else grouped[key].count++;
         });
 
-        resultsDiv.innerHTML = Object.values(map).map(v => `
+        resultsDiv.innerHTML = Object.values(grouped).map(v => `
             <div class="result-card" onclick="loadOriginal('${encodeURIComponent(JSON.stringify(v.item))}')">
-                <strong>${v.item.name}</strong> - ${v.item.phone}
+                <strong>${v.item.name || 'N/A'}</strong> - ${v.item.phone || 'N/A'}
                 <span style="float:right;font-size:12px;color:#555;">×${v.count}</span><br>
                 <small>Source: ${v.item.source} | ${new Date(v.item.created_at).toLocaleString()}</small>
             </div>
         `).join('');
     }
 
-    function loadOriginal(encoded) {
-        const item = JSON.parse(decodeURIComponent(encoded));
+    function loadOriginal(encodedData) {
+        const item = JSON.parse(decodeURIComponent(encodedData));
         showSection('new-section', document.querySelectorAll('.main-btn')[0]);
 
         source.value = item.source;
@@ -233,7 +218,7 @@
         city.value = item.city || '';
         pics.value = item.total_pictures || 0;
 
-        note.value = item.note || '';
+        note.value = item.note + "\n\n[Interaction Saved: " + new Date(item.created_at).toLocaleString() + "]";
     }
 </script>
 </body>
