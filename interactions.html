@@ -106,18 +106,16 @@
         document.querySelectorAll('.main-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).style.display = 'block';
         btn.classList.add('active');
-
         document.getElementById('search-results').innerHTML = "";
-        if (id === 'search-section') {
-            ['s-name', 's-phone', 's-email', 's-address']
-                .forEach(i => document.getElementById(i).value = "");
-        }
     }
 
     function handleSourceChange() {
         const val = document.getElementById('source').value;
         document.getElementById('mode-div').classList.toggle('hidden', val === "");
-        if (val === "") { document.getElementById('mode').value = ""; handleModeChange(); }
+        if (val === "") {
+            document.getElementById('mode').value = "";
+            handleModeChange();
+        }
     }
 
     function handleModeChange() {
@@ -126,6 +124,9 @@
     }
 
     async function saveData() {
+        const noteText = document.getElementById('note').value.trim();
+        const timestamp = new Date().toLocaleString();
+
         const interaction = {
             source: document.getElementById('source').value,
             mode: document.getElementById('mode').value,
@@ -135,12 +136,12 @@
             address: document.getElementById('address').value.trim(),
             city: document.getElementById('city').value.trim(),
             total_pictures: document.getElementById('pics').value || 0,
-            note: document.getElementById('note').value.trim()
+            note: noteText
         };
 
         const { data: existing } = await supabaseClient
             .from('interactions')
-            .select('id,note,created_at')
+            .select('id,note')
             .eq('name', interaction.name)
             .eq('phone', interaction.phone)
             .eq('email', interaction.email)
@@ -149,29 +150,37 @@
             .order('created_at', { ascending: true })
             .limit(1);
 
-        const now = new Date().toLocaleString();
-
         if (existing && existing.length > 0) {
             const original = existing[0];
             const updatedNote =
-                original.note +
-                "\n\n" +
-                interaction.note +
-                "\n[Interaction Saved: " + now + "]";
+                (original.note ? original.note + "\n\n" : "") +
+                noteText +
+                "\n[Interaction Saved: " + timestamp + "]";
 
             await supabaseClient
                 .from('interactions')
                 .update({ note: updatedNote })
                 .eq('id', original.id);
 
-            alert("Interaction added to existing record.");
+            alert("Interaction added.");
             location.reload();
             return;
         }
 
-        const { error } = await supabaseClient.from('interactions').insert([interaction]);
+        const { data, error } = await supabaseClient
+            .from('interactions')
+            .insert([{
+                ...interaction,
+                note: noteText + "\n[Interaction Saved: " + timestamp + "]"
+            }])
+            .select()
+            .single();
+
         if (error) alert("Error: " + error.message);
-        else { alert("Saved Successfully"); location.reload(); }
+        else {
+            alert("Saved Successfully");
+            location.reload();
+        }
     }
 
     async function searchData() {
@@ -203,9 +212,9 @@
 
         resultsDiv.innerHTML = Object.values(grouped).map(v => `
             <div class="result-card" onclick="loadOriginal('${encodeURIComponent(JSON.stringify(v.item))}')">
-                <strong>${v.item.name || 'N/A'}</strong> - ${v.item.phone || 'N/A'}
+                <strong>${v.item.name}</strong> - ${v.item.phone}
                 <span style="float:right;font-size:12px;color:#555;">×${v.count}</span><br>
-                <small>Source: ${v.item.source} | ${new Date(v.item.created_at).toLocaleString()}</small>
+                <small>${new Date(v.item.created_at).toLocaleString()}</small>
             </div>
         `).join('');
     }
@@ -226,8 +235,8 @@
         document.getElementById('city').value = item.city || '';
         document.getElementById('pics').value = item.total_pictures || 0;
 
-        document.getElementById('note').value = item.note + "\n\n[Interaction Saved: " + new Date(item.created_at).toLocaleString() + "]";
+        document.getElementById('note').value = item.note || '';
     }
 </script>
-    </body>
+</body>
 </html>
