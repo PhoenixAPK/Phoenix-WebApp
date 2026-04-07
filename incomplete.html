@@ -5,35 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Incomplete</title>
 
-<!-- HARD CSP FIX (THIS WAS MISSING) -->
-<meta http-equiv="Content-Security-Policy"
-content="
-default-src 'self';
-script-src 'self' https://cdn.jsdelivr.net;
-style-src 'self' 'unsafe-inline';
-connect-src 'self' https://*.supabase.co;
-img-src 'self' data:;
-frame-src 'self';
-">
-
-https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
-
-<!-- HARD RUNTIME GUARD -->
-<script>
-(function () {
-  const file = location.pathname.split('/').pop().toLowerCase();
-  if (file !== 'incomplete.html') {
-    document.documentElement.innerHTML = '';
-    throw new Error('Blocked: wrong page');
-  }
-})();
-</script>
+<!-- ✅ SUPABASE SCRIPT (CORRECT) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
 body{background:#fff;padding:24px;color:#111827}
+
 .top-bar{display:flex;justify-content:flex-end;gap:12px;margin-bottom:16px}
 select{padding:8px 12px;border:1px solid #d1d5db;border-radius:6px}
+
 .header-row,.item-row{
   display:grid;
   grid-template-columns:1fr 2fr 1fr 1fr 120px;
@@ -41,24 +22,42 @@ select{padding:8px 12px;border:1px solid #d1d5db;border-radius:6px}
 }
 .header-row{font-weight:700;font-size:13px;border-bottom:1px solid #d1d5db}
 .item-row{border-bottom:1px solid #e5e7eb;font-size:14px}
-.open-btn{padding:6px 12px;border:none;border-radius:6px;background:#e5e7eb;cursor:pointer}
+
+.open-btn{
+  padding:6px 12px;
+  border:none;
+  border-radius:6px;
+  background:#e5e7eb;
+  cursor:pointer
+}
 </style>
 </head>
 
 <body>
 
 <div class="top-bar">
-  <select id="month"></select>
-  <select id="year"></select>
+  <select id="monthSelect"></select>
+  <select id="yearSelect"></select>
 </div>
 
 <div class="header-row">
-  <div>Reference</div><div>Name</div><div>City</div><div>Units</div><div>Action</div>
+  <div>Reference</div>
+  <div>Name</div>
+  <div>City</div>
+  <div>Units</div>
+  <div>Action</div>
 </div>
 
 <div id="list"></div>
 
 <script>
+/* ✅ HARD GUARD: only run as incomplete.html */
+if (!location.pathname.endsWith('incomplete.html')) {
+  document.body.innerHTML = '';
+  throw new Error('Blocked');
+}
+
+/* ✅ SUPABASE INIT */
 const SUPABASE_URL = "https://puymabrkwtpvhropcvqk.supabase.co";
 const SUPABASE_KEY = "YOUR_REAL_ANON_KEY";
 
@@ -68,37 +67,50 @@ const sb = supabase.createClient(
   { global:{ headers:{ apikey: SUPABASE_KEY } } }
 );
 
+/* ✅ SELECTORS */
 const list = document.getElementById('list');
-const m = document.getElementById('month');
-const y = document.getElementById('year');
-const now = new Date();
+const mSel = document.getElementById('monthSelect');
+const ySel = document.getElementById('yearSelect');
 
-for(let i=0;i<12;i++)
-  m.innerHTML += `<option value="${i}" ${i===now.getMonth()?'selected':''}>
-  ${new Date(2000,i).toLocaleString('default',{month:'long'})}</option>`;
+/* MONTHS */
+for(let i=0;i<12;i++){
+  mSel.innerHTML += `<option value="${i}">
+    ${new Date(2000,i).toLocaleString('default',{month:'long'})}
+  </option>`;
+}
 
-for(let yr=now.getFullYear()-5;yr<=now.getFullYear()+1;yr++)
-  y.innerHTML += `<option value="${yr}" ${yr===now.getFullYear()?'selected':''}>${yr}</option>`;
+/* ✅ YEARS 2026 → 2036 */
+for(let y=2026;y<=2036;y++){
+  ySel.innerHTML += `<option value="${y}">${y}</option>`;
+}
 
-m.onchange = y.onchange = load;
+/* defaults */
+mSel.value = new Date().getMonth();
+ySel.value = new Date().getFullYear();
 
+mSel.onchange = ySel.onchange = load;
+
+/* NAV */
 function openInvoice(mode,id){
   parent.document.getElementById('content-frame').src =
     `admininvoice.html?mode=${mode}&id=${id}`;
 }
 
+/* ✅ LOAD DATA */
 async function load(){
-  const start = new Date(y.value,m.value,1).toISOString();
-  const end = new Date(y.value,Number(m.value)+1,0,23,59,59).toISOString();
+  const start = new Date(ySel.value,mSel.value,1).toISOString();
+  const end   = new Date(ySel.value,Number(mSel.value)+1,0,23,59,59).toISOString();
 
-  const { data } = await sb
+  const { data, error } = await sb
     .from('interactions')
     .select('*')
-    .gte('created_at',start)
-    .lte('created_at',end)
+    .gte('created_at', start)
+    .lte('created_at', end)
     .order('created_at',{ascending:false});
 
-  list.innerHTML='';
+  list.innerHTML = '';
+  if(error) return;
+
   (data||[]).forEach(r=>{
     list.insertAdjacentHTML('beforeend',`
       <div class="item-row">
@@ -108,8 +120,9 @@ async function load(){
         <div>${r.total_pictures||0}</div>
         <div>
           <button class="open-btn"
-          onclick="openInvoice('${(r.mode||'').toLowerCase()}','${r.id}')">
-          Open</button>
+            onclick="openInvoice('${(r.mode||'').toLowerCase()}','${r.id}')">
+            Open
+          </button>
         </div>
       </div>
     `);
@@ -117,6 +130,8 @@ async function load(){
 }
 
 load();
+
+/* header sync */
 window.parent.postMessage({type:'UPDATE_HEADER',title:'Incomplete'},'*');
 </script>
 
