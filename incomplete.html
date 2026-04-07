@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Incomplete</title>
 
-<!-- SUPABASE -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- ✅ USE EXACT SCRIPTS YOU PROVIDED -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/supabase.js"></script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
@@ -51,21 +52,28 @@ select{padding:8px 12px;border:1px solid #d1d5db;border-radius:6px}
 <div id="list"></div>
 
 <script>
-/* SECURITY GUARD */
+/* ✅ GUARD */
 if (!location.pathname.endsWith('incomplete.html')) {
   document.body.innerHTML = '';
   throw new Error('Blocked');
 }
 
-/* ✅ SUPABASE INIT — ONLY REQUIRED CHANGE */
-const SUPABASE_URL = "https://puymabrkwtpvhropcvqk.supabase.co";
-const SUPABASE_KEY = "PASTE_YOUR_REAL_ANON_PUBLIC_KEY_HERE";
+/*
+  ✅ IMPORTANT
+  assets/js/supabase.js MUST expose ONE of these:
+  - window.supabaseClient
+  - window.sb
+  - window.supabase (already initialized client)
+*/
 
-const sb = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY,
-  { global:{ headers:{ apikey: SUPABASE_KEY } } }
-);
+const sb =
+  window.supabaseClient ||
+  window.sb ||
+  window.supabase;
+
+if (!sb || !sb.from) {
+  console.error('Supabase client not found. Check assets/js/supabase.js');
+}
 
 /* SELECTORS */
 const list = document.getElementById('list');
@@ -73,48 +81,49 @@ const mSel = document.getElementById('monthSelect');
 const ySel = document.getElementById('yearSelect');
 
 /* MONTHS */
-for(let i=0;i<12;i++){
+for (let i = 0; i < 12; i++) {
   mSel.innerHTML += `<option value="${i}">
-    ${new Date(2000,i).toLocaleString('default',{month:'long'})}
+    ${new Date(2000, i).toLocaleString('default', { month: 'long' })}
   </option>`;
 }
 
 /* YEARS */
-for(let y=2026;y<=2036;y++){
+for (let y = 2026; y <= 2036; y++) {
   ySel.innerHTML += `<option value="${y}">${y}</option>`;
 }
 
-/* DEFAULTS */
 mSel.value = new Date().getMonth();
 ySel.value = new Date().getFullYear();
 mSel.onchange = ySel.onchange = load;
 
 /* NAV */
-function openInvoice(mode,id){
+function openInvoice(mode, id) {
   parent.document.getElementById('content-frame').src =
     `admininvoice.html?mode=${mode}&id=${id}`;
 }
 
 /* LOAD DATA */
-async function load(){
+async function load() {
   const start = new Date(ySel.value, mSel.value, 1).toISOString();
-  const end   = new Date(ySel.value, Number(mSel.value)+1, 0, 23,59,59).toISOString();
+  const end   = new Date(ySel.value, Number(mSel.value) + 1, 0, 23, 59, 59).toISOString();
 
   const { data, error } = await sb
     .from('interactions')
     .select('*')
     .gte('created_at', start)
     .lte('created_at', end)
-    .order('created_at',{ascending:false});
+    .order('created_at', { ascending: false });
 
   list.innerHTML = '';
-  if(error){
+
+  if (error) {
     console.error(error);
+    list.innerHTML = '<div style="padding:12px;color:red">Load failed</div>';
     return;
   }
 
-  (data||[]).forEach(r=>{
-    list.insertAdjacentHTML('beforeend',`
+  data.forEach(r => {
+    list.insertAdjacentHTML('beforeend', `
       <div class="item-row">
         <div>${r.id}</div>
         <div>${r.name || ''}</div>
@@ -122,7 +131,7 @@ async function load(){
         <div>${r.total_pictures || 0}</div>
         <div>
           <button class="open-btn"
-            onclick="openInvoice('${(r.mode||'').toLowerCase()}','${r.id}')">
+            onclick="openInvoice('${(r.mode || '').toLowerCase()}', '${r.id}')">
             Open
           </button>
         </div>
@@ -135,7 +144,7 @@ load();
 
 /* HEADER SYNC */
 window.parent.postMessage(
-  {type:'UPDATE_HEADER',title:'Incomplete'},
+  { type: 'UPDATE_HEADER', title: 'Incomplete' },
   '*'
 );
 </script>
