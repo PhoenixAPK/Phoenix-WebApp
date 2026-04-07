@@ -96,7 +96,7 @@
         </div>
         <button class="action-btn" onclick="exportCSV()">Download Complete CSV</button>
     </div>
-<script>
+    <script>
     const SUPABASE_URL = "https://puymabrkwtpvhropcvqk.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -112,7 +112,7 @@
     function handleSourceChange() {
         const val = document.getElementById('source').value;
         document.getElementById('mode-div').classList.toggle('hidden', val === "");
-        if(val === "") {
+        if (val === "") {
             document.getElementById('mode').value = "";
             handleModeChange();
         }
@@ -125,20 +125,20 @@
 
     async function saveData() {
         const interaction = {
-            source: source.value,
-            mode: mode.value,
-            name: name.value.trim(),
-            phone: phone.value.trim(),
-            email: email.value.trim(),
-            address: address.value.trim(),
-            city: city.value.trim(),
-            total_pictures: pics.value || 0,
-            note: note.value
+            source: document.getElementById('source').value,
+            mode: document.getElementById('mode').value,
+            name: document.getElementById('name').value.trim(),
+            phone: document.getElementById('phone').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            address: document.getElementById('address').value.trim(),
+            city: document.getElementById('city').value.trim(),
+            total_pictures: document.getElementById('pics').value || 0,
+            note: document.getElementById('note').value.trim()
         };
 
         const { data: existing } = await supabaseClient
             .from('interactions')
-            .select('id,note')
+            .select('id,note,created_at')
             .eq('name', interaction.name)
             .eq('phone', interaction.phone)
             .eq('email', interaction.email)
@@ -147,13 +147,23 @@
             .order('created_at', { ascending: true })
             .limit(1);
 
-        if (existing && existing.length) {
+        const now = new Date().toLocaleString();
+
+        if (existing && existing.length > 0) {
+            const original = existing[0];
+
+            const updatedNote =
+                original.note +
+                "\n\n" +
+                interaction.note +
+                "\n[Interaction Saved: " + now + "]";
+
             await supabaseClient
                 .from('interactions')
-                .update({ note: existing[0].note })
-                .eq('id', existing[0].id);
+                .update({ note: updatedNote })
+                .eq('id', original.id);
 
-            alert("Interaction already exists. No duplicate created.");
+            alert("Interaction added to existing record.");
             location.reload();
             return;
         }
@@ -162,27 +172,31 @@
             .from('interactions')
             .insert([interaction]);
 
-        if (error) alert(error.message);
-        else { alert("Saved Successfully"); location.reload(); }
+        if (error) {
+            alert(error.message);
+        } else {
+            alert("Saved Successfully");
+            location.reload();
+        }
     }
 
     async function searchData() {
-        const nameVal = document.getElementById('s-name').value.trim();
-        const phoneVal = document.getElementById('s-phone').value.trim();
-        const emailVal = document.getElementById('s-email').value.trim();
-        const addressVal = document.getElementById('s-address').value.trim();
+        const name = document.getElementById('s-name').value.trim();
+        const phone = document.getElementById('s-phone').value.trim();
+        const email = document.getElementById('s-email').value.trim();
+        const address = document.getElementById('s-address').value.trim();
         const resultsDiv = document.getElementById('search-results');
 
-        if (!nameVal && !phoneVal && !emailVal && !addressVal) {
+        if (!name && !phone && !email && !address) {
             resultsDiv.innerHTML = "";
             return;
         }
 
         let query = supabaseClient.from('interactions').select('*');
-        if(nameVal) query = query.ilike('name', `%${nameVal}%`);
-        if(phoneVal) query = query.ilike('phone', `%${phoneVal}%`);
-        if(emailVal) query = query.ilike('email', `%${emailVal}%`);
-        if(addressVal) query = query.ilike('address', `%${addressVal}%`);
+        if (name) query = query.ilike('name', `%${name}%`);
+        if (phone) query = query.ilike('phone', `%${phone}%`);
+        if (email) query = query.ilike('email', `%${email}%`);
+        if (address) query = query.ilike('address', `%${address}%`);
 
         const { data } = await query.order('created_at', { ascending: true });
 
@@ -206,19 +220,19 @@
         const item = JSON.parse(decodeURIComponent(encodedData));
         showSection('new-section', document.querySelectorAll('.main-btn')[0]);
 
-        source.value = item.source;
+        document.getElementById('source').value = item.source;
         handleSourceChange();
-        mode.value = item.mode;
+        document.getElementById('mode').value = item.mode;
         handleModeChange();
 
-        name.value = item.name || '';
-        phone.value = item.phone || '';
-        email.value = item.email || '';
-        address.value = item.address || '';
-        city.value = item.city || '';
-        pics.value = item.total_pictures || 0;
+        document.getElementById('name').value = item.name || '';
+        document.getElementById('phone').value = item.phone || '';
+        document.getElementById('email').value = item.email || '';
+        document.getElementById('address').value = item.address || '';
+        document.getElementById('city').value = item.city || '';
+        document.getElementById('pics').value = item.total_pictures || 0;
 
-        note.value = item.note + "\n\n[Interaction Saved: " + new Date(item.created_at).toLocaleString() + "]";
+        document.getElementById('note').value = item.note || '';
     }
 </script>
 </body>
