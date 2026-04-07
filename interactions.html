@@ -96,8 +96,7 @@
         </div>
         <button class="action-btn" onclick="exportCSV()">Download Complete CSV</button>
     </div>
-
-    <script>
+<script>
     const SUPABASE_URL = "https://puymabrkwtpvhropcvqk.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -154,7 +153,7 @@
             const original = existing[0];
             const updatedNote =
                 (original.note || "") +
-                `\n\n[Repeated Interaction: ${now}]\n` +
+                `\n\n[Interaction Updated: ${now}]\n` +
                 interaction.note;
 
             await supabaseClient
@@ -162,7 +161,7 @@
                 .update({ note: updatedNote })
                 .eq('id', original.id);
 
-            alert("Existing interaction updated. No duplicate created.");
+            alert("Linked to existing interaction. No duplicate created.");
             location.reload();
             return;
         }
@@ -171,19 +170,18 @@
             .from('interactions')
             .insert([interaction]);
 
-        if (error) {
-            alert(error.message);
-        } else {
+        if (error) alert(error.message);
+        else {
             alert("Saved Successfully");
             location.reload();
         }
     }
 
     async function searchData() {
-        const n = document.getElementById('s-name').value.trim();
-        const p = document.getElementById('s-phone').value.trim();
-        const e = document.getElementById('s-email').value.trim();
-        const a = document.getElementById('s-address').value.trim();
+        const n = s-name.value.trim();
+        const p = s-phone.value.trim();
+        const e = s-email.value.trim();
+        const a = s-address.value.trim();
         const resultsDiv = document.getElementById('search-results');
 
         if (!n && !p && !e && !a) {
@@ -191,34 +189,32 @@
             return;
         }
 
-        let query = supabaseClient.from('interactions').select('*');
+        let query = supabaseClient
+            .from('interactions')
+            .select('*')
+            .order('created_at', { ascending: true });
+
         if (n) query = query.ilike('name', `%${n}%`);
         if (p) query = query.ilike('phone', `%${p}%`);
         if (e) query = query.ilike('email', `%${e}%`);
         if (a) query = query.ilike('address', `%${a}%`);
 
-        const { data } = await query.order('created_at', { ascending: false }).limit(10);
+        const { data } = await query;
 
-        resultsDiv.innerHTML = "";
+        const map = {};
+        data.forEach(i => {
+            const key = `${i.name}|${i.phone}|${i.email}|${i.address}|${i.city}`;
+            if (!map[key]) map[key] = { item: i, count: 1 };
+            else map[key].count++;
+        });
 
-        for (const i of data || []) {
-            const { count } = await supabaseClient
-                .from('interactions')
-                .select('*', { count: 'exact', head: true })
-                .eq('name', i.name)
-                .eq('phone', i.phone)
-                .eq('email', i.email)
-                .eq('address', i.address)
-                .eq('city', i.city);
-
-            resultsDiv.innerHTML += `
-                <div class="result-card" onclick="loadOriginal('${encodeURIComponent(JSON.stringify(i))}')">
-                    <strong>${i.name || 'N/A'}</strong> - ${i.phone || 'N/A'}
-                    <span style="float:right;font-size:12px;color:#555;">×${count || 1}</span><br>
-                    <small>Source: ${i.source} | ${new Date(i.created_at).toLocaleString()}</small>
-                </div>
-            `;
-        }
+        resultsDiv.innerHTML = Object.values(map).map(v => `
+            <div class="result-card" onclick="loadOriginal('${encodeURIComponent(JSON.stringify(v.item))}')">
+                <strong>${v.item.name}</strong> - ${v.item.phone}
+                <span style="float:right;font-size:12px;color:#555;">×${v.count}</span><br>
+                <small>Source: ${v.item.source} | ${new Date(v.item.created_at).toLocaleString()}</small>
+            </div>
+        `).join('');
     }
 
     function loadOriginal(encoded) {
@@ -236,8 +232,9 @@
         address.value = item.address || '';
         city.value = item.city || '';
         pics.value = item.total_pictures || 0;
+
         note.value = item.note || '';
     }
-    </script>
+</script>
 </body>
 </html>
