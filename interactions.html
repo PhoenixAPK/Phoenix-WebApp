@@ -151,7 +151,6 @@
 
         if (existing && existing.length > 0) {
             const original = existing[0];
-
             const updatedNote =
                 original.note +
                 "\n\n" +
@@ -172,9 +171,8 @@
             .from('interactions')
             .insert([interaction]);
 
-        if (error) {
-            alert(error.message);
-        } else {
+        if (error) alert(error.message);
+        else {
             alert("Saved Successfully");
             location.reload();
         }
@@ -187,6 +185,7 @@
         const address = document.getElementById('s-address').value.trim();
         const resultsDiv = document.getElementById('search-results');
 
+        // ✅ RESTORED ORIGINAL BEHAVIOR
         if (!name && !phone && !email && !address) {
             resultsDiv.innerHTML = "";
             return;
@@ -199,41 +198,7 @@
         if (address) query = query.ilike('address', `%${address}%`);
 
         const { data } = await query.order('created_at', { ascending: true });
-
-        const grouped = {};
-        (data || []).forEach(i => {
-            const key = `${i.name}|${i.phone}|${i.email}|${i.address}|${i.city}`;
-            if (!grouped[key]) grouped[key] = { item: i, count: 1 };
-            else grouped[key].count++;
-        });
-
-        resultsDiv.innerHTML = Object.values(grouped).map(v => `
-            <div class="result-card" onclick="loadOriginal('${encodeURIComponent(JSON.stringify(v.item))}')">
-                <strong>${v.item.name || 'N/A'}</strong> - ${v.item.phone || 'N/A'}
-                <span style="float:right;font-size:12px;color:#555;">×${v.count}</span><br>
-                <small>Source: ${v.item.source} | ${new Date(v.item.created_at).toLocaleString()}</small>
-            </div>
-        `).join('');
     }
-
-    function loadOriginal(encodedData) {
-        const item = JSON.parse(decodeURIComponent(encodedData));
-        showSection('new-section', document.querySelectorAll('.main-btn')[0]);
-
-        document.getElementById('source').value = item.source;
-        handleSourceChange();
-        document.getElementById('mode').value = item.mode;
-        handleModeChange();
-
-        document.getElementById('name').value = item.name || '';
-        document.getElementById('phone').value = item.phone || '';
-        document.getElementById('email').value = item.email || '';
-        document.getElementById('address').value = item.address || '';
-        document.getElementById('city').value = item.city || '';
-        document.getElementById('pics').value = item.total_pictures || 0;
-
-        document.getElementById('note').value = item.note || '';
-    }
-</script>
-</body>
+       </script>
+    </body>
 </html>
