@@ -205,16 +205,24 @@
             .order('created_at', { ascending: true });
 
         let fullNote = "";
-        (all || []).forEach(r => {
-            if (r.note && r.note.trim()) {
-                fullNote += r.note.trim() +
-                    "\n[Interaction Saved: " +
-                    new Date(r.created_at).toLocaleString() +
-                    "]\n\n";
-            }
-        });
+const seen = new Set();
 
-        document.getElementById('note').value = fullNote.trim();
+(all || []).forEach(r => {
+    if (!r.note || !r.note.trim()) return;
+
+    const block =
+        r.note.trim() +
+        "\n[Interaction Saved: " +
+        new Date(r.created_at).toLocaleString() +
+        "]";
+
+    if (!seen.has(block)) {
+        seen.add(block);
+        fullNote += block + "\n\n";
+    }
+});
+
+document.getElementById('note').value = fullNote.trim();
     }
 </script>
 </body>
