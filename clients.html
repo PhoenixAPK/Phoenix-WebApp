@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Client Detail Page</title>
+
+<style>
+/* --------- Base --------- */
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f5f6f8;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+.section {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* --------- Client Info --------- */
+.client-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.field label {
+    font-size: 12px;
+    color: #666;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.field input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
+}
+
+/* --------- History Section --------- */
+.history-container {
+    background: #f0f0f0;
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.filter-select {
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background: #fafafa;
+}
+
+.history-item {
+    background: #e6e6e6;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.history-item summary {
+    font-weight: 500;
+    list-style: none;
+}
+
+.history-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.history-details {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #555;
+}
+
+/* --------- Read Only Look --------- */
+.readonly-note {
+    font-size: 12px;
+    color: #777;
+    margin-top: 10px;
+    font-style: italic;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= CLIENT INFO ================= -->
+<div class="section">
+    <div class="section-title">Client Information</div>
+
+    <div class="client-grid">
+        <div class="field">
+            <label>Name</label>
+            <input value="Acme Corporation" disabled />
+        </div>
+
+        <div class="field">
+            <label>Contact</label>
+            <input value="+212 600000000" disabled />
+        </div>
+
+        <div class="field">
+            <label>Email</label>
+            <input value="contact@acme.com" disabled />
+        </div>
+
+        <div class="field">
+            <label>Address</label>
+            <input value="123 Main Street" disabled />
+        </div>
+
+        <div class="field">
+            <label>City</label>
+            <input value="Rabat" disabled />
+        </div>
+
+        <div class="field">
+            <label>Region</label>
+            <input value="Rabat‑Salé‑Kénitra" disabled />
+        </div>
+    </div>
+</div>
+
+<!-- ================= CLIENT HISTORY ================= -->
+<div class="section">
+    <div class="section-title">
+        Client History
+        <select class="filter-select" id="sortOrder">
+            <option value="asc">Oldest → Newest</option>
+            <option value="desc">Newest → Oldest</option>
+        </select>
+    </div>
+
+    <div class="history-container" id="historyList"></div>
+
+    <div class="readonly-note">
+        History is read‑only and cannot be modified.
+    </div>
+</div>
+
+<script>
+/* --------- Mock History Data --------- */
+const historyData = [
+    {
+        type: "Request",
+        date: "2026-02-01",
+        time: "09:12",
+        content: "Request ID: PR00001"
+    },
+    {
+        type: "Interaction",
+        date: "2026-02-01",
+        time: "14:32",
+        content: "Client confirmed project details"
+    },
+    {
+        type: "Request",
+        date: "2026-03-05",
+        time: "11:45",
+        content: "Request ID: PR00007"
+    }
+];
+
+/* --------- Render --------- */
+function renderHistory(order = "asc") {
+    const container = document.getElementById("historyList");
+    container.innerHTML = "";
+
+    const sorted = [...historyData].sort((a, b) => {
+        const d1 = new Date(a.date + " " + a.time);
+        const d2 = new Date(b.date + " " + b.time);
+        return order === "asc" ? d1 - d2 : d2 - d1;
+    });
+
+    sorted.forEach(item => {
+        const el = document.createElement("details");
+        el.className = "history-item";
+
+        el.innerHTML = `
+            <summary>
+                ${item.type} submitted on ${item.date}
+            </summary>
+            <div class="history-details">
+                ${item.content}<br/>
+                Time: ${item.time}
+            </div>
+        `;
+
+        container.appendChild(el);
+    });
+}
+
+/* --------- Events --------- */
+document.getElementById("sortOrder").addEventListener("change", e => {
+    renderHistory(e.target.value);
+});
+
+/* --------- Init --------- */
+renderHistory();
+</script>
+
+</body>
+</html>
