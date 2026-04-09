@@ -106,13 +106,19 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     function showSection(id, btn) {
-        document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-        document.querySelectorAll('.main-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).style.display = 'block';
-        btn.classList.add('active');
-        document.getElementById('search-results').innerHTML = "";
-    }
+    document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+    document.querySelectorAll('.main-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).style.display = 'block';
+    btn.classList.add('active');
 
+    // RESET SEARCH STATE
+    document.getElementById('s-name').value = "";
+    document.getElementById('s-phone').value = "";
+    document.getElementById('s-email').value = "";
+    document.getElementById('s-address').value = "";
+    document.getElementById('search-results').innerHTML = "";
+}
+    
     function handleSourceChange() {
         const val = document.getElementById('source').value;
         document.getElementById('mode-div').classList.toggle('hidden', val === "");
