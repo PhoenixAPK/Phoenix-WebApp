@@ -110,12 +110,6 @@
     document.querySelectorAll('.main-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(id).style.display = 'block';
     btn.classList.add('active');
-
-    // RESET SEARCH STATE
-    document.getElementById('s-name').value = "";
-    document.getElementById('s-phone').value = "";
-    document.getElementById('s-email').value = "";
-    document.getElementById('s-address').value = "";
     document.getElementById('search-results').innerHTML = "";
 }
     
