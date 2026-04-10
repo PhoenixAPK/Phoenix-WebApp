@@ -2,152 +2,205 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Phoenix Printing Solutions</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clients</title>
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
-body{height:100vh;background:#f2f3f5;overflow:hidden}
-.app{height:100vh;display:grid;grid-template-rows:60px 1fr 40px}
-header{background:#ffffff;border-bottom:1px solid #ddd;padding:0 24px;display:flex;align-items:center;justify-content:space-between;font-weight:bold}
-.header-right{display:none;align-items:center;gap:16px;font-size:14px;font-weight:normal}
-.logout-btn{padding:6px 12px;border:none;border-radius:6px;cursor:pointer;background:#e5e7eb}
-.logout-btn:hover{background:#d1d5db}
-.body{display:flex;height:100%}
-aside{width:260px;background:#e5e7eb;padding:16px;overflow-y:auto;flex-shrink:0;border-right:1px solid #d6d6d6}
-.menu-section{margin-bottom:16px}
-.menu-header{font-size:14px;font-weight:700;text-transform:uppercase;padding:6px 8px;cursor:pointer;color:#111827}
-.menu-items{display:none;margin-top:6px}
-.menu-item{padding:8px 14px;margin:4px 0;font-size:15px;color:#111827;border-radius:8px;cursor:pointer}
-.menu-item:hover{background:#d1d5db}
-.menu-item.active{background:#d1d5db;font-weight:700}
-main{flex:1;background:#ffffff;overflow:auto}
-#content-frame{width:100%;height:100%;border:none}
-footer{background:#ffffff;border-top:1px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:12px;color:#666}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* === CONTENT WRAPPER (CRITICAL FIX) === */
+.page-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* === MAIN BUTTON VIEW === */
+.nav-container {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 40px;
+}
+
+.main-btn {
+  width: 160px;
+  height: 110px;
+  background: #e5e7eb;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.main-btn:hover {
+  background: #d1d5db;
+}
+
+/* === CLIENT VIEW === */
+#clientView {
+  display: none;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  font-weight: 600;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+
+/* === CLIENT INFO === */
+.client-info {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.client-info label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+  color: #333;
+  font-size: 13px;
+  text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+}
+
+.client-info input,
+.client-info select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid rgba(204, 204, 204, 0.8);
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.client-info input:focus,
+.client-info select:focus {
+  border-color: #046C4E;
+  outline: none;
+  box-shadow: 0 0 5px rgba(4,108,78,0.3);
+}
+
+/* === HISTORY === */
+.history-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.history-box {
+  background: #f0f0f0;
+  border-radius: 6px;
+  padding: 15px;
+  color: #666;
+  font-size: 13px;
+}
+
+.history-note {
+  font-size: 12px;
+  font-style: italic;
+  margin-top: 8px;
+}
 </style>
 </head>
+
 <body>
-<div class="app">
 
-<header>
- <div>
-  logo.png <span id="main-header-title"></span>
- </div>
- <div class="header-right" id="user-info">
-   <span id="user-label"></span>
-   <button class="logout-btn" onclick="logout()">Logout</button>
- </div>
-</header>
+<div class="page-wrapper">
 
-<div class="body">
-<aside>
- <div class="menu-section">
-  <div class="menu-header" onclick="toggleMenu(this)">Dashboard</div>
-  <div class="menu-items">
-   <div class="menu-item" onclick="loadPage('overview.html',this)">Overview</div>
+  <!-- MAIN VIEW -->
+  <div id="mainView" class="nav-container">
+    <button class="main-btn" onclick="openClient()">New</button>
+    <button class="main-btn" onclick="openClient()">Search</button>
   </div>
- </div>
- <div class="menu-section">
-  <div class="menu-header" onclick="toggleMenu(this)">Main</div>
-  <div class="menu-items">
-   <div class="menu-item" onclick="loadPage('pendingqueue.html',this)">Pending</div>
-   <div class="menu-item" onclick="loadPage('inprogress.html',this)">In Progress</div>
-   <div class="menu-item" onclick="loadPage('admininvoice.html',this)">Invoice</div>
-   <div class="menu-item" onclick="loadPage('interactions.html',this)">Interactions</div>
-  </div>
- </div>
- <div class="menu-section">
-  <div class="menu-header" onclick="toggleMenu(this)">Profiles</div>
-  <div class="menu-items">
-   <div class="menu-item" onclick="loadPage('clients.html',this)">Clients</div>
-   <div class="menu-item" onclick="loadPage('businesses.html',this)">Businesses</div>
-  </div>
- </div>
- <div class="menu-section">
-  <div class="menu-header" onclick="toggleMenu(this)">Accounting</div>
-  <div class="menu-items">
-   <div class="menu-item" onclick="loadPage('monthlyExpenses.html',this)">Monthly Expenses</div>
-   <div class="menu-item" onclick="loadPage('paidCompleted.html',this)">Paid – Completed</div>
-   <div class="menu-item" onclick="loadPage('monthlyRevenue.html',this)">Monthly Revenue</div>
-  </div>
- </div>
- <div class="menu-section">
-  <div class="menu-header" onclick="toggleMenu(this)">Admin Space</div>
-  <div class="menu-items">
-   <div class="menu-item" onclick="loadPage('userManagement.html',this)">User Management</div>
-   <div class="menu-item" onclick="loadPage('printerMaintenance.html',this)">Printer Maintenance</div>
-   <div class="menu-item" onclick="loadPage('carMaintenance.html',this)">Car Maintenance</div>
-  </div>
- </div>
- <div class="menu-section">
-  <div class="menu-header" onclick="toggleMenu(this)">System</div>
-  <div class="menu-items">
-   <div class="menu-item" onclick="loadPage('uploads.html',this)">Uploads</div>
-   <div class="menu-item" onclick="loadPage('archive.html',this)">Requests Archive</div>
-    <div class="menu-item" onclick="loadPage('interactionsarchive.html',this)">Interactions Archive</div>
-  </div>
- </div>
-</aside>
 
-<main>
- <iframe id="content-frame" src="overview.html"></iframe>
-</main>
-</div>
+  <!-- CLIENT VIEW -->
+  <div id="clientView">
 
-<footer>© 2026 Phoenix Printing Solutions</footer>
+    <button class="back-btn" onclick="goBack()">← Back</button>
+
+    <div class="client-info">
+      <div class="input-grid">
+        <div>
+          <label>Name</label>
+          <input>
+        </div>
+        <div>
+          <label>Contact</label>
+          <input>
+        </div>
+        <div>
+          <label>Email</label>
+          <input>
+        </div>
+        <div>
+          <label>Address</label>
+          <input>
+        </div>
+        <div>
+          <label>City</label>
+          <select><option>Select City</option></select>
+        </div>
+        <div>
+          <label>Region</label>
+          <input>
+        </div>
+      </div>
+    </div>
+
+    <div class="history-card">
+      <div class="history-header">
+        <strong>Client History</strong>
+        <select>
+          <option>Oldest → Newest</option>
+          <option>Newest → Oldest</option>
+        </select>
+      </div>
+      <div class="history-box">
+        No history available for this client.
+        <div class="history-note">
+          History is read-only and cannot be modified.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
 </div>
 
 <script>
-function toggleMenu(header){
- const items = header.nextElementSibling;
- items.style.display = items.style.display === "block" ? "none" : "block";
+function openClient() {
+  document.getElementById("mainView").style.display = "none";
+  document.getElementById("clientView").style.display = "block";
 }
 
-function loadPage(page, el){
- const iframe = document.getElementById('content-frame');
- iframe.src = page;
- 
- // Reset header text to empty whenever a new page starts loading
- document.getElementById('main-header-title').textContent = "";
-
- document.querySelectorAll('.menu-item').forEach(i=>i.classList.remove('active'));
- if(el) el.classList.add('active');
-}
-
-// Automatically sync title from the page inside the iframe
-window.addEventListener('message', function(event) {
-  if (event.data.type === 'UPDATE_HEADER') {
-    document.getElementById('main-header-title').textContent = event.data.title;
-  }
-});
-
-window.onload = () => {
-  const iframe = document.getElementById('content-frame');
-  
-  // Attempt to pull <h1> text from sub-page if it exists
-  iframe.onload = function() {
-    try {
-      const doc = iframe.contentDocument || iframe.contentWindow.document;
-      const h1 = doc.querySelector('h1');
-      document.getElementById('main-header-title').textContent = h1 ? h1.textContent : "";
-    } catch(e) {
-      document.getElementById('main-header-title').textContent = "";
-    }
-  };
-
-  const name = sessionStorage.getItem("displayName");
-  const role = sessionStorage.getItem("userRole");
-  if(name && role){
-   document.getElementById("user-label").textContent = `Logged in as: ${role} – ${name}`;
-   document.getElementById("user-info").style.display = "flex";
-  } else {
-   window.location.href = "adminlogin.html";
-  }
-};
-
-function logout(){
- sessionStorage.clear();
- window.location.href = "adminlogin.html";
+function goBack() {
+  document.getElementById("clientView").style.display = "none";
+  document.getElementById("mainView").style.display = "flex";
 }
 </script>
+
 </body>
 </html>
+``
