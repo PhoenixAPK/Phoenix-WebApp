@@ -5,6 +5,7 @@
 <title>Clients</title>
 
 <style>
+/* ===== RESET ===== */
 * {
   margin: 0;
   padding: 0;
@@ -47,7 +48,7 @@ body {
   padding: 24px;
 }
 
-/* RETURN BUTTON */
+/* ===== RETURN BUTTON ===== */
 .back-btn {
   width: 74px;
   height: 30px;
@@ -93,7 +94,7 @@ select {
   font-size: 14px;
 }
 
-/* SAVE BUTTON */
+/* ===== SAVE BUTTON ===== */
 .save-wrapper {
   width: 100%;
   display: flex;
@@ -132,7 +133,6 @@ select {
   font-size: 15px;
 }
 
-/* ✅ FIXED: STATIC WIDTH / FIT TEXT ONLY */
 .history-sort {
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -172,70 +172,98 @@ select {
 
 <body>
 
+<!-- ===== MAIN VIEW ===== -->
 <div id="mainView">
   <button class="main-btn" onclick="openClient('new')">New</button>
   <button class="main-btn" onclick="openClient('search')">Search</button>
 </div>
 
+<!-- ===== CLIENT VIEW ===== -->
 <div id="clientView">
 
-  <button class="back-btn" onclick="goBack()">← Return</button>
+<button class="back-btn" onclick="goBack()">← Return</button>
 
-  <div class="client-info">
-    <div class="input-grid">
-      <div><label>Name</label><input></div>
-      <div><label>Contact</label><input></div>
-      <div><label>Email</label><input></div>
-      <div><label>Address</label><input></div>
-      <div>
-        <label>City</label>
-        <select><option>Select City</option></select>
-      </div>
-      <div>
-        <label>Region</label>
-        <input>
-        <div class="save-wrapper">
-          <button class="save-btn" id="saveBtn">Save</button>
-        </div>
-      </div>
+<div class="client-info">
+  <div class="input-grid">
+
+    <div>
+      <label>Name</label>
+      <input type="text">
     </div>
-  </div>
 
-  <div class="history-indicator" id="historyIndicator">
-    <div class="history-header">
-      <h3>History Indicator</h3>
-      <select class="history-sort">
-        <option>Newest → Oldest</option>
-        <option>Oldest → Newest</option>
+    <div>
+      <label>Contact</label>
+      <input type="text">
+    </div>
+
+    <div>
+      <label>Email</label>
+      <input type="email">
+    </div>
+
+    <div>
+      <label>Address</label>
+      <input type="text">
+    </div>
+
+    <div>
+      <label>City</label>
+      <select id="clientCity">
+        <option value="">Select City</option>
       </select>
     </div>
 
-    <div class="history-section">
-      <button onclick="toggleHistory(this)">Requests</button>
-      <div class="history-content"></div>
+    <div>
+      <label>Region</label>
+      <input type="text" id="clientRegion" readonly>
+      <div class="save-wrapper">
+        <button class="save-btn" id="saveBtn">Save</button>
+      </div>
     </div>
 
-    <div class="history-section">
-      <button onclick="toggleHistory(this)">Interactions</button>
-      <div class="history-content"></div>
-    </div>
-
-    <div class="history-section">
-      <button onclick="toggleHistory(this)">Invoice</button>
-      <div class="history-content"></div>
-    </div>
   </div>
+</div>
+
+<div class="history-indicator" id="historyIndicator">
+  <div class="history-header">
+    <h3>History Indicator</h3>
+    <select class="history-sort">
+      <option>Newest → Oldest</option>
+      <option>Oldest → Newest</option>
+    </select>
+  </div>
+
+  <div class="history-section">
+    <button onclick="toggleHistory(this)">Requests</button>
+    <div class="history-content"></div>
+  </div>
+
+  <div class="history-section">
+    <button onclick="toggleHistory(this)">Interactions</button>
+    <div class="history-content"></div>
+  </div>
+
+  <div class="history-section">
+    <button onclick="toggleHistory(this)">Invoice</button>
+    <div class="history-content"></div>
+  </div>
+</div>
 
 </div>
 
 <script>
+/* ===== MODE HANDLING ===== */
 function openClient(mode) {
   document.getElementById("mainView").style.display = "none";
   document.getElementById("clientView").style.display = "block";
-  document.getElementById("historyIndicator").style.display =
-    mode === "search" ? "block" : "none";
-  document.getElementById("saveBtn").style.display =
-    mode === "new" ? "inline-block" : "none";
+
+  if (mode === "search") {
+    document.getElementById("historyIndicator").style.display = "block";
+    document.getElementById("saveBtn").style.display = "none";
+  } else {
+    document.getElementById("historyIndicator").style.display = "none";
+    document.getElementById("saveBtn").style.display = "inline-block";
+  }
 }
 
 function goBack() {
@@ -245,17 +273,156 @@ function goBack() {
 
 function toggleHistory(btn) {
   const content = btn.nextElementSibling;
-  content.style.display =
-    content.style.display === "block" ? "none" : "block";
+  content.style.display = content.style.display === "block" ? "none" : "block";
 }
 
+/* ===== CITY → REGION DATA (99 ENTRIES) ===== */
+const cityData = [
+  { city: "Agadir", region: "Souss-Massa", distance_km: 500 },
+  { city: "Ain Harrouda", region: "Casablanca-Settat", distance_km: 80 },
+  { city: "Ait Melloul", region: "Souss-Massa", distance_km: 510 },
+  { city: "Al Aaroui", region: "Oriental", distance_km: 510 },
+  { city: "Al Hoceima", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 400 },
+  { city: "Arfoud", region: "Drâa-Tafilalet", distance_km: 590 },
+  { city: "Asilah", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 170 },
+  { city: "Azemmour", region: "Casablanca-Settat", distance_km: 150 },
+  { city: "Azilal", region: "Béni Mellal-Khénifra", distance_km: 340 },
+  { city: "Azrou", region: "Fès-Meknès", distance_km: 180 },
+
+  { city: "Ben Guerir", region: "Marrakech-Safi", distance_km: 250 },
+  { city: "Ben Slimane", region: "Casablanca-Settat", distance_km: 70 },
+  { city: "Beni Mellal", region: "Béni Mellal-Khénifra", distance_km: 270 },
+  { city: "Benslimane", region: "Casablanca-Settat", distance_km: 70 },
+  { city: "Berrechid", region: "Casablanca-Settat", distance_km: 120 },
+  { city: "Biougra", region: "Souss-Massa", distance_km: 490 },
+  { city: "Bni Anṣār (Beni Ensar)", region: "Oriental", distance_km: 540 },
+  { city: "Bouarfa", region: "Oriental", distance_km: 680 },
+  { city: "Boujdour", region: "Laâyoune-Sakia El Hamra", distance_km: 1200 },
+  { city: "Boulemane", region: "Fès-Meknès", distance_km: 280 },
+  { city: "Bouznika", region: "Casablanca-Settat", distance_km: 45 },
+
+  { city: "Casablanca", region: "Casablanca-Settat", distance_km: 90 },
+  { city: "Chefchaouen", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 230 },
+  { city: "Chichaoua", region: "Marrakech-Safi", distance_km: 380 },
+
+  { city: "Dakhla", region: "Dakhla-Oued Ed-Dahab", distance_km: 1700 },
+  { city: "Dar Bouazza", region: "Casablanca-Settat", distance_km: 110 },
+  { city: "Dcheira El Jihadia", region: "Souss-Massa", distance_km: 500 },
+  { city: "Driouch", region: "Oriental", distance_km: 480 },
+
+  { city: "El Hajeb", region: "Fès-Meknès", distance_km: 160 },
+  { city: "El Jadida", region: "Casablanca-Settat", distance_km: 170 },
+  { city: "El Kelaa Des Sraghna", region: "Marrakech-Safi", distance_km: 230 },
+  { city: "Errachidia", region: "Drâa-Tafilalet", distance_km: 550 },
+  { city: "Essaouira", region: "Marrakech-Safi", distance_km: 470 },
+
+  { city: "Fes (Fès)", region: "Fès-Meknès", distance_km: 200 },
+  { city: "Figuig", region: "Oriental", distance_km: 750 },
+  { city: "Fnideq", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 290 },
+  { city: "Fquih Ben Salah", region: "Béni Mellal-Khénifra", distance_km: 240 },
+
+  { city: "Guelmim", region: "Guelmim-Oued Noun", distance_km: 750 },
+  { city: "Guercif", region: "Oriental", distance_km: 400 },
+
+  { city: "Ifrane", region: "Fès-Meknès", distance_km: 190 },
+  { city: "Imzouren", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 410 },
+  { city: "Inezgane", region: "Souss-Massa", distance_km: 505 },
+
+  { city: "Jerada", region: "Oriental", distance_km: 640 },
+
+  { city: "Kasbat Tadla", region: "Béni Mellal-Khénifra", distance_km: 210 },
+  { city: "Kenitra (Kénitra)", region: "Rabat-Salé-Kénitra", distance_km: 45 },
+  { city: "Khenifra", region: "Béni Mellal-Khénifra", distance_km: 280 },
+  { city: "Khemisset", region: "Rabat-Salé-Kénitra", distance_km: 85 },
+  { city: "Khouribga", region: "Béni Mellal-Khénifra", distance_km: 160 },
+  { city: "Ksar El Kebir", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 180 },
+
+  { city: "L'Aaioune Sidi Mellouk", region: "Oriental", distance_km: 600 },
+  { city: "Laâyoune", region: "Laâyoune-Sakia El Hamra", distance_km: 1050 },
+  { city: "Larache", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 160 },
+  { city: "Lqliaa", region: "Souss-Massa", distance_km: 500 },
+
+  { city: "M'Rirt", region: "Béni Mellal-Khénifra", distance_km: 220 },
+  { city: "M'diq", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 270 },
+  { city: "Marrakesh (Marrakech)", region: "Marrakech-Safi", distance_km: 330 },
+  { city: "Martil", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 260 },
+  { city: "Meknes (Meknès)", region: "Fès-Meknès", distance_km: 145 },
+  { city: "Midelt", region: "Drâa-Tafilalet", distance_km: 350 },
+  { city: "Mohammedia", region: "Casablanca-Settat", distance_km: 60 },
+  { city: "Moulay Yacoub", region: "Fès-Meknès", distance_km: 210 },
+
+  { city: "Nador", region: "Oriental", distance_km: 520 },
+
+  { city: "Ouarzazate", region: "Drâa-Tafilalet", distance_km: 450 },
+  { city: "Ouezzane", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 150 },
+  { city: "Oued Zem", region: "Béni Mellal-Khénifra", distance_km: 190 },
+  { city: "Ouazzane", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 150 },
+  { city: "Oujda", region: "Oriental", distance_km: 600 },
+  { city: "Oulad Teima", region: "Souss-Massa", distance_km: 490 },
+
+  { city: "Rabat", region: "Rabat-Salé-Kénitra", distance_km: 0 },
+
+  { city: "Safi", region: "Marrakech-Safi", distance_km: 320 },
+  { city: "Salé", region: "Rabat-Salé-Kénitra", distance_km: 0 },
+  { city: "Sefrou", region: "Fès-Meknès", distance_km: 220 },
+  { city: "Settat", region: "Casablanca-Settat", distance_km: 140 },
+  { city: "Sidi Bennour", region: "Casablanca-Settat", distance_km: 190 },
+  { city: "Sidi Ifni", region: "Guelmim-Oued Noun", distance_km: 670 },
+  { city: "Sidi Kacem", region: "Rabat-Salé-Kénitra", distance_km: 100 },
+  { city: "Sidi Slimane", region: "Rabat-Salé-Kénitra", distance_km: 80 },
+  { city: "Sidi Yahya El Gharb", region: "Rabat-Salé-Kénitra", distance_km: 60 },
+  { city: "Skhirat", region: "Rabat-Salé-Kénitra", distance_km: 30 },
+  { city: "Smara", region: "Laâyoune-Sakia El Hamra", distance_km: 1000 },
+  { city: "Souk El Arbaa", region: "Rabat-Salé-Kénitra", distance_km: 90 },
+
+  { city: "Tahannaout", region: "Marrakech-Safi", distance_km: 350 },
+  { city: "Tan-Tan", region: "Guelmim-Oued Noun", distance_km: 850 },
+  { city: "Tangier (Tanger)", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 280 },
+  { city: "Taounate", region: "Fès-Meknès", distance_km: 280 },
+  { city: "Taroudant", region: "Souss-Massa", distance_km: 470 },
+  { city: "Tarfaya", region: "Laâyoune-Sakia El Hamra", distance_km: 950 },
+  { city: "Tata", region: "Souss-Massa", distance_km: 600 },
+  { city: "Taza", region: "Fès-Meknès", distance_km: 350 },
+  { city: "Temara", region: "Rabat-Salé-Kénitra", distance_km: 15 },
+  { city: "Tetouan (Tétouan)", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 250 },
+  { city: "Tifelt", region: "Rabat-Salé-Kénitra", distance_km: 70 },
+  { city: "Tinghir", region: "Drâa-Tafilalet", distance_km: 490 },
+  { city: "Tiznit", region: "Souss-Massa", distance_km: 590 },
+
+  { city: "Youssoufia", region: "Marrakech-Safi", distance_km: 250 },
+
+  { city: "Zaio", region: "Oriental", distance_km: 560 },
+  { city: "Zagora", region: "Drâa-Tafilalet", distance_km: 650 }
+];
+/* ===== CITY DROPDOWN POPULATION ===== */
+const citySelect = document.getElementById("clientCity");
+const regionInput = document.getElementById("clientRegion");
+
+cityData.forEach(function(item) {
+  const option = document.createElement("option");
+  option.value = item.city;
+  option.textContent = item.city;
+  citySelect.appendChild(option);
+});
+
+citySelect.addEventListener("change", function() {
+  const selectedCity = this.value;
+  const match = cityData.find(c => c.city === selectedCity);
+  regionInput.value = match ? match.region : "";
+});
+
+/* ===== SAVE ACTION ===== */
 document.getElementById("saveBtn").onclick = function () {
-  document.querySelectorAll(".client-info input").forEach(input => {
-    input.value = "";
+  document.querySelectorAll(".client-info input").forEach(function (input) {
+    if (!input.hasAttribute("readonly")) {
+      input.value = "";
+    }
   });
+  citySelect.value = "";
+  regionInput.value = "";
 };
 </script>
 
 </body>
 </html>
-``
+
