@@ -5,109 +5,139 @@
 <title>Phoenix Webapp – Clients</title>
 
 <style>
-body {
-    margin: 0;
-    font-family: "Segoe UI", Arial, sans-serif;
-    background: #f4f5f7;
+/* ===== RESET ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
 }
 
-/* ===== MAIN VIEW ===== */
-#mainView {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 30px;
+/* ===== PAGE BASE ===== */
+body {
+  background: #ffffff;
+  padding: 24px;
+  color: #111827;
+}
+
+/* ===== MAIN BUTTON VIEW ===== */
+.nav-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .main-btn {
-    width: 140px;
-    height: 120px;
-    border-radius: 10px;
-    border: none;
-    background: #e1e3e8;
-    font-weight: 600;
-    font-size: 15px;
-    cursor: pointer;
+  width: 160px;
+  height: 110px;
+  background: #e5e7eb;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s;
 }
 
 .main-btn:hover {
-    background: #d6d8dd;
+  background: #d1d5db;
 }
 
-/* ===== CLIENT DETAIL ===== */
-#clientView {
-    display: none;
-    padding: 20px;
+/* ===== CLIENT SECTION ===== */
+.section {
+  display: none;
+  max-width: 900px;
+  margin: 0 auto;
+  animation: fadeIn 0.3s;
 }
 
-.card {
-    background: #ffffff;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.client-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 15px;
+/* ===== BACK BUTTON ===== */
+.back-btn {
+  background: none;
+  border: none;
+  font-weight: 600;
+  margin-bottom: 16px;
+  cursor: pointer;
 }
 
-.field label {
-    display: block;
-    font-size: 12px;
-    color: #666;
-    margin-bottom: 5px;
+/* ===== CLIENT INFO ===== */
+.client-info {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
 }
 
-.field input,
-.field select {
-    width: 100%;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.client-info label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+  color: #333;
+  font-size: 13px;
+  text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+}
+
+.client-info input,
+.client-info select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid rgba(204, 204, 204, 0.8);
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 14px;
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.client-info input:focus,
+.client-info select:focus {
+  border-color: #046C4E;
+  outline: none;
+  box-shadow: 0 0 5px rgba(4,108,78,0.3);
 }
 
 /* ===== HISTORY ===== */
+.history-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+}
+
 .history-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .history-box {
-    background: #efefef;
-    padding: 15px;
-    border-radius: 6px;
-    color: #666;
+  background: #f0f0f0;
+  border-radius: 6px;
+  padding: 15px;
+  color: #666;
+  font-size: 13px;
 }
 
-.history-item {
-    margin-bottom: 10px;
-    padding: 10px;
-    background: #e3e3e3;
-    border-radius: 5px;
-}
-
-.history-item details summary {
-    cursor: pointer;
-    font-weight: 500;
-}
-
-.note {
-    font-size: 12px;
-    font-style: italic;
-    margin-top: 10px;
-}
-
-.back-btn {
-    background: none;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    margin-bottom: 15px;
+.history-note {
+  font-size: 12px;
+  font-style: italic;
+  margin-top: 10px;
 }
 </style>
 </head>
@@ -115,133 +145,80 @@ body {
 <body>
 
 <!-- ===== MAIN VIEW ===== -->
-<div id="mainView">
-    <button class="main-btn" onclick="openClient()">New</button>
-    <button class="main-btn" onclick="openClient()">Search</button>
+<div id="mainView" class="nav-container">
+  <button class="main-btn" onclick="openClient()">New</button>
+  <button class="main-btn" onclick="openClient()">Search</button>
 </div>
 
 <!-- ===== CLIENT DETAIL VIEW ===== -->
-<div id="clientView">
+<div id="clientView" class="section">
 
-    <button class="back-btn" onclick="goBack()">← Back</button>
+  <button class="back-btn" onclick="goBack()">← Back</button>
 
-    <!-- CLIENT INFO -->
-    <div class="card">
-        <div class="client-grid">
-            <div class="field">
-                <label>Name</label>
-                <input>
-            </div>
-            <div class="field">
-                <label>Contact</label>
-                <input>
-            </div>
-            <div class="field">
-                <label>Email</label>
-                <input>
-            </div>
-            <div class="field">
-                <label>Address</label>
-                <input>
-            </div>
-            <div class="field">
-                <label>City</label>
-                <select>
-                    <option value="">Select City</option>
-                </select>
-            </div>
-            <div class="field">
-                <label>Region</label>
-                <input>
-            </div>
-        </div>
+  <!-- CLIENT INFO -->
+  <div class="client-info">
+    <div class="input-grid">
+      <div>
+        <label>Name</label>
+        <input>
+      </div>
+      <div>
+        <label>Contact</label>
+        <input>
+      </div>
+      <div>
+        <label>Email</label>
+        <input>
+      </div>
+      <div>
+        <label>Address</label>
+        <input>
+      </div>
+      <div>
+        <label>City</label>
+        <select>
+          <option>Select City</option>
+        </select>
+      </div>
+      <div>
+        <label>Region</label>
+        <input>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIENT HISTORY -->
+  <div class="history-card">
+    <div class="history-header">
+      <strong>Client History</strong>
+      <select>
+        <option>Oldest → Newest</option>
+        <option>Newest → Oldest</option>
+      </select>
     </div>
 
-    <!-- CLIENT HISTORY -->
-    <div class="card">
-        <div class="history-header">
-            <strong>Client History</strong>
-            <select id="sortOrder">
-                <option value="asc">Oldest → Newest</option>
-                <option value="desc">Newest → Oldest</option>
-            </select>
-        </div>
-
-        <div class="history-box" id="history">
-            <div class="note">No history available for this client.</div>
-            <div class="note">History is read-only and cannot be modified.</div>
-        </div>
+    <div class="history-box">
+      No history available for this client.
+      <div class="history-note">
+        History is read-only and cannot be modified.
+      </div>
     </div>
+  </div>
 
 </div>
 
 <script>
-const historyData = [];
-
-function formatDate(dateStr, timeStr) {
-    const d = new Date(dateStr + " " + timeStr);
-    return d.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric"
-    });
-}
-
-function renderHistory(order) {
-    const container = document.getElementById("history");
-    container.innerHTML = "";
-
-    if (historyData.length === 0) {
-        container.innerHTML = `
-            <div class="note">No history available for this client.</div>
-            <div class="note">History is read-only and cannot be modified.</div>
-        `;
-        return;
-    }
-
-    const sorted = [...historyData].sort((a, b) => {
-        const d1 = new Date(a.date + " " + a.time);
-        const d2 = new Date(b.date + " " + b.time);
-        return order === "asc" ? d1 - d2 : d2 - d1;
-    });
-
-    sorted.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "history-item";
-        div.innerHTML = `
-            <details>
-                <summary>${item.type} submitted on ${formatDate(item.date, item.time)}</summary>
-                <div>
-                    ${item.description}<br>
-                    Time: ${item.time}
-                </div>
-            </details>
-        `;
-        container.appendChild(div);
-    });
-
-    const note = document.createElement("div");
-    note.className = "note";
-    note.textContent = "History is read-only and cannot be modified.";
-    container.appendChild(note);
-}
-
-document.getElementById("sortOrder").addEventListener("change", e => {
-    renderHistory(e.target.value);
-});
-
 function openClient() {
-    document.getElementById("mainView").style.display = "none";
-    document.getElementById("clientView").style.display = "block";
+  document.getElementById("mainView").style.display = "none";
+  document.getElementById("clientView").style.display = "block";
 }
 
 function goBack() {
-    document.getElementById("clientView").style.display = "none";
-    document.getElementById("mainView").style.display = "flex";
+  document.getElementById("clientView").style.display = "none";
+  document.getElementById("mainView").style.display = "flex";
 }
-
-renderHistory("asc");
 </script>
 
 </body>
 </html>
+``
