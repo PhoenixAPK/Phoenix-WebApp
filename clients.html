@@ -1,188 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Phoenix Webapp – Clients</title>
+<meta charset="UTF-8" />
+<title>Client Detail Page</title>
 
 <style>
-/* RESET */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
-}
-
-/* IMPORTANT: iframe page must NOT control layout */
+/* --------- Base --------- */
 body {
-  background: transparent;
-  color: #111827;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #f5f6f8;
+    margin: 0;
+    padding: 20px;
+    color: #333;
 }
 
-/* MAIN BUTTON VIEW */
-.nav-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  padding: 40px 0;
-}
-
-.main-btn {
-  width: 160px;
-  height: 110px;
-  background: #e5e7eb;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.main-btn:hover {
-  background: #d1d5db;
-}
-
-/* CLIENT VIEW */
 .section {
-  display: none;
-  padding: 24px;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
 }
 
-/* BACK */
-.back-btn {
-  background: none;
-  border: none;
-  font-weight: 600;
-  margin-bottom: 16px;
-  cursor: pointer;
+.section-title {
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-/* CLIENT INFO */
-.client-info {
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
+/* --------- Client Info --------- */
+.client-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
 }
 
-.input-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
+.field label {
+    font-size: 12px;
+    color: #666;
+    display: block;
+    margin-bottom: 4px;
 }
 
-.client-info label {
-  display: block;
-  margin-bottom: 4px;
-  font-weight: 500;
-  color: #333;
-  font-size: 13px;
-  text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+.field input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #dcdcdc;
+    border-radius: 4px;
 }
 
-.client-info input,
-.client-info select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid rgba(204,204,204,0.8);
-  border-radius: 6px;
-  font-size: 14px;
-  background-color: rgba(255,255,255,0.9);
+/* --------- History Section --------- */
+.history-container {
+    background: #f0f0f0;
+    border-radius: 6px;
+    padding: 15px;
 }
 
-.client-info input:focus,
-.client-info select:focus {
-  border-color: #046C4E;
-  outline: none;
-  box-shadow: 0 0 5px rgba(4,108,78,0.3);
+.filter-select {
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background: #fafafa;
 }
 
-/* HISTORY */
-.history-card {
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 20px;
+.history-item {
+    background: #e6e6e6;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
 }
 
-.history-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+.history-item summary {
+    font-weight: 500;
+    list-style: none;
 }
 
-.history-box {
-  background: #f0f0f0;
-  border-radius: 6px;
-  padding: 15px;
-  color: #666;
-  font-size: 13px;
+.history-item summary::-webkit-details-marker {
+    display: none;
 }
 
-.history-note {
-  font-size: 12px;
-  font-style: italic;
-  margin-top: 10px;
+.history-details {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #555;
+}
+
+/* --------- Read Only Look --------- */
+.readonly-note {
+    font-size: 12px;
+    color: #777;
+    margin-top: 10px;
+    font-style: italic;
 }
 </style>
 </head>
 
 <body>
 
-<!-- MAIN VIEW -->
-<div id="mainView" class="nav-container">
-  <button class="main-btn" onclick="openClient()">New</button>
-  <button class="main-btn" onclick="openClient()">Search</button>
+<!-- ================= CLIENT INFO ================= -->
+<div class="section">
+    <div class="section-title">Client Information</div>
+
+    <div class="client-grid">
+        <div class="field">
+            <label>Name</label>
+            <input value="Acme Corporation" disabled />
+        </div>
+
+        <div class="field">
+            <label>Contact</label>
+            <input value="+212 600000000" disabled />
+        </div>
+
+        <div class="field">
+            <label>Email</label>
+            <input value="contact@acme.com" disabled />
+        </div>
+
+        <div class="field">
+            <label>Address</label>
+            <input value="123 Main Street" disabled />
+        </div>
+
+        <div class="field">
+            <label>City</label>
+            <input value="Rabat" disabled />
+        </div>
+
+        <div class="field">
+            <label>Region</label>
+            <input value="Rabat‑Salé‑Kénitra" disabled />
+        </div>
+    </div>
 </div>
 
-<!-- CLIENT VIEW -->
-<div id="clientView" class="section">
-
-  <button class="back-btn" onclick="goBack()">← Back</button>
-
-  <div class="client-info">
-    <div class="input-grid">
-      <div><label>Name</label><input></div>
-      <div><label>Contact</label><input></div>
-      <div><label>Email</label><input></div>
-      <div><label>Address</label><input></div>
-      <div>
-        <label>City</label>
-        <select><option>Select City</option></select>
-      </div>
-      <div><label>Region</label><input></div>
-    </div>
-  </div>
-
-  <div class="history-card">
-    <div class="history-header">
-      <strong>Client History</strong>
-      <select>
-        <option>Oldest → Newest</option>
-        <option>Newest → Oldest</option>
-      </select>
+<!-- ================= CLIENT HISTORY ================= -->
+<div class="section">
+    <div class="section-title">
+        Client History
+        <select class="filter-select" id="sortOrder">
+            <option value="asc">Oldest → Newest</option>
+            <option value="desc">Newest → Oldest</option>
+        </select>
     </div>
 
-    <div class="history-box">
-      No history available for this client.
-      <div class="history-note">
-        History is read-only and cannot be modified.
-      </div>
-    </div>
-  </div>
+    <div class="history-container" id="historyList"></div>
 
+    <div class="readonly-note">
+        History is read‑only and cannot be modified.
+    </div>
 </div>
 
 <script>
-function openClient() {
-  document.getElementById("mainView").style.display = "none";
-  document.getElementById("clientView").style.display = "block";
+/* --------- Mock History Data --------- */
+const historyData = [
+    {
+        type: "Request",
+        date: "2026-02-01",
+        time: "09:12",
+        content: "Request ID: PR00001"
+    },
+    {
+        type: "Interaction",
+        date: "2026-02-01",
+        time: "14:32",
+        content: "Client confirmed project details"
+    },
+    {
+        type: "Request",
+        date: "2026-03-05",
+        time: "11:45",
+        content: "Request ID: PR00007"
+    }
+];
+
+/* --------- Render --------- */
+function renderHistory(order = "asc") {
+    const container = document.getElementById("historyList");
+    container.innerHTML = "";
+
+    const sorted = [...historyData].sort((a, b) => {
+        const d1 = new Date(a.date + " " + a.time);
+        const d2 = new Date(b.date + " " + b.time);
+        return order === "asc" ? d1 - d2 : d2 - d1;
+    });
+
+    sorted.forEach(item => {
+        const el = document.createElement("details");
+        el.className = "history-item";
+
+        el.innerHTML = `
+            <summary>
+                ${item.type} submitted on ${item.date}
+            </summary>
+            <div class="history-details">
+                ${item.content}<br/>
+                Time: ${item.time}
+            </div>
+        `;
+
+        container.appendChild(el);
+    });
 }
-function goBack() {
-  document.getElementById("clientView").style.display = "none";
-  document.getElementById("mainView").style.display = "flex";
-}
+
+/* --------- Events --------- */
+document.getElementById("sortOrder").addEventListener("change", e => {
+    renderHistory(e.target.value);
+});
+
+/* --------- Init --------- */
+renderHistory();
 </script>
 
 </body>
