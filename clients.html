@@ -5,7 +5,7 @@
 <title>Phoenix Webapp – Clients</title>
 
 <style>
-/* ===== RESET ===== */
+/* RESET */
 * {
   margin: 0;
   padding: 0;
@@ -13,23 +13,19 @@
   font-family: Arial, sans-serif;
 }
 
-/* ===== PAGE BASE ===== */
+/* IMPORTANT: iframe page must NOT control layout */
 body {
-  background: #ffffff;
-  padding: 24px;
+  background: transparent;
   color: #111827;
 }
 
-/* ===== MAIN BUTTON VIEW ===== */
+/* MAIN BUTTON VIEW */
 .nav-container {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 16px;
-  margin-bottom: 32px;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
+  padding: 40px 0;
 }
 
 .main-btn {
@@ -41,28 +37,19 @@ body {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  text-align: center;
-  transition: background 0.2s;
 }
 
 .main-btn:hover {
   background: #d1d5db;
 }
 
-/* ===== CLIENT SECTION ===== */
+/* CLIENT VIEW */
 .section {
   display: none;
-  max-width: 900px;
-  margin: 0 auto;
-  animation: fadeIn 0.3s;
+  padding: 24px;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* ===== BACK BUTTON ===== */
+/* BACK */
 .back-btn {
   background: none;
   border: none;
@@ -71,7 +58,7 @@ body {
   cursor: pointer;
 }
 
-/* ===== CLIENT INFO ===== */
+/* CLIENT INFO */
 .client-info {
   background: #ffffff;
   border-radius: 8px;
@@ -98,11 +85,10 @@ body {
 .client-info select {
   width: 100%;
   padding: 8px;
-  border: 1px solid rgba(204, 204, 204, 0.8);
+  border: 1px solid rgba(204,204,204,0.8);
   border-radius: 6px;
-  box-sizing: border-box;
   font-size: 14px;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255,255,255,0.9);
 }
 
 .client-info input:focus,
@@ -112,7 +98,7 @@ body {
   box-shadow: 0 0 5px rgba(4,108,78,0.3);
 }
 
-/* ===== HISTORY ===== */
+/* HISTORY */
 .history-card {
   background: #ffffff;
   border-radius: 8px;
@@ -144,50 +130,31 @@ body {
 
 <body>
 
-<!-- ===== MAIN VIEW ===== -->
+<!-- MAIN VIEW -->
 <div id="mainView" class="nav-container">
   <button class="main-btn" onclick="openClient()">New</button>
   <button class="main-btn" onclick="openClient()">Search</button>
 </div>
 
-<!-- ===== CLIENT DETAIL VIEW ===== -->
+<!-- CLIENT VIEW -->
 <div id="clientView" class="section">
 
   <button class="back-btn" onclick="goBack()">← Back</button>
 
-  <!-- CLIENT INFO -->
   <div class="client-info">
     <div class="input-grid">
-      <div>
-        <label>Name</label>
-        <input>
-      </div>
-      <div>
-        <label>Contact</label>
-        <input>
-      </div>
-      <div>
-        <label>Email</label>
-        <input>
-      </div>
-      <div>
-        <label>Address</label>
-        <input>
-      </div>
+      <div><label>Name</label><input></div>
+      <div><label>Contact</label><input></div>
+      <div><label>Email</label><input></div>
+      <div><label>Address</label><input></div>
       <div>
         <label>City</label>
-        <select>
-          <option>Select City</option>
-        </select>
+        <select><option>Select City</option></select>
       </div>
-      <div>
-        <label>Region</label>
-        <input>
-      </div>
+      <div><label>Region</label><input></div>
     </div>
   </div>
 
-  <!-- CLIENT HISTORY -->
   <div class="history-card">
     <div class="history-header">
       <strong>Client History</strong>
@@ -212,7 +179,6 @@ function openClient() {
   document.getElementById("mainView").style.display = "none";
   document.getElementById("clientView").style.display = "block";
 }
-
 function goBack() {
   document.getElementById("clientView").style.display = "none";
   document.getElementById("mainView").style.display = "flex";
@@ -221,4 +187,3 @@ function goBack() {
 
 </body>
 </html>
-``
