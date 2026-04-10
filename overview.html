@@ -172,7 +172,61 @@ for(let d=1;d<=daysInMonth;d++){
  ctx.fillText(d,x-4,canvas.height-10);
 }
 </script>
+<script>
+async function loadChartData(){
+ if(!window.supabaseClient) return;
 
+ const today=new Date();
+ const year=today.getFullYear();
+ const month=today.getMonth();
+ const daysInMonth=new Date(year, month+1, 0).getDate();
+
+ // init per-day counters
+ const daily={
+  pending:Array(daysInMonth).fill(0),
+  "in-progress":Array(daysInMonth).fill(0),
+  completed:Array(daysInMonth).fill(0),
+  archived:Array(daysInMonth).fill(0),
+  incomplete:Array(daysInMonth).fill(0)
+ };
+
+ const start=new Date(year,month,1).toISOString();
+ const end=new Date(year,month+1,1).toISOString();
+
+ const { data, error } = await window.supabaseClient
+  .from("pps_queue")
+  .select("status, created_at")
+  .gte("created_at", start)
+  .lt("created_at", end);
+
+ if(error) return;
+
+ data.forEach(r=>{
+  const d=new Date(r.created_at).getDate()-1;
+  const key=r.status || "pending";
+  if(daily[key]) daily[key][d]++;
+ });
+
+ const drawLine=(arr,color)=>{
+  ctx.strokeStyle=color;
+  ctx.beginPath();
+  arr.forEach((v,i)=>{
+   const x=padding+i*((canvas.width-padding*2)/(daysInMonth-1));
+   const y=canvas.height-padding-(v*20);
+   i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+ };
+
+ drawLine(daily.pending,"#f59e0b");
+ drawLine(daily["in-progress"],"#3b82f6");
+ drawLine(daily.completed,"#10b981");
+ drawLine(daily.archived,"#6b7280");
+ drawLine(daily.incomplete,"#ef4444");
+}
+
+document.addEventListener("DOMContentLoaded", loadChartData);
+</script>
 <!-- ✅ OVERVIEW COUNTERS -->
 <script>
 async function loadOverviewCounters(){
