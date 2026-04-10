@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Clients</title>
-
+ 
 <style>
 /* ===== RESET ===== */
 * {
@@ -12,12 +12,12 @@
   box-sizing: border-box;
   font-family: Arial, Helvetica, sans-serif;
 }
-
+ 
 body {
   background: transparent;
   color: #111827;
 }
-
+ 
 /* ===== MAIN VIEW ===== */
 #mainView {
   display: flex;
@@ -25,7 +25,7 @@ body {
   gap: 20px;
   padding: 40px 0;
 }
-
+ 
 .main-btn {
   width: 160px;
   height: 44px;
@@ -37,17 +37,17 @@ body {
   font-weight: 600;
   cursor: pointer;
 }
-
+ 
 .main-btn:hover {
   background: #d1d5db;
 }
-
+ 
 /* ===== CLIENT VIEW ===== */
 #clientView {
   display: none;
   padding: 24px;
 }
-
+ 
 /* ===== RETURN BUTTON ===== */
 .back-btn {
   width: 74px;
@@ -63,7 +63,7 @@ body {
   justify-content: center;
   margin-bottom: 16px;
 }
-
+ 
 /* ===== CLIENT INFO ===== */
 .client-info {
   background: #ffffff;
@@ -71,20 +71,20 @@ body {
   padding: 20px;
   margin-bottom: 20px;
 }
-
+ 
 .input-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 15px;
 }
-
+ 
 label {
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 4px;
   display: block;
 }
-
+ 
 input,
 select {
   width: 100%;
@@ -93,7 +93,7 @@ select {
   border-radius: 6px;
   font-size: 14px;
 }
-
+ 
 /* ===== SAVE BUTTON ===== */
 .save-wrapper {
   width: 100%;
@@ -101,7 +101,7 @@ select {
   justify-content: flex-end;
   margin-top: 10px;
 }
-
+ 
 .save-btn {
   width: 120px;
   height: 34px;
@@ -113,26 +113,30 @@ select {
   font-weight: 600;
   cursor: pointer;
 }
-
+ 
 /* ===== HISTORY INDICATOR ===== */
-.history-indicator {
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 20px;
+.history-wrapper {
   display: none;
 }
-
-.history-header {
+ 
+/* FIXED TOP FRAME */
+.history-top-frame {
+  background: #e9eaec;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
 }
-
-.history-header h3 {
-  font-size: 15px;
+ 
+.history-top-frame h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
 }
-
+ 
+/* DROPDOWN */
 .history-sort {
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -142,77 +146,83 @@ select {
   max-width: max-content;
   flex: 0 0 auto;
 }
-
-/* ===== EXPANDABLE SECTIONS ===== */
+ 
+/* SECTION */
 .history-section {
-  background: #f3f4f6;
-  border-radius: 8px;
   margin-bottom: 16px;
 }
-
-.history-section button {
-  width: 100%;
-  background: none;
-  border: none;
-  text-align: left;
-  padding: 28px 28px;
-  font-size: 15px;
-  font-weight: 600;
+ 
+/* HEADER FRAME */
+.history-section-header {
+  background: #e9eaec;
+  border-radius: 10px;
+  padding: 14px 20px;
   cursor: pointer;
 }
-
-.history-content {
-  display: none;
-  padding: 24px 28px 32px;
+ 
+.history-section-header h3 {
   font-size: 14px;
-  color: #6b7280;
+  font-weight: 600;
+  color: #111827;
+}
+ 
+/* CONTAINER FRAME */
+.history-section-body {
+  background: #f3f4f6;
+  border-radius: 10px;
+  min-height: 120px;
+  margin-top: 6px;
+  padding: 20px;
+  display: none;
+  font-size: 13px;
+  color: #9ca3af;
 }
 </style>
 </head>
-
+ 
 <body>
-
+ 
 <!-- ===== MAIN VIEW ===== -->
 <div id="mainView">
   <button class="main-btn" onclick="openClient('new')">New</button>
   <button class="main-btn" onclick="openClient('search')">Search</button>
 </div>
-
+ 
 <!-- ===== CLIENT VIEW ===== -->
 <div id="clientView">
-
+ 
 <button class="back-btn" onclick="goBack()">← Return</button>
-
+ 
 <div class="client-info">
   <div class="input-grid">
-
+ 
     <div>
       <label>Name</label>
       <input type="text">
     </div>
-
+ 
     <div>
       <label>Contact</label>
       <input type="text">
     </div>
-
+ 
     <div>
       <label>Email</label>
       <input type="email">
     </div>
-
+ 
     <div>
       <label>Address</label>
       <input type="text">
     </div>
-
+ 
     <div>
       <label>City</label>
       <select id="clientCity">
         <option value="">Select City</option>
       </select>
     </div>
-
+ 
     <div>
       <label>Region</label>
       <input type="text" id="clientRegion" readonly>
@@ -220,43 +230,56 @@ select {
         <button class="save-btn" id="saveBtn">Save</button>
       </div>
     </div>
-
+ 
   </div>
 </div>
-
-<div class="history-indicator" id="historyIndicator">
-  <div class="history-header">
+ 
+<!-- ===== HISTORY INDICATOR ===== -->
+<div class="history-wrapper" id="historyIndicator">
+ 
+  <!-- TOP FRAME: History Indicator + sort -->
+  <div class="history-top-frame">
     <h3>History Indicator</h3>
     <select class="history-sort">
       <option>Newest → Oldest</option>
       <option>Oldest → Newest</option>
     </select>
   </div>
-
+ 
+  <!-- REQUESTS -->
   <div class="history-section">
-    <button onclick="toggleHistory(this)">Requests</button>
-    <div class="history-content"></div>
+    <div class="history-section-header" onclick="toggleSection('requests')">
+      <h3>Requests</h3>
+    </div>
+    <div class="history-section-body" id="requests"></div>
   </div>
-
+ 
+  <!-- INTERACTIONS -->
   <div class="history-section">
-    <button onclick="toggleHistory(this)">Interactions</button>
-    <div class="history-content"></div>
+    <div class="history-section-header" onclick="toggleSection('interactions')">
+      <h3>Interactions</h3>
+    </div>
+    <div class="history-section-body" id="interactions"></div>
   </div>
-
+ 
+  <!-- INVOICE -->
   <div class="history-section">
-    <button onclick="toggleHistory(this)">Invoice</button>
-    <div class="history-content"></div>
+    <div class="history-section-header" onclick="toggleSection('invoice')">
+      <h3>Invoice</h3>
+    </div>
+    <div class="history-section-body" id="invoice"></div>
   </div>
+ 
 </div>
-
+ 
 </div>
-
+ 
 <script>
 /* ===== MODE HANDLING ===== */
 function openClient(mode) {
   document.getElementById("mainView").style.display = "none";
   document.getElementById("clientView").style.display = "block";
-
+ 
   if (mode === "search") {
     document.getElementById("historyIndicator").style.display = "block";
     document.getElementById("saveBtn").style.display = "none";
@@ -265,17 +288,17 @@ function openClient(mode) {
     document.getElementById("saveBtn").style.display = "inline-block";
   }
 }
-
+ 
 function goBack() {
   document.getElementById("clientView").style.display = "none";
   document.getElementById("mainView").style.display = "flex";
 }
-
-function toggleHistory(btn) {
-  const content = btn.nextElementSibling;
-  content.style.display = content.style.display === "block" ? "none" : "block";
+ 
+function toggleSection(id) {
+  const section = document.getElementById(id);
+  section.style.display = section.style.display === "block" ? "none" : "block";
 }
-
+ 
 /* ===== CITY → REGION DATA (99 ENTRIES) ===== */
 const cityData = [
   { city: "Agadir", region: "Souss-Massa", distance_km: 500 },
@@ -288,7 +311,7 @@ const cityData = [
   { city: "Azemmour", region: "Casablanca-Settat", distance_km: 150 },
   { city: "Azilal", region: "Béni Mellal-Khénifra", distance_km: 340 },
   { city: "Azrou", region: "Fès-Meknès", distance_km: 180 },
-
+ 
   { city: "Ben Guerir", region: "Marrakech-Safi", distance_km: 250 },
   { city: "Ben Slimane", region: "Casablanca-Settat", distance_km: 70 },
   { city: "Beni Mellal", region: "Béni Mellal-Khénifra", distance_km: 270 },
@@ -300,48 +323,48 @@ const cityData = [
   { city: "Boujdour", region: "Laâyoune-Sakia El Hamra", distance_km: 1200 },
   { city: "Boulemane", region: "Fès-Meknès", distance_km: 280 },
   { city: "Bouznika", region: "Casablanca-Settat", distance_km: 45 },
-
+ 
   { city: "Casablanca", region: "Casablanca-Settat", distance_km: 90 },
   { city: "Chefchaouen", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 230 },
   { city: "Chichaoua", region: "Marrakech-Safi", distance_km: 380 },
-
+ 
   { city: "Dakhla", region: "Dakhla-Oued Ed-Dahab", distance_km: 1700 },
   { city: "Dar Bouazza", region: "Casablanca-Settat", distance_km: 110 },
   { city: "Dcheira El Jihadia", region: "Souss-Massa", distance_km: 500 },
   { city: "Driouch", region: "Oriental", distance_km: 480 },
-
+ 
   { city: "El Hajeb", region: "Fès-Meknès", distance_km: 160 },
   { city: "El Jadida", region: "Casablanca-Settat", distance_km: 170 },
   { city: "El Kelaa Des Sraghna", region: "Marrakech-Safi", distance_km: 230 },
   { city: "Errachidia", region: "Drâa-Tafilalet", distance_km: 550 },
   { city: "Essaouira", region: "Marrakech-Safi", distance_km: 470 },
-
+ 
   { city: "Fes (Fès)", region: "Fès-Meknès", distance_km: 200 },
   { city: "Figuig", region: "Oriental", distance_km: 750 },
   { city: "Fnideq", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 290 },
   { city: "Fquih Ben Salah", region: "Béni Mellal-Khénifra", distance_km: 240 },
-
+ 
   { city: "Guelmim", region: "Guelmim-Oued Noun", distance_km: 750 },
   { city: "Guercif", region: "Oriental", distance_km: 400 },
-
+ 
   { city: "Ifrane", region: "Fès-Meknès", distance_km: 190 },
   { city: "Imzouren", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 410 },
   { city: "Inezgane", region: "Souss-Massa", distance_km: 505 },
-
+ 
   { city: "Jerada", region: "Oriental", distance_km: 640 },
-
+ 
   { city: "Kasbat Tadla", region: "Béni Mellal-Khénifra", distance_km: 210 },
   { city: "Kenitra (Kénitra)", region: "Rabat-Salé-Kénitra", distance_km: 45 },
   { city: "Khenifra", region: "Béni Mellal-Khénifra", distance_km: 280 },
   { city: "Khemisset", region: "Rabat-Salé-Kénitra", distance_km: 85 },
   { city: "Khouribga", region: "Béni Mellal-Khénifra", distance_km: 160 },
   { city: "Ksar El Kebir", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 180 },
-
+ 
   { city: "L'Aaioune Sidi Mellouk", region: "Oriental", distance_km: 600 },
   { city: "Laâyoune", region: "Laâyoune-Sakia El Hamra", distance_km: 1050 },
   { city: "Larache", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 160 },
   { city: "Lqliaa", region: "Souss-Massa", distance_km: 500 },
-
+ 
   { city: "M'Rirt", region: "Béni Mellal-Khénifra", distance_km: 220 },
   { city: "M'diq", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 270 },
   { city: "Marrakesh (Marrakech)", region: "Marrakech-Safi", distance_km: 330 },
@@ -350,18 +373,18 @@ const cityData = [
   { city: "Midelt", region: "Drâa-Tafilalet", distance_km: 350 },
   { city: "Mohammedia", region: "Casablanca-Settat", distance_km: 60 },
   { city: "Moulay Yacoub", region: "Fès-Meknès", distance_km: 210 },
-
+ 
   { city: "Nador", region: "Oriental", distance_km: 520 },
-
+ 
   { city: "Ouarzazate", region: "Drâa-Tafilalet", distance_km: 450 },
   { city: "Ouezzane", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 150 },
   { city: "Oued Zem", region: "Béni Mellal-Khénifra", distance_km: 190 },
   { city: "Ouazzane", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 150 },
   { city: "Oujda", region: "Oriental", distance_km: 600 },
   { city: "Oulad Teima", region: "Souss-Massa", distance_km: 490 },
-
+ 
   { city: "Rabat", region: "Rabat-Salé-Kénitra", distance_km: 0 },
-
+ 
   { city: "Safi", region: "Marrakech-Safi", distance_km: 320 },
   { city: "Salé", region: "Rabat-Salé-Kénitra", distance_km: 0 },
   { city: "Sefrou", region: "Fès-Meknès", distance_km: 220 },
@@ -374,7 +397,7 @@ const cityData = [
   { city: "Skhirat", region: "Rabat-Salé-Kénitra", distance_km: 30 },
   { city: "Smara", region: "Laâyoune-Sakia El Hamra", distance_km: 1000 },
   { city: "Souk El Arbaa", region: "Rabat-Salé-Kénitra", distance_km: 90 },
-
+ 
   { city: "Tahannaout", region: "Marrakech-Safi", distance_km: 350 },
   { city: "Tan-Tan", region: "Guelmim-Oued Noun", distance_km: 850 },
   { city: "Tangier (Tanger)", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 280 },
@@ -388,29 +411,30 @@ const cityData = [
   { city: "Tifelt", region: "Rabat-Salé-Kénitra", distance_km: 70 },
   { city: "Tinghir", region: "Drâa-Tafilalet", distance_km: 490 },
   { city: "Tiznit", region: "Souss-Massa", distance_km: 590 },
-
+ 
   { city: "Youssoufia", region: "Marrakech-Safi", distance_km: 250 },
-
+ 
   { city: "Zaio", region: "Oriental", distance_km: 560 },
   { city: "Zagora", region: "Drâa-Tafilalet", distance_km: 650 }
 ];
+ 
 /* ===== CITY DROPDOWN POPULATION ===== */
 const citySelect = document.getElementById("clientCity");
 const regionInput = document.getElementById("clientRegion");
-
+ 
 cityData.forEach(function(item) {
   const option = document.createElement("option");
   option.value = item.city;
   option.textContent = item.city;
   citySelect.appendChild(option);
 });
-
+ 
 citySelect.addEventListener("change", function() {
   const selectedCity = this.value;
   const match = cityData.find(c => c.city === selectedCity);
   regionInput.value = match ? match.region : "";
 });
-
+ 
 /* ===== SAVE ACTION ===== */
 document.getElementById("saveBtn").onclick = function () {
   document.querySelectorAll(".client-info input").forEach(function (input) {
@@ -422,7 +446,6 @@ document.getElementById("saveBtn").onclick = function () {
   regionInput.value = "";
 };
 </script>
-
+ 
 </body>
 </html>
-
