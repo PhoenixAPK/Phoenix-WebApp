@@ -19,16 +19,16 @@ body {
 
 /* ===== MAIN VIEW ===== */
 #mainView {
-  display: flex;           /* MAIN VIEW IS VISIBLE */
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
+  display: flex;
+  justify-content: center;   /* center buttons as a group */
+  gap: 20px;
   padding: 40px 0;
+  /* ❌ removed align-items:center to avoid vertical centering */
 }
 
 .main-btn {
-  width: 160px;
-  height: 110px;
+  width: 230px;              /* matches original buttons */
+  height: 48px;
   background: #e5e7eb;
   border: none;
   border-radius: 8px;
@@ -40,7 +40,7 @@ body {
 .main-btn:hover {
   background: #d1d5db;
 }
-
+  
 /* ===== CLIENT VIEW ===== */
 #clientView {
   display: none;           /* HIDDEN UNTIL CLICK */
