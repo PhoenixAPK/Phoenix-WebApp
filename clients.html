@@ -17,9 +17,9 @@ body {
   color: #111827;
 }
 
-/* ================= MAIN VIEW ================= */
+/* ===== MAIN VIEW ===== */
 #mainView {
-  display: flex;
+  display: flex;           /* MAIN VIEW IS VISIBLE */
   justify-content: center;
   align-items: center;
   gap: 16px;
@@ -41,9 +41,9 @@ body {
   background: #d1d5db;
 }
 
-/* ================= CLIENT DETAIL ================= */
+/* ===== CLIENT VIEW ===== */
 #clientView {
-  display: none;
+  display: none;           /* HIDDEN UNTIL CLICK */
   padding: 24px;
 }
 
@@ -55,7 +55,7 @@ body {
   cursor: pointer;
 }
 
-/* ================= CLIENT INFO ================= */
+/* ===== CLIENT INFO ===== */
 .client-info {
   background: #ffffff;
   border-radius: 8px;
@@ -77,7 +77,8 @@ label {
   font-size: 13px;
 }
 
-input, select {
+input,
+select {
   width: 100%;
   padding: 8px;
   border: 1px solid rgba(204,204,204,0.8);
@@ -86,13 +87,14 @@ input, select {
   background-color: rgba(255,255,255,0.95);
 }
 
-input:focus, select:focus {
+input:focus,
+select:focus {
   border-color: #046C4E;
   outline: none;
   box-shadow: 0 0 5px rgba(4,108,78,0.3);
 }
 
-/* ================= HISTORY ================= */
+/* ===== HISTORY ===== */
 .history-card {
   background: #ffffff;
   border-radius: 8px;
@@ -114,10 +116,6 @@ input:focus, select:focus {
   font-size: 13px;
 }
 
-.history-item {
-  margin-bottom: 8px;
-}
-
 .history-note {
   font-size: 12px;
   font-style: italic;
@@ -128,77 +126,69 @@ input:focus, select:focus {
 
 <body>
 
-<!-- ================= MAIN VIEW ================= -->
+<!-- ===== MAIN VIEW ===== -->
 <div id="mainView">
-  <button class="main-btn" onclick="openNewClient()">New</button>
-  <button class="main-btn" onclick="openSearch()">Search</button>
+  <button class="main-btn" onclick="openClient()">New</button>
+  <button class="main-btn" onclick="openClient()">Search</button>
 </div>
 
-<!-- ================= CLIENT DETAIL VIEW ================= -->
+<!-- ===== CLIENT VIEW ===== -->
 <div id="clientView">
 
   <button class="back-btn" onclick="goBack()">← Back</button>
 
-  <!-- CLIENT INFO -->
   <div class="client-info">
     <div class="input-grid">
       <div>
-        <label>Client Name</label>
-        <input id="clientName">
+        <label>Name</label>
+        <input>
       </div>
       <div>
-        <label>Client Phone</label>
-        <input id="clientPhone">
+        <label>Contact</label>
+        <input>
       </div>
       <div>
-        <label>Client Email</label>
-        <input id="clientEmail">
+        <label>Email</label>
+        <input>
       </div>
       <div>
-        <label>Client Address</label>
-        <input id="clientAddress">
+        <label>Address</label>
+        <input>
       </div>
       <div>
-        <label>Client City</label>
-        <select id="clientCity">
+        <label>City</label>
+        <select>
           <option value="">Select City</option>
         </select>
       </div>
       <div>
         <label>Region</label>
-        <input id="clientRegion">
+        <input>
       </div>
     </div>
   </div>
 
-  <!-- CLIENT HISTORY -->
   <div class="history-card">
     <div class="history-header">
       <strong>Client History</strong>
-      <select id="sortHistory">
-        <option value="asc">Oldest → Newest</option>
-        <option value="desc">Newest → Oldest</option>
+      <select>
+        <option>Oldest → Newest</option>
+        <option>Newest → Oldest</option>
       </select>
     </div>
 
-    <div class="history-box" id="historyBox">
-      <div class="history-note">No history available for this client.</div>
-      <div class="history-note">History is read-only and cannot be modified.</div>
+    <div class="history-box">
+      No history available for this client.
+      <div class="history-note">
+        History is read-only and cannot be modified.
+      </div>
     </div>
   </div>
 
 </div>
 
 <script>
-const historyData = [];
-
-function openNewClient() {
-  clearClientForm();
-  document.getElementById("mainView").style.display = "none";
-  document.getElementById("clientView").style.display = "block";
-}
-
-function openSearch() {
+function openClient() {
   document.getElementById("mainView").style.display = "none";
   document.getElementById("clientView").style.display = "block";
 }
@@ -206,43 +196,6 @@ function openSearch() {
 function goBack() {
   document.getElementById("clientView").style.display = "none";
   document.getElementById("mainView").style.display = "flex";
-}
-
-function clearClientForm() {
-  document.querySelectorAll("#clientView input").forEach(i => i.value = "");
-  document.getElementById("clientCity").value = "";
-}
-
-document.getElementById("sortHistory").addEventListener("change", renderHistory);
-
-function renderHistory() {
-  const box = document.getElementById("historyBox");
-  box.innerHTML = "";
-
-  if (historyData.length === 0) {
-    box.innerHTML = `
-      <div class="history-note">No history available for this client.</div>
-      <div class="history-note">History is read-only and cannot be modified.</div>
-    `;
-    return;
-  }
-
-  const order = document.getElementById("sortHistory").value;
-  const sorted = [...historyData].sort((a,b) => {
-    return order === "asc" ? a.ts - b.ts : b.ts - a.ts;
-  });
-
-  sorted.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "history-item";
-    div.textContent = item.text;
-    box.appendChild(div);
-  });
-
-  const note = document.createElement("div");
-  note.className = "history-note";
-  note.textContent = "History is read-only and cannot be modified.";
-  box.appendChild(note);
 }
 </script>
 
