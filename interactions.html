@@ -317,7 +317,7 @@
                if(name) query = query.ilike('name', `%${name}%`);
                if(phone) query = query.ilike('phone', `%${phone}%`);
                if(email) query = query.ilike('email', `%${email}%`);
-               if(address) query = query.ilike('address', `%${address}%`);
+               if(address) query = query.ilike('city', `%${address}%`);
                // 🔹 Support Search Request and Invoice in query
                if(request) query = query.ilike('id', `%${request}%`);
                if(invoice) query = query.ilike('id', `%${invoice}%`);
