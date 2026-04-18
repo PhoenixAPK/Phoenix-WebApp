@@ -770,6 +770,39 @@ async function downloadInvoice() {
 
   window.addEventListener("load", prefill);
 })();
+(function() {
+    const params = new URL(window.location.href).searchParams;
+    const urlMode = params.get('mode');
+    
+    // 1. Activate Mode
+    if (urlMode && !document.getElementById('calculatorPage').offsetParent) {
+        if (urlMode === 'entrepreneur') startEntrepreneurMode();
+        else startClientMode();
+    }
+
+    // 2. Autofill Data
+    setTimeout(() => {
+        if(params.get('name')) document.getElementById('clientName').value = params.get('name');
+        if(params.get('phone')) document.getElementById('clientContact').value = params.get('phone');
+        if(params.get('email')) document.getElementById('clientEmail').value = params.get('email');
+        if(params.get('address')) document.getElementById('clientAddress').value = params.get('address');
+        
+        // City & Workspaces
+        if(params.get('city')) {
+            document.getElementById('clientCity').value = params.get('city');
+            handleCity();
+        }
+
+        // Pictures
+        if(params.get('units')) {
+            const units = parseInt(params.get('units'));
+            const currentRows = document.querySelectorAll('.picture-row').length;
+            for (let i = currentRows; i < units; i++) addPictureRow(false);
+        }
+        
+        calculateAreas();
+    }, 100);
+})();
 </script>
 </body>
 </html>
