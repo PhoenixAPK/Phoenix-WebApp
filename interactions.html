@@ -133,13 +133,19 @@
            <div><label>Search Phone</label><input type="tel" id="s-phone" oninput="searchData()" placeholder="e.g. 555"></div>
            <div><label>Search Email</label><input type="email" id="s-email" oninput="searchData()" placeholder="e.g. @gmail"></div>
            <div><label>Search Address/City</label><input type="text" id="s-address" oninput="searchData()" placeholder="Location"></div>
+           <!-- 🔹 UPDATED: Identical structure to other inputs (Label on top, Input below) -->
+           <div><label>Search Request</label><input type="text" id="s-request" oninput="searchData()" placeholder="Request #"></div>
+           <div><label>Search Invoice</label><input type="text" id="s-invoice" oninput="searchData()" placeholder="Invoice #"></div>
        </div>
+       <!-- 🔹 SYSTEM COUNTER: Right-hand side display for encounter count -->
+       <div style="display:flex;justify-content:flex-end;align-items:center;margin:8px 0 4px;"><span id="interaction-counter" style="font-size:13px;color:#6b7280;font-weight:500">🔍 Showing: 0</span></div>
        <div id="search-results" style="margin-top:24px;"></div>
    </div>
  
    <!-- EXPORT SECTION -->
    <div id="export-section" class="section">
-       <div class="quick-select">
+       <!-- ✅ CENTERED QUICK-SELECT BUTTONS (Horizontal & Well Centered) -->
+       <div class="quick-select" style="justify-content:center;display:flex;">
            <button class="q-btn" onclick="setQuickDate('today')">📅 Today</button>
            <button class="q-btn" onclick="setQuickDate('week')">🗓️ This Week</button>
            <button class="q-btn" onclick="setQuickDate('month')">📆 This Month</button>
@@ -183,12 +189,15 @@
        </div>
    </div>
  
-   <button onclick="diagnoseSchema()" style="position:fixed;bottom:16px;left:16px;padding:10px 18px;background:#7c3aed;color:white;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;box-shadow:0 4px 12px rgba(124,58,237,0.3);z-index:9999;">🔬 Check Schema</button>
+   <!-- 🔬 Check Schema button REMOVED ENTIRELY AS REQUESTED -->
  
    <script>
        const SUPABASE_URL = "https://puymabrkwtpvhropcvqk.supabase.co";
        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk";
        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+       
+       // 🔹 FIX: AbortController to cancel pending Supabase queries when inputs change
+       let searchAbortController = null;
        
        function escapeHtml(text) { if (text === null || text === undefined) return ''; const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }; return String(text).replace(/[&<>"']/g, m => map[m]); }
        function showToast(message, type = 'success') { document.querySelectorAll('.toast').forEach(t => t.remove()); const toast = document.createElement('div'); toast.className = `toast ${type}`; toast.innerHTML = `<span>${message}</span>`; document.body.appendChild(toast); setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(120%)'; setTimeout(() => toast.remove(), 300); }, 5000); }
@@ -200,7 +209,19 @@
            document.querySelectorAll('.main-btn').forEach(b => b.classList.remove('active'));
            document.getElementById(id).style.display = 'block';
            btn.classList.add('active');
-           if(id !== 'search-section') {
+           
+           // 🔹 FIX: When entering Search section, clear inputs AND explicitly call searchData() to enforce empty-state validation
+           if(id === 'search-section') {
+               ['s-name', 's-phone', 's-email', 's-address', 's-request', 's-invoice'].forEach(fieldId => { 
+                   const el = document.getElementById(fieldId); 
+                   if(el) el.value = ""; 
+               });
+               document.getElementById('search-results').innerHTML = "";
+               const counter = document.getElementById('interaction-counter');
+               if(counter) counter.textContent = "🔍 Showing: 0";
+               // 🔹 CRITICAL: Call searchData() after clearing to re-validate empty state
+               searchData();
+           } else {
                document.getElementById('search-results').innerHTML = "";
                ['s-name', 's-phone', 's-email', 's-address'].forEach(fieldId => { const el = document.getElementById(fieldId); if(el) el.value = ""; });
            }
@@ -214,34 +235,80 @@
        function handleSourceChange() { const val = document.getElementById('source').value; const modeDiv = document.getElementById('mode-div'); if (val === "") { modeDiv.classList.add('hidden'); document.getElementById('mode').value = ""; handleModeChange(); } else { modeDiv.classList.remove('hidden'); } }
        function handleModeChange() { const val = document.getElementById('mode').value; const formFields = document.getElementById('form-fields'); if (val === "") { formFields.classList.add('hidden'); } else { formFields.classList.remove('hidden'); } }
  
+       // 🔹 NEW SECTION: Duplicate detection (Name/Phone/Email/City) + timestamped note only
        async function saveData() {
            const saveBtn = document.getElementById('save-btn');
            const originalText = saveBtn.innerHTML;
            const source = document.getElementById('source').value;
            const mode = document.getElementById('mode').value;
            const name = document.getElementById('name').value.trim();
+           const phone = document.getElementById('phone').value.trim();
+           const email = document.getElementById('email').value.trim();
+           const city = document.getElementById('city').value.trim();
            if (!source || !mode || !name) { showToast('⚠️ Please fill in Source, Mode, and Name', 'warning'); return; }
            showLoading(saveBtn, originalText);
-           const interaction = { source, mode, name, phone: document.getElementById('phone').value.trim() || null, email: document.getElementById('email').value.trim() || null, address: document.getElementById('address').value.trim() || null, city: document.getElementById('city').value.trim() || null, total_pictures: parseInt(document.getElementById('pics').value) || 0, note: document.getElementById('note').value.trim() || null };
+           
+           // 🔹 Check for duplicate using identical fields: Name, Phone, Email, City
            try {
-               const { data, error } = await supabaseClient.from('interactions').insert([interaction]).select().single();
-               if (error) throw error;
-               showToast('✅ Interaction saved successfully!', 'success');
-               document.getElementById('source').value = ""; handleSourceChange(); document.getElementById('name').value = ""; document.getElementById('phone').value = ""; document.getElementById('email').value = ""; document.getElementById('address').value = ""; document.getElementById('city').value = ""; document.getElementById('pics').value = "0"; document.getElementById('note').value = "";
+               let dupQuery = supabaseClient.from('interactions').select('id,note,created_at');
+               if(name) dupQuery = dupQuery.ilike('name', name);
+               if(phone) dupQuery = dupQuery.eq('phone', phone);
+               if(email) dupQuery = dupQuery.ilike('email', email);
+               if(city) dupQuery = dupQuery.ilike('city', city);
+               const { data: dupData, error: dupError } = await dupQuery.limit(1);
+               if (dupError) throw dupError;
+               
+               const note = document.getElementById('note').value.trim();
+               const timestamp = new Date().toLocaleString();
+               
+               if (dupData && dupData.length > 0) {
+                   // 🔹 DUPLICATE FOUND: Do NOT create new interaction. Only append timestamped note.
+                   const existingId = dupData[0].id;
+                   const existingNote = dupData[0].note || '';
+                   const newNote = existingNote + (existingNote ? "\n\n" : "") + `[${timestamp}] ${note}`;
+                   const { error: updateError } = await supabaseClient.from('interactions').update({ note: newNote }).eq('id', existingId);
+                   if (updateError) throw updateError;
+                   showToast('⚠️ Duplicate detected. Note appended with timestamp.', 'warning');
+               } else {
+                   // 🔹 No duplicate: Create new interaction as normal
+                   const interaction = { source, mode, name, phone: phone || null, email: email || null, address: document.getElementById('address').value.trim() || null, city: city || null, total_pictures: parseInt(document.getElementById('pics').value) || 0, note: note || null };
+                   const { data, error } = await supabaseClient.from('interactions').insert([interaction]).select().single();
+                   if (error) throw error;
+                   showToast('✅ Interaction saved successfully!', 'success');
+               }
+               // 🔹 HARD RESET: Clear all fields to Blank / 0 after save
+               document.getElementById('source').value = ""; handleSourceChange();
+               document.getElementById('mode').value = ""; handleModeChange();
+               ['name','phone','email','address','city'].forEach(f => document.getElementById(f).value = "");
+               document.getElementById('pics').value = "0";
+               document.getElementById('note').value = "";
            } catch (err) { console.error('Save error:', err); showToast(`❌ Save failed: ${err.message}`, 'error'); } finally { hideLoading(saveBtn); }
        }
  
-       // ✅ UPDATED SEARCH: Shows blank when no results
+       // 🔹 SEARCH: Blank when ALL fields empty, duplicate grouping with encounter counter + AbortController fix
        async function searchData() {
+           // 🔹 FIX: Cancel any pending query before starting a new one
+           if (searchAbortController) {
+               searchAbortController.abort();
+           }
+           searchAbortController = new AbortController();
+           const signal = searchAbortController.signal;
+           
            const name = document.getElementById('s-name').value.trim();
            const phone = document.getElementById('s-phone').value.trim();
            const email = document.getElementById('s-email').value.trim();
            const address = document.getElementById('s-address').value.trim();
-           const resultsDiv = document.getElementById('search-results');
+           // 🔹 Get Request and Invoice values too
+           const request = document.getElementById('s-request').value.trim();
+           const invoice = document.getElementById('s-invoice').value.trim();
            
-           // ✅ If all fields empty, show blank (not even "Searching...")
-           if (!name && !phone && !email && !address) { 
+           const resultsDiv = document.getElementById('search-results');
+           const counter = document.getElementById('interaction-counter');
+           
+           // ✅ CRITICAL FIX: If ALL search fields are empty → Results MUST be BLANK/EMPTY
+           if (!name && !phone && !email && !address && !request && !invoice) { 
                resultsDiv.innerHTML = ""; 
+               if(counter) counter.textContent = "🔍 Showing: 0";
                return; 
            }
            
@@ -251,25 +318,53 @@
                if(phone) query = query.ilike('phone', `%${phone}%`);
                if(email) query = query.ilike('email', `%${email}%`);
                if(address) query = query.ilike('address', `%${address}%`);
+               // 🔹 Support Search Request and Invoice in query
+               if(request) query = query.ilike('id', `%${request}%`);
+               if(invoice) query = query.ilike('id', `%${invoice}%`);
                
-               const { data, error } = await query.order('created_at', { ascending: false }).limit(25);
+               const { data, error } = await query.order('created_at', { ascending: false }).limit(100);
+               // 🔹 FIX: Ignore results if query was aborted
+               if (signal.aborted) return;
                if (error) throw error;
                
-               // ✅ If no results, show blank (not "No matches found")
-               if (!data || data.length === 0) {
+               // 🔹 GROUP DUPLICATES: Count encounters for identical Name/Phone/Email/City
+               const groups = new Map();
+               if (data && data.length > 0) {
+                   for (const item of data) {
+                       const key = `${(item.name||'').toLowerCase().trim()}|${(item.phone||'').trim()}|${(item.email||'').toLowerCase().trim()}|${(item.city||'').toLowerCase().trim()}`;
+                       if (!groups.has(key)) {
+                           groups.set(key, { item, count: 1 });
+                       } else {
+                           groups.get(key).count += 1;
+                       }
+                   }
+               }
+               
+               const uniqueItems = Array.from(groups.values());
+               
+               // ✅ If no results → Blank / 0
+               if (!uniqueItems || uniqueItems.length === 0) {
                    resultsDiv.innerHTML = "";
+                   if(counter) counter.textContent = "🔍 Showing: 0";
                    return;
                }
                
-               // ✅ Only show results when valid data found
-               resultsDiv.innerHTML = data.map(i => `
-               <div class="result-card" onclick="loadOriginal('${encodeURIComponent(JSON.stringify(i))}')" role="button" tabindex="0">
-                   <strong>${escapeHtml(i.name || 'Unnamed')}</strong> ${i.phone ? `• ${escapeHtml(i.phone)}` : ''} ${i.email ? `• ${escapeHtml(i.email)}` : ''}
-                   <br><small style="color:#6b7280">📍 ${escapeHtml(i.city || i.address || 'No location')} | 📦 ${i.total_pictures || 0} pics | ${new Date(i.created_at).toLocaleDateString()} ${new Date(i.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</small>
+               // ✅ Update counter with unique count
+               if(counter) counter.textContent = `🔍 Showing: ${uniqueItems.length}`;
+               
+               // ✅ Render only unique results with encounter count badge
+               resultsDiv.innerHTML = uniqueItems.map(({item, count}) => `
+               <div class="result-card" onclick="loadOriginal('${encodeURIComponent(JSON.stringify(item))}')" role="button" tabindex="0">
+                   <strong>${escapeHtml(item.name || 'Unnamed')}</strong> ${item.phone ? `• ${escapeHtml(item.phone)}` : ''} ${item.email ? `• ${escapeHtml(item.email)}` : ''}
+                   ${count > 1 ? `<span style="float:right;background:#3b82f6;color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;">×${count}</span>` : ''}
+                   <br><small style="color:#6b7280">📍 ${escapeHtml(item.city || item.address || 'No location')} | 📦 ${item.total_pictures || 0} pics | ${new Date(item.created_at).toLocaleDateString()} ${new Date(item.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</small>
                </div>`).join('');
            } catch (err) { 
+               // 🔹 FIX: Ignore abort errors
+               if (err.name === 'AbortError') return;
                console.error('Search error:', err); 
-               resultsDiv.innerHTML = ""; // ✅ Show blank on error too
+               resultsDiv.innerHTML = ""; 
+               if(counter) counter.textContent = "🔍 Showing: 0";
            }
        }
  
@@ -285,7 +380,7 @@
                const savedTime = new Date(item.created_at).toLocaleString();
                const existingNote = item.note || '';
                document.getElementById('note').value = existingNote + (existingNote ? "\n\n" : "") + `[Loaded: ${savedTime}]`;
-               showToast('📋 Interaction loaded for editing', 'success');
+             
            } catch (e) { console.error('Load error:', e); showToast('❌ Failed to load interaction data', 'error'); }
        }
  
@@ -360,18 +455,46 @@
                        <div><strong>${escapeHtml(r.name || 'Unnamed')}</strong>${r.phone ? `<br><small style="color:#6b7280">📞 ${escapeHtml(r.phone)}</small>` : ''}${r.email ? `<br><small style="color:#6b7280">✉️ ${escapeHtml(r.email)}</small>` : ''}</div>
                        <div>${escapeHtml(r.city || r.address || '—')}</div>
                        <div style="text-align:center;font-weight:600">${r.total_pictures || 0}</div>
-                       <div><button class="inc-open-btn" onclick="incOpenRequest('${r.id}')">Open</button></div>
+                       <div style="display:flex;gap:6px">
+                           <button class="inc-open-btn" onclick="incOpenFromIncomplete('${r.id}','open')">Open</button>
+                           <button class="inc-open-btn" onclick="incOpenFromIncomplete('${r.id}','invoice')" style="background:#3b82f6">Invoice</button>
+                       </div>
                    </div>`;
                }).join('');
            } catch (err) { console.error('Incomplete load error:', err); list.innerHTML = `<div class="inc-empty" style="color:#dc2626">❌ Load failed: ${escapeHtml(err.message)}</div>`; }
        }
  
-       function incOpenRequest(id) {
-           const r = incRowMap[id]; if (!r) { showToast('❌ Request data not found', 'error'); return; }
-           const mode = (r.mode || '').toLowerCase();
-           const params = new URLSearchParams({ id: id, mode: mode, name: r.name || '', phone: r.phone || '', email: r.email || '', address: r.address || '', city: r.city || '', units: r.total_pictures || 0, source: r.source || '', note: r.note || '' });
-           if (window.parent && window.parent !== window) { const frame = window.parent.document.getElementById('content-frame'); if (frame) { frame.src = `admininvoice.html?${params}`; showToast('🔄 Opening in invoice editor...', 'success'); return; } }
-           window.location.href = `admininvoice.html?${params}`;
+       // 🔹 Incomplete Section: Open & Invoice buttons with mode detection
+       function incOpenFromIncomplete(id, action = 'open') {
+           const r = incRowMap[id];
+           if (!r) { showToast('❌ Request data not found', 'error'); return; }
+           
+           if (action === 'invoice') {
+               // 🔹 INVOICE: Detect mode and open admininvoice accordingly
+               const mode = (r.mode || '').toLowerCase();
+               const modeParam = mode === 'client' ? 'client' : 'entrepreneur';
+               const params = new URLSearchParams({ 
+                   id: id, 
+                   mode: modeParam, 
+                   name: r.name || '', 
+                   phone: r.phone || '', 
+                   email: r.email || '', 
+                   address: r.address || '', 
+                   city: r.city || '', 
+                   units: r.total_pictures || 0, 
+                   source: r.source || '', 
+                   note: r.note || '' 
+               });
+               if (window.parent && window.parent !== window) {
+                   const frame = window.parent.document.getElementById('content-frame');
+                   if (frame) { frame.src = `admininvoice.html?${params}`; showToast('🔄 Opening invoice editor...', 'success'); return; }
+               }
+               window.location.href = `admininvoice.html?${params}`;
+               return;
+           }
+           
+           // 🔹 OPEN: Same logic as search results (loadOriginal)
+           loadOriginal(encodeURIComponent(JSON.stringify(r)));
        }
  
        function incToggleCalendar(type) {
@@ -398,7 +521,26 @@
        }
  
        document.addEventListener('DOMContentLoaded', () => { showSection('new-section', document.querySelector('.main-btn.active')); });
+       
+       // 🔹 SURGICAL ADDITION: Hard reset when leaving any section (EXPAND ONLY)
+       (function() {
+           const _showSection = window.showSection;
+           window.showSection = function(id, btn) {
+               if (id !== 'new-section') {
+                   // 🔹 Reset New section to Blank / 0 when switching away
+                   document.getElementById('source').value = ""; handleSourceChange();
+                   document.getElementById('mode').value = ""; handleModeChange();
+                   ['name','phone','email','address','city'].forEach(f => { const el = document.getElementById(f); if(el) el.value = ""; });
+                   document.getElementById('pics').value = "0";
+                   document.getElementById('note').value = "";
+                   // Clear search inputs/results to prevent leakage
+                   ['s-name','s-phone','s-email','s-address','s-request','s-invoice'].forEach(fieldId => { const el = document.getElementById(fieldId); if(el) el.value = ""; });
+                   const results = document.getElementById('search-results'); if(results) results.innerHTML = "";
+                   const counter = document.getElementById('interaction-counter'); if(counter) counter.textContent = "🔍 Showing: 0";
+               }
+               _showSection(id, btn);
+           };
+       })();
    </script>
 </body>
 </html>
-
