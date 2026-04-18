@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Interactions - Phoenix</title>
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <style>
+       * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
+       body { background: #ffffff; padding: 20px 40px; color: #111827; line-height: 1.5; }
+       .nav-container { display: flex; justify-content: center; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; }
+       .main-btn { flex: 1; max-width: 180px; padding: 16px 20px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.2s; color: #374151; }
+       .main-btn:hover { background: #e5e7eb; border-color: #d1d5db; }
+       .main-btn.active { background: #111827; color: white; border-color: #111827; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+       .section { display: none; max-width: 1000px; margin: 0 auto; animation: fadeIn 0.25s ease-out; }
+       @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+       .step-row { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+       .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+       .full-width { grid-column: 1 / -1; margin-top: 4px; }
+       label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: #4b5563; text-transform: uppercase; letter-spacing: 0.03em; }
+       select, input, textarea { padding: 12px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; width: 100%; transition: border-color 0.2s, box-shadow 0.2s; background: #fff; }
+       select:focus, input:focus, textarea:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+       textarea { height: 100px; resize: vertical; font-family: inherit; }
+       .action-btn { margin-top: 24px; padding: 14px 32px; background: #111827; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: background 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+       .action-btn:hover { background: #1f2937; }
+       .action-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+       .result-card { padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px; margin-top: 12px; cursor: pointer; background: #fff; transition: all 0.2s; }
+       .result-card:hover { border-color: #3b82f6; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-1px); }
+       .hidden { display: none !important; }
+       .quick-select { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+       .q-btn { padding: 8px 16px; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: #374151; transition: all 0.2s; }
+       .q-btn:hover { background: #f9fafb; border-color: #9ca3af; }
+       
+       /* ===== CENTERED INCOMPLETE SECTION ===== */
+       .incomplete-topbar { 
+           display: flex; 
+           justify-content: center; /* ✅ Centered for professional look */
+           align-items: center; 
+           gap: 8px; 
+           margin-bottom: 20px; 
+           flex-wrap: wrap; 
+       }
+       #inc-month, #inc-year { 
+           width: 110px; 
+           flex: none; 
+           padding: 6px 8px; 
+           font-size: 13px; 
+           background: #fff; 
+           border: 1px solid #d1d5db; 
+           border-radius: 6px; 
+       }
+       .view-btn { 
+           height: 32px; 
+           padding: 0 14px; 
+           background: #fff; 
+           border: 1px solid #d1d5db; 
+           border-radius: 6px; 
+           font-size: 12px; 
+           font-weight: 600; 
+           cursor: pointer; 
+           color: #374151; 
+           transition: all 0.2s; 
+       }
+       .view-btn:hover { background: #f9fafb; border-color: #9ca3af; }
+       .view-btn.active { background: #111827; color: #fff; border-color: #111827; }
+       
+       /* 🔹 SURGICAL LAYOUT FIX: Compressed middle gap, shifted City left, expanded Action column for buttons */
+       .inc-header-row, .inc-item-row { display: grid; grid-template-columns: 80px 1.5fr 100px 70px 140px; align-items: center; padding: 12px 16px; gap: 8px; }
+       .inc-header-row { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.06em; background: #f9fafb; border-radius: 8px; margin-bottom: 8px; border: 1px solid #f3f4f6; }
+       .inc-item-row { font-size: 14px; border-bottom: 1px solid #f3f4f6; background: #fff; transition: background 0.15s; }
+       .inc-item-row:last-child { border-bottom: none; }
+       .inc-item-row:hover { background: #fafafa; }
+       .inc-table-wrap { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+       .inc-open-btn { padding: 7px 16px; background: #111827; color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s; width: 100%; }
+       .inc-open-btn:hover { background: #374151; }
+       .inc-empty { padding: 40px; text-align: center; font-size: 14px; color: #6b7280; }
+       .cal-panel { display: none; background: #f9fafb; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #e5e7eb; }
+       .cal-panel.open { display: block; animation: slideDown 0.2s ease-out; }
+       @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+       .cal-year-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+       .cal-year-row span { font-size: 15px; font-weight: 700; color: #111827; }
+       .cal-nav { background: none; border: none; font-size: 22px; cursor: pointer; color: #4b5563; padding: 0 8px; border-radius: 6px; transition: background 0.2s; }
+       .cal-nav:hover { background: #e5e7eb; color: #111827; }
+       .month-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
+       .month-chip { height: 40px; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; color: #374151; }
+       .month-chip:hover { background: #f3f4f6; border-color: #9ca3af; }
+       .month-chip.current { border-color: #3b82f6; font-weight: 600; }
+       .month-chip.selected { background: #111827; color: #fff; border-color: #111827; font-weight: 600; }
+       .inc-filter-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; font-size: 13px; color: #4b5563; padding: 10px 14px; background: #eff6ff; border-radius: 8px; border: 1px solid #bfdbfe; }
+       .inc-filter-bar strong { color: #1e40af; font-weight: 700; }
+       .toast { position: fixed; bottom: 24px; right: 24px; padding: 14px 20px; border-radius: 10px; color: white; font-size: 14px; font-weight: 500; z-index: 10000; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: slideIn 0.3s ease-out; display: flex; align-items: center; gap: 10px; }
+       .toast.success { background: #059669; }
+       .toast.error { background: #dc2626; }
+       .toast.warning { background: #d97706; }
+       @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+       .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
+       @keyframes spin { to { transform: rotate(360deg); } }
+       @media (max-width: 768px) { body { padding: 16px; } .nav-container { gap: 8px; } .main-btn { max-width: none; padding: 14px; font-size: 13px; } .step-row { flex-direction: column; } .inc-header-row, .inc-item-row { grid-template-columns: 70px 1.8fr 100px 70px 80px; font-size: 13px; } .inc-header-row div:nth-child(3), .inc-item-row div:nth-child(3) { display: none; } }
+   </style>
+</head>
+<body>
+ 
+   <div class="nav-container">
+       <button class="main-btn active" onclick="showSection('new-section', this)">✨ New</button>
+       <button class="main-btn" onclick="showSection('search-section', this)">🔍 Search</button>
+       <button class="main-btn" onclick="showSection('export-section', this)">📤 Export</button>
+       <button class="main-btn" onclick="showSection('incomplete-section', this)">⏳ Incomplete</button>
+   </div>
+ 
+   <!-- NEW INTERACTION SECTION -->
+   <div id="new-section" class="section" style="display: block;">
+       <div class="step-row">
+           <div style="flex:1; min-width: 240px;"><label>Source *</label><select id="source" onchange="handleSourceChange()"><option value="">Select Source</option><option>Phone</option><option>Email</option><option>PhoenixWeb</option><option>Websearch</option><option>Facebook</option><option>Instagram</option><option>TikTok</option><option>YouTube</option></select></div>
+           <div id="mode-div" class="hidden" style="flex:1; min-width: 240px;"><label>Mode *</label><select id="mode" onchange="handleModeChange()"><option value="">Select Mode</option><option>Client</option><option>Entrepreneur</option></select></div>
+       </div>
+       <div id="form-fields" class="hidden">
+           <div class="input-grid">
+               <div><label>Name *</label><input type="text" id="name" placeholder="Full name"></div>
+               <div><label>Phone</label><input type="tel" id="phone" placeholder="+1 (555) 123-4567"></div>
+               <div><label>Email</label><input type="email" id="email" placeholder="email@example.com"></div>
+               <div><label>Address</label><input type="text" id="address" placeholder="Street address"></div>
+               <div>
+    <label>City</label>
+    <select id="city">
+        <option value="">Select City</option>
+        <option>Agadir</option>
+        <option>Ain Harrouda</option>
+        <option>Ait Melloul</option>
+        <option>Al Aaroui</option>
+        <option>Al Hoceima</option>
+        <option>Arfoud</option>
+        <option>Asilah</option>
+        <option>Azemmour</option>
+        <option>Azilal</option>
+        <option>Azrou</option>
+        <option>Ben Guerir</option>
+        <option>Ben Slimane</option>
+        <option>Beni Mellal</option>
+        <option>Benslimane</option>
+        <option>Berrechid</option>
+        <option>Biougra</option>
+        <option>Bni Anṣār (Beni Ensar)</option>
+        <option>Bouarfa</option>
+        <option>Boujdour</option>
+        <option>Boulemane</option>
+        <option>Bouznika</option>
+        <option>Casablanca</option>
+        <option>Chefchaouen</option>
+        <option>Chichaoua</option>
+        <option>Dakhla</option>
+        <option>Dar Bouazza</option>
+        <option>Dcheira El Jihadia</option>
+        <option>Driouch</option>
+        <option>El Hajeb</option>
+        <option>El Jadida</option>
+        <option>El Kelaa Des Sraghna</option>
+        <option>Errachidia</option>
+        <option>Essaouira</option>
+        <option>Fes (Fès)</option>
+        <option>Figuig</option>
+        <option>Fnideq</option>
+        <option>Fquih Ben Salah</option>
+        <option>Guelmim</option>
+        <option>Guercif</option>
+        <option>Ifrane</option>
+        <option>Imzouren</option>
+        <option>Inezgane</option>
+        <option>Jerada</option>
+        <option>Kasbat Tadla</option>
+        <option>Kenitra (Kénitra)</option>
+        <option>Khemisset</option>
+        <option>Khenifra</option>
+        <option>Khouribga</option>
+        <option>Ksar El Kebir</option>
+        <option>L'Aaioune Sidi Mellouk</option>
+        <option>Laâyoune</option>
+        <option>Larache</option>
+        <option>Lqliaa</option>
+        <option>M'diq</option>
+        <option>M'Rirt</option>
+        <option>Marrakesh (Marrakech)</option>
+        <option>Martil</option>
+        <option>Meknes (Meknès)</option>
+        <option>Midelt</option>
+        <option>Mohammedia</option>
+        <option>Moulay Yacoub</option>
+        <option>Nador</option>
+        <option>Ouarzazate</option>
+        <option>Ouazzane</option>
+        <option>Oued Zem</option>
+        <option>Ouezzane</option>
+        <option>Oujda</option>
+        <option>Oulad Teima</option>
+        <option>Rabat</option>
+        <option>Safi</option>
+        <option>Salé</option>
+        <option>Sefrou</option>
+        <option>Settat</option>
+        <option>Sidi Bennour</option>
+        <option>Sidi Ifni</option>
+        <option>Sidi Kacem</option>
+        <option>Sidi Slimane</option>
+        <option>Sidi Yahya El Gharb</option>
+        <option>Skhirat</option>
+        <option>Smara</option>
+        <option>Souk El Arbaa</option>
+        <option>Tahannaout</option>
+        <option>Tan-Tan</option>
+        <option>Tangier (Tanger)</option>
+        <option>Taounate</option>
+        <option>Taourirt</option>
+        <option>Tarfaya</option>
+        <option>Taroudant</option>
+        <option>Tata</option>
+        <option>Taza</option>
+        <option>Temara</option>
+        <option>Tetouan (Tétouan)</option>
+        <option>Tifelt</option>
+        <option>Tinghir</option>
+        <option>Tiznit</option>
+        <option>Youssoufia</option>
+        <option>Zagora</option>
+        <option>Zaio</option>
+    </select>
+</div>
+               <div><label>Total Pictures</label><input type="number" id="pics" min="0" value="0"></div>
+               <div class="full-width"><label>Note</label><textarea id="note" placeholder="Additional details..."></textarea></div>
+           </div>
+           <button class="action-btn" id="save-btn" onclick="saveData()">💾 Save Interaction</button>
+       </div>
+   </div>
+ 
+   <!-- SEARCH SECTION -->
+   <div id="search-section" class="section">
+       <div class="input-grid">
+           <div><label>Search Name</label><input type="text" id="s-name" oninput="searchData()" placeholder="Type to search..."></div>
+           <div><label>Search Phone</label><input type="tel" id="s-phone" oninput="searchData()" placeholder="e.g. 555"></div>
+           <div><label>Search Email</label><input type="email" id="s-email" oninput="searchData()" placeholder="e.g. @gmail"></div>
+           <div><label>Search City</label><input type="text" id="s-address" oninput="searchData()" placeholder="City"></div>
+           <!-- 🔹 UPDATED: Identical structure to other inputs (Label on top, Input below) -->
+           <div><label>Search Request</label><input type="text" id="s-request" oninput="searchData()" placeholder="Request #"></div>
+           <div><label>Search Invoice</label><input type="text" id="s-invoice" oninput="searchData()" placeholder="Invoice #"></div>
+       </div>
+       <!-- 🔹 SYSTEM COUNTER: Right-hand side display for encounter count -->
+       <div style="display:flex;justify-content:flex-end;align-items:center;margin:8px 0 4px;"><span id="interaction-counter" style="font-size:13px;color:#6b7280;font-weight:500">🔍 Showing: 0</span></div>
+       <div id="search-results" style="margin-top:24px;"></div>
+   </div>
+ 
+   <!-- EXPORT SECTION -->
+   <div id="export-section" class="section">
+       <!-- ✅ CENTERED QUICK-SELECT BUTTONS (Horizontal & Well Centered) -->
+       <div class="quick-select" style="justify-content:center;display:flex;">
+           <button class="q-btn" onclick="setQuickDate('today')">📅 Today</button>
+           <button class="q-btn" onclick="setQuickDate('week')">🗓️ This Week</button>
+           <button class="q-btn" onclick="setQuickDate('month')">📆 This Month</button>
+       </div>
+       <div class="step-row">
+           <div style="flex:1; min-width: 200px;"><label>From Date</label><input type="date" id="date-from"></div>
+           <div style="flex:1; min-width: 200px;"><label>To Date</label><input type="date" id="date-to"></div>
+       </div>
+       <button class="action-btn" onclick="exportCSV()" id="export-btn">📥 Download CSV</button>
+   </div>
+ 
+   <!-- INCOMPLETE SECTION -->
+   <div id="incomplete-section" class="section">
+       <div class="incomplete-topbar">
+           <select id="inc-month" title="Select month"></select>
+           <select id="inc-year" title="Select year"></select>
+           <button class="view-btn active" id="btn-monthly" onclick="incToggleCalendar('monthly')">📅 Monthly</button>
+           <button class="view-btn" id="btn-yearly" onclick="incToggleCalendar('yearly')">🗓️ Yearly</button>
+       </div>
+       <div class="cal-panel open" id="inc-monthly-panel">
+           <div class="cal-year-row"><span>Quick Select: Current Month</span></div>
+           <div class="month-grid" id="inc-monthly-grid"></div>
+       </div>
+       <div class="cal-panel" id="inc-yearly-panel">
+           <div class="cal-year-row">
+               <button class="cal-nav" onclick="incChangeYear(-1)" aria-label="Previous year">❮</button>
+               <span id="inc-year-label"></span>
+               <button class="cal-nav" onclick="incChangeYear(1)" aria-label="Next year">❯</button>
+           </div>
+           <div class="month-grid" id="inc-yearly-grid"></div>
+       </div>
+       <div class="inc-filter-bar" id="inc-filter-bar" style="display:none">
+           🔍 Showing: <strong id="inc-filter-text"></strong>
+           <button class="view-btn" style="height:28px;padding:0 12px;font-size:12px;margin-left:auto" onclick="incClearFilter()">✕ Clear</button>
+       </div>
+       <div class="inc-table-wrap">
+           <div class="inc-header-row">
+               <div>ID</div><div>Name / Business</div><div>City</div><div>Pics</div><div>Action</div>
+           </div>
+           <div id="inc-list"><div class="inc-empty">🔄 Loading items…</div></div>
+       </div>
+   </div>
+ 
+   <!-- 🔬 Check Schema button REMOVED ENTIRELY AS REQUESTED -->
+ 
+   <script>
+       const SUPABASE_URL = "https://puymabrkwtpvhropcvqk.supabase.co";
+       const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk";
+       const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+       
+       // 🔹 FIX: AbortController to cancel pending Supabase queries when inputs change
+       let searchAbortController = null;
+       
+       function escapeHtml(text) { if (text === null || text === undefined) return ''; const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }; return String(text).replace(/[&<>"']/g, m => map[m]); }
+       function showToast(message, type = 'success') { document.querySelectorAll('.toast').forEach(t => t.remove()); const toast = document.createElement('div'); toast.className = `toast ${type}`; toast.innerHTML = `<span>${message}</span>`; document.body.appendChild(toast); setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(120%)'; setTimeout(() => toast.remove(), 300); }, 5000); }
+       function showLoading(btn, originalText) { btn.disabled = true; btn.dataset.original = originalText; btn.innerHTML = `<span class="spinner"></span>Processing...`; }
+       function hideLoading(btn) { btn.disabled = false; if (btn.dataset.original) { btn.innerHTML = btn.dataset.original; delete btn.dataset.original; } }
+ 
+       function showSection(id, btn) {
+           document.querySelectorAll('.section').forEach(s => { s.style.display = 'none'; s.classList.remove('active'); });
+           document.querySelectorAll('.main-btn').forEach(b => b.classList.remove('active'));
+           document.getElementById(id).style.display = 'block';
+           btn.classList.add('active');
+           
+           // 🔹 FIX: When entering Search section, clear inputs AND explicitly call searchData() to enforce empty-state validation
+           if(id === 'search-section') {
+               ['s-name', 's-phone', 's-email', 's-address', 's-request', 's-invoice'].forEach(fieldId => { 
+                   const el = document.getElementById(fieldId); 
+                   if(el) el.value = ""; 
+               });
+               document.getElementById('search-results').innerHTML = "";
+               const counter = document.getElementById('interaction-counter');
+               if(counter) counter.textContent = "🔍 Showing: 0";
+               // 🔹 CRITICAL: Call searchData() after clearing to re-validate empty state
+               searchData();
+           } else {
+               document.getElementById('search-results').innerHTML = "";
+               ['s-name', 's-phone', 's-email', 's-address'].forEach(fieldId => { const el = document.getElementById(fieldId); if(el) el.value = ""; });
+           }
+           if(id === 'incomplete-section') {
+               const m = parseInt(document.getElementById('inc-month').value) || new Date().getMonth();
+               const y = parseInt(document.getElementById('inc-year').value) || new Date().getFullYear();
+               incLoad(y, m);
+           }
+       }
+ 
+       function handleSourceChange() { const val = document.getElementById('source').value; const modeDiv = document.getElementById('mode-div'); if (val === "") { modeDiv.classList.add('hidden'); document.getElementById('mode').value = ""; handleModeChange(); } else { modeDiv.classList.remove('hidden'); } }
+       function handleModeChange() { const val = document.getElementById('mode').value; const formFields = document.getElementById('form-fields'); if (val === "") { formFields.classList.add('hidden'); } else { formFields.classList.remove('hidden'); } }
+ 
+       // 🔹 NEW SECTION: Duplicate detection (Name/Phone/Email/City) + timestamped note only
+       async function saveData() {
+           const saveBtn = document.getElementById('save-btn');
+           const originalText = saveBtn.innerHTML;
+           const source = document.getElementById('source').value;
+           const mode = document.getElementById('mode').value;
+           const name = document.getElementById('name').value.trim();
+           const phone = document.getElementById('phone').value.trim();
+           const email = document.getElementById('email').value.trim();
+           const city = document.getElementById('city').value.trim();
+           if (!source || !mode || !name) { showToast('⚠️ Please fill in Source, Mode, and Name', 'warning'); return; }
+           showLoading(saveBtn, originalText);
+           
+           // 🔹 Check for duplicate using identical fields: Name, Phone, Email, City
+           try {
+               let dupQuery = supabaseClient.from('interactions').select('id,note,created_at');
+               if(name) dupQuery = dupQuery.ilike('name', name);
+               if(phone) dupQuery = dupQuery.eq('phone', phone);
+               if(email) dupQuery = dupQuery.ilike('email', email);
+               if(city) dupQuery = dupQuery.ilike('city', city);
+               const {  dupData, error: dupError } = await dupQuery.limit(1);
+               if (dupError) throw dupError;
+               
+               const note = document.getElementById('note').value.trim();
+               const timestamp = new Date().toLocaleString();
+               
+               if (dupData && dupData.length > 0) {
+                   // 🔹 DUPLICATE FOUND: Do NOT create new interaction. Only append timestamped note.
+                   const existingId = dupData[0].id;
+                   const existingNote = dupData[0].note || '';
+                   const newNote = existingNote + (existingNote ? "\n\n" : "") + `[${timestamp}] ${note}`;
+                   const { error: updateError } = await supabaseClient.from('interactions').update({ note: newNote }).eq('id', existingId);
+                   if (updateError) throw updateError;
+                   showToast('⚠️ Duplicate detected. Note appended with timestamp.', 'warning');
+               } else {
+                   // 🔹 No duplicate: Create new interaction as normal
+                   const interaction = { source, mode, name, phone: phone || null, email: email || null, address: document.getElementById('address').value.trim() || null, city: city || null, total_pictures: parseInt(document.getElementById('pics').value) || 0, note: note || null };
+                   const { data, error } = await supabaseClient.from('interactions').insert([interaction]).select().single();
+                   if (error) throw error;
+                   showToast('✅ Interaction saved successfully!', 'success');
+               }
+               // 🔹 HARD RESET: Clear all fields to Blank / 0 after save
+               document.getElementById('source').value = ""; handleSourceChange();
+               document.getElementById('mode').value = ""; handleModeChange();
+               ['name','phone','email','address','city'].forEach(f => document.getElementById(f).value = "");
+               document.getElementById('pics').value = "0";
+               document.getElementById('note').value = "";
+           } catch (err) { console.error('Save error:', err); showToast(`❌ Save failed: ${err.message}`, 'error'); } finally { hideLoading(saveBtn); }
+       }
+ 
+       // 🔹 SEARCH: Blank when ALL fields empty, duplicate grouping with encounter counter + AbortController fix
+       async function searchData() {
+           // 🔹 FIX: Cancel any pending query before starting a new one
+           if (searchAbortController) {
+               searchAbortController.abort();
+           }
+           searchAbortController = new AbortController();
+           const signal = searchAbortController.signal;
+           
+           const name = document.getElementById('s-name').value.trim();
+           const phone = document.getElementById('s-phone').value.trim();
+           const email = document.getElementById('s-email').value.trim();
+           const address = document.getElementById('s-address').value.trim();
+           // 🔹 Get Request and Invoice values too
+           const request = document.getElementById('s-request').value.trim();
+           const invoice = document.getElementById('s-invoice').value.trim();
+           
+           const resultsDiv = document.getElementById('search-results');
+           const counter = document.getElementById('interaction-counter');
+           
+           // ✅ CRITICAL FIX: If ALL search fields are empty → Results MUST be BLANK/EMPTY
+           if (!name && !phone && !email && !address && !request && !invoice) { 
+               resultsDiv.innerHTML = ""; 
+               if(counter) counter.textContent = "🔍 Showing: 0";
+               return; 
+           }
+           
+           try {
+               let query = supabaseClient.from('interactions').select('*');
+               if(name) query = query.ilike('name', `%${name}%`);
+               if(phone) query = query.ilike('phone', `%${phone}%`);
+               if(email) query = query.ilike('email', `%${email}%`);
+               if(address) query = query.ilike('city', `%${address}%`);
+               // 🔹 Support Search Request and Invoice in query
+               if(request) query = query.ilike('id', `%${request}%`);
+               if(invoice) query = query.ilike('id', `%${invoice}%`);
+               
+               const { data, error } = await query.order('created_at', { ascending: false }).limit(100);
+               // 🔹 FIX: Ignore results if query was aborted
+               if (signal.aborted) return;
+               if (error) throw error;
+               
+               // 🔹 GROUP DUPLICATES: Count encounters for identical Name/Phone/Email/City
+               const groups = new Map();
+               if (data && data.length > 0) {
+                   for (const item of data) {
+                       const key = `${(item.name||'').toLowerCase().trim()}|${(item.phone||'').trim()}|${(item.email||'').toLowerCase().trim()}|${(item.city||'').toLowerCase().trim()}`;
+                       if (!groups.has(key)) {
+                           groups.set(key, { item, count: 1 });
+                       } else {
+                           groups.get(key).count += 1;
+                       }
+                   }
+               }
+               
+               const uniqueItems = Array.from(groups.values());
+               
+               // ✅ If no results → Blank / 0
+               if (!uniqueItems || uniqueItems.length === 0) {
+                   resultsDiv.innerHTML = "";
+                   if(counter) counter.textContent = "🔍 Showing: 0";
+                   return;
+               }
+               
+               // ✅ Update counter with unique count
+               if(counter) counter.textContent = `🔍 Showing: ${uniqueItems.length}`;
+               
+               // ✅ Render only unique results with encounter count badge
+               resultsDiv.innerHTML = uniqueItems.map(({item, count}) => `
+               <div class="result-card" onclick="loadOriginal('${encodeURIComponent(JSON.stringify(item))}')" role="button" tabindex="0">
+                   <strong>${escapeHtml(item.name || 'Unnamed')}</strong> ${item.phone ? `• ${escapeHtml(item.phone)}` : ''} ${item.email ? `• ${escapeHtml(item.email)}` : ''}
+                   ${count > 1 ? `<span style="float:right;background:#3b82f6;color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;">×${count}</span>` : ''}
+                   <br><small style="color:#6b7280">📍 ${escapeHtml(item.city || item.address || 'No location')} | 📦 ${item.total_pictures || 0} pics | ${new Date(item.created_at).toLocaleDateString()} ${new Date(item.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</small>
+               </div>`).join('');
+           } catch (err) { 
+               // 🔹 FIX: Ignore abort errors
+               if (err.name === 'AbortError') return;
+               console.error('Search error:', err); 
+               resultsDiv.innerHTML = ""; 
+               if(counter) counter.textContent = "🔍 Showing: 0";
+           }
+       }
+ 
+       function loadOriginal(encodedData) {
+           try {
+               const item = JSON.parse(decodeURIComponent(encodedData));
+               showSection('new-section', document.querySelectorAll('.main-btn')[0]);
+               document.getElementById('source').value = item.source || ''; handleSourceChange();
+               document.getElementById('mode').value = item.mode || ''; handleModeChange();
+               document.getElementById('name').value = item.name || ''; document.getElementById('phone').value = item.phone || '';
+               document.getElementById('email').value = item.email || ''; document.getElementById('address').value = item.address || '';
+               document.getElementById('city').value = item.city || ''; document.getElementById('pics').value = item.total_pictures || 0;
+               const savedTime = new Date(item.created_at).toLocaleString();
+               const existingNote = item.note || '';
+               document.getElementById('note').value = existingNote + (existingNote ? "\n\n" : "") + `[Loaded: ${savedTime}]`;
+               showToast('Interaction loaded for editing', 'success');
+           } catch (e) { console.error('Load error:', e); showToast('❌ Failed to load interaction data', 'error'); }
+       }
+ 
+       function setQuickDate(range) {
+           const to = new Date(); to.setHours(23, 59, 59, 999); const from = new Date();
+           if(range === 'today') from.setHours(0, 0, 0, 0);
+           else if(range === 'week') { from.setDate(from.getDate() - 7); from.setHours(0, 0, 0, 0); }
+           else if(range === 'month') { from.setMonth(from.getMonth() - 1); from.setHours(0, 0, 0, 0); }
+           document.getElementById('date-from').value = from.toISOString().split('T')[0];
+           document.getElementById('date-to').value = to.toISOString().split('T')[0];
+       }
+ 
+       async function exportCSV() {
+           const exportBtn = document.getElementById('export-btn');
+           const originalText = exportBtn.innerHTML;
+           const fromVal = document.getElementById('date-from').value;
+           const toVal = document.getElementById('date-to').value;
+           if(!fromVal || !toVal) { showToast('⚠️ Please select both dates', 'warning'); return; }
+           showLoading(exportBtn, originalText);
+           try {
+               const fromDate = new Date(fromVal); fromDate.setHours(0, 0, 0, 0);
+               const toDate = new Date(toVal); toDate.setHours(23, 59, 59, 999);
+               const { data, error } = await supabaseClient.from('interactions').select('*').gte('created_at', fromDate.toISOString()).lte('created_at', toDate.toISOString()).order('created_at', { ascending: false });
+               if (error) throw error;
+               if(!data || data.length === 0) { showToast('📭 No interactions found', 'warning'); return; }
+               const headers = Object.keys(data[0]).map(h => `"${h}"`).join(',');
+               let csv = headers + "\n";
+               data.forEach(r => { const row = Object.keys(data[0]).map(key => { const val = r[key]; if (val === null || val === undefined) return '""'; const str = String(val).replace(/"/g, '""'); return `"${str}"`; }).join(','); csv += row + "\n"; });
+               const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+               const url = window.URL.createObjectURL(blob);
+               const a = document.createElement("a"); a.href = url; a.download = `Phoenix_Interactions_${fromVal}_to_${toVal}.csv`; a.style.display = 'none'; document.body.appendChild(a); a.click(); document.body.removeChild(a); window.URL.revokeObjectURL(url);
+               showToast(`✅ Exported ${data.length} interactions`, 'success');
+           } catch (err) { console.error('Export error:', err); showToast(`❌ Export failed: ${err.message}`, 'error'); } finally { hideLoading(exportBtn); }
+       }
+ 
+       // ===== INCOMPLETE SECTION =====
+       const INC_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+       let incCalYear = new Date().getFullYear();
+       let incActiveCalendar = 'monthly';
+       let incActiveFilter = null;
+       const incRowMap = {};
+ 
+       (function buildIncDropdowns() {
+           const mSel = document.getElementById('inc-month'); const ySel = document.getElementById('inc-year');
+           INC_MONTHS.forEach((m, i) => { mSel.innerHTML += `<option value="${i}">${m}</option>`; });
+           const currentYear = new Date().getFullYear();
+           for (let y = currentYear - 2; y <= currentYear + 5; y++) { ySel.innerHTML += `<option value="${y}">${y}</option>`; }
+           mSel.value = new Date().getMonth(); ySel.value = currentYear;
+           mSel.onchange = () => { incActiveCalendar = 'monthly'; document.getElementById('btn-monthly').classList.add('active'); document.getElementById('btn-yearly').classList.remove('active'); incLoad(parseInt(ySel.value), parseInt(mSel.value)); };
+           ySel.onchange = () => incLoad(parseInt(ySel.value), parseInt(mSel.value));
+       })();
+ 
+       async function incLoad(year, month) {
+           const list = document.getElementById('inc-list');
+           const mVal = year !== undefined ? month : parseInt(document.getElementById('inc-month').value);
+           const yVal = month !== undefined ? year : parseInt(document.getElementById('inc-year').value);
+           list.innerHTML = '<div class="inc-empty">🔄 Loading items…</div>';
+           const startDate = new Date(Date.UTC(yVal, mVal, 1, 0, 0, 0));
+           const endDate = new Date(Date.UTC(yVal, mVal + 1, 0, 23, 59, 59, 999));
+ 
+           try {
+               const { data, error } = await supabaseClient.from('interactions').select('*').gte('created_at', startDate.toISOString()).lte('created_at', endDate.toISOString()).order('created_at', { ascending: false });
+               if (error) throw error;
+               if (!data || data.length === 0) { list.innerHTML = `<div class="inc-empty">✅ No items found for ${INC_MONTHS[mVal]} ${yVal}</div>`; return; }
+ 
+               list.innerHTML = data.map(r => {
+                   incRowMap[String(r.id)] = r;
+                   const shortId = String(r.id).slice(0, 8);
+                   return `
+                   <div class="inc-item-row">
+                       <div style="font-family:monospace;font-size:12px;color:#6b7280">#${shortId}</div>
+                       <div><strong>${escapeHtml(r.name || 'Unnamed')}</strong>${r.phone ? `<br><small style="color:#6b7280">📞 ${escapeHtml(r.phone)}</small>` : ''}${r.email ? `<br><small style="color:#6b7280">✉️ ${escapeHtml(r.email)}</small>` : ''}</div>
+                       <div>${escapeHtml(r.city || r.address || '—')}</div>
+                       <div style="text-align:center;font-weight:600">${r.total_pictures || 0}</div>
+                       <div style="display:flex;gap:6px">
+                           <button class="inc-open-btn" onclick="incOpenFromIncomplete('${r.id}','open')">Open</button>
+                           <button class="inc-open-btn" onclick="incOpenFromIncomplete('${r.id}','invoice')" style="background:#3b82f6">Invoice</button>
+                       </div>
+                   </div>`;
+               }).join('');
+           } catch (err) { console.error('Incomplete load error:', err); list.innerHTML = `<div class="inc-empty" style="color:#dc2626">❌ Load failed: ${escapeHtml(err.message)}</div>`; }
+       }
+ 
+       // 🔹 Incomplete Section: Open & Invoice buttons with mode detection
+       function incOpenFromIncomplete(id, action = 'open') {
+           const r = incRowMap[id];
+           if (!r) { showToast('❌ Request data not found', 'error'); return; }
+           
+           if (action === 'invoice') {
+               // 🔹 INVOICE: Detect mode and open admininvoice accordingly
+               const mode = (r.mode || '').toLowerCase();
+               const modeParam = mode === 'client' ? 'client' : 'entrepreneur';
+               const params = new URLSearchParams({ 
+                   request_id: id, 
+                   mode: modeParam, 
+                   name: r.name || '', 
+                   phone: r.phone || '', 
+                   email: r.email || '', 
+                   address: r.address || '', 
+                   city: r.city || '', 
+                   units: r.total_pictures || 0, 
+                   source: r.source || '', 
+                   note: r.note || '' 
+               });
+               if (window.parent && window.parent !== window) {
+                   const frame = window.parent.document.getElementById('content-frame');
+                   if (frame) { frame.src = `admininvoice.html?${params}`; showToast('🔄 Opening invoice editor...', 'success'); return; }
+               }
+               window.location.href = `admininvoice.html?${params}`;
+               return;
+           }
+           
+           // 🔹 OPEN: Same logic as search results (loadOriginal)
+           loadOriginal(encodeURIComponent(JSON.stringify(r)));
+       }
+ 
+       function incToggleCalendar(type) {
+           const mPanel = document.getElementById('inc-monthly-panel'); const yPanel = document.getElementById('inc-yearly-panel'); const bM = document.getElementById('btn-monthly'); const bY = document.getElementById('btn-yearly');
+           if (incActiveCalendar === type) { mPanel.classList.remove('open'); yPanel.classList.remove('open'); bM.classList.remove('active'); bY.classList.remove('active'); incActiveCalendar = null; return; }
+           incActiveCalendar = type;
+           if (type === 'monthly') { mPanel.classList.add('open'); yPanel.classList.remove('open'); bM.classList.add('active'); bY.classList.remove('active'); incBuildMonthlyGrid(); } 
+           else { yPanel.classList.add('open'); mPanel.classList.remove('open'); bY.classList.add('active'); bM.classList.remove('active'); incUpdateYearlyGrid(); }
+       }
+       function incBuildMonthlyGrid() { const now = new Date(); const grid = document.getElementById('inc-monthly-grid'); grid.innerHTML = `<button class="month-chip current selected" onclick="incApplyFilter(${now.getFullYear()}, ${now.getMonth()})" style="grid-column: 1 / -1; font-weight:700">${INC_MONTHS[now.getMonth()]} ${now.getFullYear()} • Current Month</button>`; }
+       function incUpdateYearlyGrid() { document.getElementById('inc-year-label').textContent = incCalYear; const now = new Date(); const grid = document.getElementById('inc-yearly-grid'); grid.innerHTML = INC_MONTHS.map((m, i) => { const isCurrent = incCalYear === now.getFullYear() && i === now.getMonth(); const isSelected = incActiveFilter && incActiveFilter.year === incCalYear && incActiveFilter.month === i; return `<button class="month-chip ${isCurrent ? 'current' : ''} ${isSelected ? 'selected' : ''}" onclick="incApplyFilter(${incCalYear}, ${i})" title="${m} ${incCalYear}">${m.slice(0,3)}</button>`; }).join(''); }
+       function incChangeYear(delta) { incCalYear += delta; incUpdateYearlyGrid(); }
+       function incApplyFilter(year, month) { incActiveFilter = { year, month }; incUpdateYearlyGrid(); document.getElementById('inc-filter-bar').style.display = 'flex'; document.getElementById('inc-filter-text').textContent = `${INC_MONTHS[month]} ${year}`; document.getElementById('inc-month').value = month; document.getElementById('inc-year').value = year; incLoad(year, month); showToast(`📅 Showing ${INC_MONTHS[month]} ${year}`, 'success'); }
+       function incClearFilter() { incActiveFilter = null; document.getElementById('inc-filter-bar').style.display = 'none'; incUpdateYearlyGrid(); const m = parseInt(document.getElementById('inc-month').value); const y = parseInt(document.getElementById('inc-year').value); incLoad(y, m); showToast('🔄 Filter cleared', 'success'); }
+ 
+       async function diagnoseSchema() {
+           showToast('🔬 Checking table schema...', 'success');
+           try {
+               const { data, error } = await supabaseClient.from('interactions').select('*').limit(1);
+               if (error) throw error;
+               const panel = document.createElement('div'); panel.className = 'toast success'; panel.style.top = '10px'; panel.style.bottom = 'auto'; panel.style.right = '10px'; panel.innerHTML = `<div style="max-height:200px;overflow-y:auto"><strong>Table Schema:</strong><br><code style="font-size:11px">${data[0] ? Object.keys(data[0]).join('<br>') : 'Table empty'}</code><br><small>✅ Code updated to match your exact columns</small></div>`;
+               document.body.appendChild(panel); setTimeout(() => panel.remove(), 8000);
+           } catch (err) { console.error(err); showToast('❌ Schema check failed', 'error'); }
+       }
+ 
+       document.addEventListener('DOMContentLoaded', () => { showSection('new-section', document.querySelector('.main-btn.active')); });
+       
+       // 🔹 SURGICAL ADDITION: Hard reset when leaving any section (EXPAND ONLY)
+       (function() {
+           const _showSection = window.showSection;
+           window.showSection = function(id, btn) {
+               if (id !== 'new-section') {
+                   // 🔹 Reset New section to Blank / 0 when switching away
+                   document.getElementById('source').value = ""; handleSourceChange();
+                   document.getElementById('mode').value = ""; handleModeChange();
+                   ['name','phone','email','address','city'].forEach(f => { const el = document.getElementById(f); if(el) el.value = ""; });
+                   document.getElementById('pics').value = "0";
+                   document.getElementById('note').value = "";
+                   // Clear search inputs/results to prevent leakage
+                   ['s-name','s-phone','s-email','s-address','s-request','s-invoice'].forEach(fieldId => { const el = document.getElementById(fieldId); if(el) el.value = ""; });
+                   const results = document.getElementById('search-results'); if(results) results.innerHTML = "";
+                   const counter = document.getElementById('interaction-counter'); if(counter) counter.textContent = "🔍 Showing: 0";
+               }
+               _showSection(id, btn);
+           };
+       })();
+   </script>
+</body>
+</html>
