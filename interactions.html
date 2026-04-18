@@ -64,7 +64,8 @@
        .view-btn:hover { background: #f9fafb; border-color: #9ca3af; }
        .view-btn.active { background: #111827; color: #fff; border-color: #111827; }
        
-       .inc-header-row, .inc-item-row { display: grid; grid-template-columns: 90px 2.5fr 120px 80px 90px; align-items: center; padding: 12px 16px; gap: 12px; }
+       /* 🔹 SURGICAL LAYOUT FIX: Compressed middle gap, shifted City left, expanded Action column for buttons */
+       .inc-header-row, .inc-item-row { display: grid; grid-template-columns: 80px 1.5fr 100px 70px 140px; align-items: center; padding: 12px 16px; gap: 8px; }
        .inc-header-row { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.06em; background: #f9fafb; border-radius: 8px; margin-bottom: 8px; border: 1px solid #f3f4f6; }
        .inc-item-row { font-size: 14px; border-bottom: 1px solid #f3f4f6; background: #fff; transition: background 0.15s; }
        .inc-item-row:last-child { border-bottom: none; }
@@ -132,7 +133,7 @@
            <div><label>Search Name</label><input type="text" id="s-name" oninput="searchData()" placeholder="Type to search..."></div>
            <div><label>Search Phone</label><input type="tel" id="s-phone" oninput="searchData()" placeholder="e.g. 555"></div>
            <div><label>Search Email</label><input type="email" id="s-email" oninput="searchData()" placeholder="e.g. @gmail"></div>
-           <div><label>Search Address/City</label><input type="text" id="s-address" oninput="searchData()" placeholder="Location"></div>
+           <div><label>Search City</label><input type="text" id="s-address" oninput="searchData()" placeholder="City"></div>
            <!-- 🔹 UPDATED: Identical structure to other inputs (Label on top, Input below) -->
            <div><label>Search Request</label><input type="text" id="s-request" oninput="searchData()" placeholder="Request #"></div>
            <div><label>Search Invoice</label><input type="text" id="s-invoice" oninput="searchData()" placeholder="Invoice #"></div>
@@ -255,7 +256,7 @@
                if(phone) dupQuery = dupQuery.eq('phone', phone);
                if(email) dupQuery = dupQuery.ilike('email', email);
                if(city) dupQuery = dupQuery.ilike('city', city);
-               const { data: dupData, error: dupError } = await dupQuery.limit(1);
+               const {  dupData, error: dupError } = await dupQuery.limit(1);
                if (dupError) throw dupError;
                
                const note = document.getElementById('note').value.trim();
@@ -380,7 +381,7 @@
                const savedTime = new Date(item.created_at).toLocaleString();
                const existingNote = item.note || '';
                document.getElementById('note').value = existingNote + (existingNote ? "\n\n" : "") + `[Loaded: ${savedTime}]`;
-             
+               showToast('Interaction loaded for editing', 'success');
            } catch (e) { console.error('Load error:', e); showToast('❌ Failed to load interaction data', 'error'); }
        }
  
