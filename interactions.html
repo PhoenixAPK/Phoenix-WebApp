@@ -119,7 +119,110 @@
                <div><label>Phone</label><input type="tel" id="phone" placeholder="+1 (555) 123-4567"></div>
                <div><label>Email</label><input type="email" id="email" placeholder="email@example.com"></div>
                <div><label>Address</label><input type="text" id="address" placeholder="Street address"></div>
-               <div><label>City</label><input type="text" id="city" placeholder="City"></div>
+               <div>
+    <label>City</label>
+    <select id="city">
+        <option value="">Select City</option>
+        <option>Agadir</option>
+        <option>Ain Harrouda</option>
+        <option>Ait Melloul</option>
+        <option>Al Aaroui</option>
+        <option>Al Hoceima</option>
+        <option>Arfoud</option>
+        <option>Asilah</option>
+        <option>Azemmour</option>
+        <option>Azilal</option>
+        <option>Azrou</option>
+        <option>Ben Guerir</option>
+        <option>Ben Slimane</option>
+        <option>Beni Mellal</option>
+        <option>Benslimane</option>
+        <option>Berrechid</option>
+        <option>Biougra</option>
+        <option>Bni Anṣār (Beni Ensar)</option>
+        <option>Bouarfa</option>
+        <option>Boujdour</option>
+        <option>Boulemane</option>
+        <option>Bouznika</option>
+        <option>Casablanca</option>
+        <option>Chefchaouen</option>
+        <option>Chichaoua</option>
+        <option>Dakhla</option>
+        <option>Dar Bouazza</option>
+        <option>Dcheira El Jihadia</option>
+        <option>Driouch</option>
+        <option>El Hajeb</option>
+        <option>El Jadida</option>
+        <option>El Kelaa Des Sraghna</option>
+        <option>Errachidia</option>
+        <option>Essaouira</option>
+        <option>Fes (Fès)</option>
+        <option>Figuig</option>
+        <option>Fnideq</option>
+        <option>Fquih Ben Salah</option>
+        <option>Guelmim</option>
+        <option>Guercif</option>
+        <option>Ifrane</option>
+        <option>Imzouren</option>
+        <option>Inezgane</option>
+        <option>Jerada</option>
+        <option>Kasbat Tadla</option>
+        <option>Kenitra (Kénitra)</option>
+        <option>Khemisset</option>
+        <option>Khenifra</option>
+        <option>Khouribga</option>
+        <option>Ksar El Kebir</option>
+        <option>L'Aaioune Sidi Mellouk</option>
+        <option>Laâyoune</option>
+        <option>Larache</option>
+        <option>Lqliaa</option>
+        <option>M'diq</option>
+        <option>M'Rirt</option>
+        <option>Marrakesh (Marrakech)</option>
+        <option>Martil</option>
+        <option>Meknes (Meknès)</option>
+        <option>Midelt</option>
+        <option>Mohammedia</option>
+        <option>Moulay Yacoub</option>
+        <option>Nador</option>
+        <option>Ouarzazate</option>
+        <option>Ouazzane</option>
+        <option>Oued Zem</option>
+        <option>Ouezzane</option>
+        <option>Oujda</option>
+        <option>Oulad Teima</option>
+        <option>Rabat</option>
+        <option>Safi</option>
+        <option>Salé</option>
+        <option>Sefrou</option>
+        <option>Settat</option>
+        <option>Sidi Bennour</option>
+        <option>Sidi Ifni</option>
+        <option>Sidi Kacem</option>
+        <option>Sidi Slimane</option>
+        <option>Sidi Yahya El Gharb</option>
+        <option>Skhirat</option>
+        <option>Smara</option>
+        <option>Souk El Arbaa</option>
+        <option>Tahannaout</option>
+        <option>Tan-Tan</option>
+        <option>Tangier (Tanger)</option>
+        <option>Taounate</option>
+        <option>Taourirt</option>
+        <option>Tarfaya</option>
+        <option>Taroudant</option>
+        <option>Tata</option>
+        <option>Taza</option>
+        <option>Temara</option>
+        <option>Tetouan (Tétouan)</option>
+        <option>Tifelt</option>
+        <option>Tinghir</option>
+        <option>Tiznit</option>
+        <option>Youssoufia</option>
+        <option>Zagora</option>
+        <option>Zaio</option>
+    </select>
+</div>
                <div><label>Total Pictures</label><input type="number" id="pics" min="0" value="0"></div>
                <div class="full-width"><label>Note</label><textarea id="note" placeholder="Additional details..."></textarea></div>
            </div>
@@ -475,7 +578,7 @@
                const mode = (r.mode || '').toLowerCase();
                const modeParam = mode === 'client' ? 'client' : 'entrepreneur';
                const params = new URLSearchParams({ 
-                   id: id, 
+                   request_id: id, 
                    mode: modeParam, 
                    name: r.name || '', 
                    phone: r.phone || '', 
