@@ -101,14 +101,14 @@
 <body>
  
    <div class="nav-container">
-       <button class="main-btn active" onclick="showSection('new-section', this)">✨ New</button>
+       <button class="main-btn" onclick="showSection('new-section', this)">✨ New</button>
        <button class="main-btn" onclick="showSection('search-section', this)">🔍 Search</button>
        <button class="main-btn" onclick="showSection('export-section', this)">📤 Export</button>
        <button class="main-btn" onclick="showSection('incomplete-section', this)">⏳ Incomplete</button>
    </div>
  
    <!-- NEW INTERACTION SECTION -->
-   <div id="new-section" class="section" style="display: block;">
+   <div id="new-section" class="section">
        <div class="step-row">
            <div style="flex:1; min-width: 240px;"><label>Source *</label><select id="source" onchange="handleSourceChange()"><option value="">Select Source</option><option>Phone</option><option>Email</option><option>PhoenixWeb</option><option>Websearch</option><option>Facebook</option><option>Instagram</option><option>TikTok</option><option>YouTube</option></select></div>
            <div id="mode-div" class="hidden" style="flex:1; min-width: 240px;"><label>Mode *</label><select id="mode" onchange="handleModeChange()"><option value="">Select Mode</option><option>Client</option><option>Entrepreneur</option></select></div>
@@ -624,7 +624,10 @@
            } catch (err) { console.error(err); showToast('❌ Schema check failed', 'error'); }
        }
  
-       document.addEventListener('DOMContentLoaded', () => { showSection('new-section', document.querySelector('.main-btn.active')); });
+       // 🔹 NO SECTION ACTIVE ON LOAD - Wait for user click
+       document.addEventListener('DOMContentLoaded', () => {
+           // All sections hidden by default, no button active
+       });
        
        // 🔹 SURGICAL ADDITION: Hard reset when leaving any section (EXPAND ONLY)
        (function() {
