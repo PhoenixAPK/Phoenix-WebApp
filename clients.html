@@ -6,357 +6,143 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
  
 <style>
-/* ===== RESET ===== */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: Arial, Helvetica, sans-serif;
-}
- 
-body {
-  background: transparent;
-  color: #111827;
-}
- 
-/* ===== MAIN VIEW ===== */
-#mainView {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  padding: 40px 0;
-}
- 
-/* UPDATED BUTTON STYLES TO MATCH INTERACTIONS PAGE */
-.main-btn {
-  /* Fixed dimensions for uniformity */
-  width: 150px;
-  height: 42px;
-  
-  /* Flexbox for perfect icon + text alignment */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px; /* Space between icon and text */
-  
-  /* Default Light Style (for Search) */
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
- 
-.main-btn:hover {
-  background: #e5e7eb;
-  border-color: #d1d5db;
-}
-
-/* Dark/Active Style (for New) - Matches Interactions Page */
-.main-btn.primary {
-  background: #111827;
-  color: #ffffff;
-  border-color: #111827;
-}
-
-.main-btn.primary:hover {
-  background: #1f2937;
-  border-color: #1f2937;
-}
- 
-/* ===== CLIENT VIEW ===== */
-#clientView {
-  display: none;
-  padding: 24px;
-}
- 
-/* ===== RETURN BUTTON ===== */
-.back-btn {
-  width: 74px;
-  height: 30px;
-  background: #e5e7eb;
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-}
- 
-/* ===== CLIENT INFO ===== */
-.client-info {
-  background: #ffffff;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
-}
- 
-.input-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-}
- 
-label {
-  font-size: 13px;
-  font-weight: 500;
-  margin-bottom: 4px;
-  display: block;
-}
- 
-input,
-select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid rgba(204,204,204,0.8);
-  border-radius: 6px;
-  font-size: 14px;
-}
- 
-/* ===== SAVE BUTTON ===== */
-.save-wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 10px;
-}
- 
-.save-btn {
-  width: 120px;
-  height: 34px;
-  background: #111827;
-  color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* ===== SEARCH TOOLS & RESULTS ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+body { background: transparent; color: #111827; }
+#mainView { display: flex; justify-content: center; gap: 20px; padding: 40px 0; }
+.main-btn { width: 150px; height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+.main-btn:hover { background: #e5e7eb; border-color: #d1d5db; }
+.main-btn.primary { background: #f3f4f6; color: #374151; border-color: #e5e7eb; }
+.main-btn.primary:hover { background: #e5e7eb; border-color: #d1d5db; }
+#clientView { display: none; padding: 24px; }
+.back-btn { width: 74px; height: 30px; background: #e5e7eb; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+.client-info { background: #ffffff; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+.input-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+label { font-size: 13px; font-weight: 500; margin-bottom: 4px; display: block; }
+input, select { width: 100%; padding: 8px; border: 1px solid rgba(204,204,204,0.8); border-radius: 6px; font-size: 14px; }
+.save-wrapper { width: 100%; display: flex; justify-content: flex-end; margin-top: 10px; }
+.save-btn { width: 120px; height: 34px; background: #111827; color: #ffffff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
 #searchTools { display: none; }
 #searchResults { display: none; }
-
-.result-count {
-  font-size: 13px;
-  color: #6b7280;
-  margin-bottom: 12px;
-}
-
-.result-item {
-  padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
+.result-count { font-size: 13px; color: #6b7280; margin-bottom: 12px; }
+.result-item { padding: 12px; border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: background 0.2s; }
 .result-item:hover { background: #f3f4f6; }
 .result-item:last-child { border-bottom: none; }
- 
-/* ===== HISTORY INDICATOR ===== */
 .history-wrapper { display: none; }
- 
-.history-top-frame {
-  background: #e9eaec;
-  border-radius: 10px;
-  padding: 16px 20px;
-  margin-bottom: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
- 
-.history-top-frame h3 {
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
-}
- 
-.history-sort {
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 12px;
-  width: auto;
-  max-width: max-content;
-  flex: 0 0 auto;
-}
- 
+.history-top-frame { background: #e9eaec; border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; display: flex; justify-content:space-between; align-items: center; }
+.history-top-frame h3 { font-size: 14px; font-weight: 600; color: #111827; }
+.history-sort { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 10px; font-size: 12px; width: auto; max-width: max-content; flex: 0 0 auto; }
 .history-section { margin-bottom: 16px; }
- 
-.history-section-header {
-  background: #e9eaec;
-  border-radius: 10px;
-  padding: 14px 20px;
-  cursor: pointer;
-}
- 
-.history-section-header h3 {
-  font-size: 14px;
-  font-weight: 600;
-  color: #111827;
-}
- 
-.history-section-body {
-  background: #f3f4f6;
-  border-radius: 10px;
-  min-height: 120px;
-  margin-top: 6px;
-  padding: 20px;
-  display: none;
-  font-size: 13px;
-  color: #9ca3af;
-}
+.history-section-header { background: #e9eaec; border-radius: 10px; padding: 14px 20px; cursor: pointer; }
+.history-section-header h3 { font-size: 14px; font-weight: 600; color: #111827; }
+.history-section-body { background: #f3f4f6; border-radius: 10px; min-height: 120px; margin-top: 6px; padding: 20px; display: none; font-size: 13px; color: #9ca3af; }
 </style>
 </head>
  
 <body>
  
-<!-- ===== MAIN VIEW ===== -->
 <div id="mainView">
-  <button class="main-btn primary" onclick="openClient('new')">✨ New</button>
-  <button class="main-btn" onclick="openClient('search')">🔍 Search</button>
+  <button class="main-btn primary" id="btnNew" onclick="openClient('new')">✨ New</button>
+  <button class="main-btn" id="btnSearch" onclick="openClient('search')">🔍 Search</button>
 </div>
  
-<!-- ===== CLIENT VIEW ===== -->
 <div id="clientView">
  
-<button class="back-btn" onclick="goBack()">← Return</button>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+  <button class="back-btn" onclick="goBack()">← Return</button>
+  <div id="rightActions" style="display:none; gap:8px;">
+    <div id="profileActions" style="display:none; gap:8px;">
+      <button onclick="openInvoice()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Invoice</button>
+      <button onclick="enableEditMode()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Edit</button>
+      <button id="blockUnblockBtn" onclick="handleBlockUnblock()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Block</button>
+      <button onclick="showDeleteModal()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Delete</button>
+    </div>
+    <button id="clientModeIndicator" style="display:none; width:100px; height:30px; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:6px; font-size:12px; font-weight:600; cursor:default; pointer-events:none; color:#9ca3af; display:inline-flex; align-items:center; justify-content:center;">Client Mode</button>
+  </div>
+</div>
  
-<!-- ===== SEARCH TOOLS ===== -->
 <div class="client-info" id="searchTools">
   <div class="input-grid">
-    <div>
-      <label>Name</label>
-      <input type="text" id="searchName" oninput="performSearch()">
-    </div>
-    <div>
-      <label>Contact</label>
-      <input type="text" id="searchContact" oninput="performSearch()">
-    </div>
-    <div>
-      <label>Email</label>
-      <input type="email" id="searchEmail" oninput="performSearch()">
-    </div>
-    <div>
-      <label>Address</label>
-      <input type="text" id="searchAddress" oninput="performSearch()">
-    </div>
-    <div>
-      <label>City</label>
-      <select id="searchCity" onchange="performSearch()">
-        <option value="">Select City</option>
-      </select>
-    </div>
-    <div>
-      <label>Region</label>
-      <input type="text" id="searchRegion" readonly>
-    </div>
+    <div><label>Name</label><input type="text" id="searchName" oninput="performSearch()"></div>
+    <div><label>Contact</label><input type="text" id="searchContact" oninput="performSearch()"></div>
+    <div><label>Email</label><input type="email" id="searchEmail" oninput="performSearch()"></div>
+    <div><label>Address</label><input type="text" id="searchAddress" oninput="performSearch()"></div>
+    <div><label>City</label><input type="text" id="searchCity" oninput="performSearch()"></div>
+    <div><label>Region</label><input type="text" id="searchRegion" readonly></div>
   </div>
 </div>
 
-<!-- ===== SEARCH RESULTS ===== -->
 <div class="client-info" id="searchResults" style="display:none;">
   <div class="result-count">🔍 Showing: <span id="resultCount">0</span></div>
   <div id="resultsList"></div>
 </div>
  
-<!-- ===== CLIENT INFO FORM ===== -->
 <div class="client-info" id="clientForm" style="display:none;">
   <div class="input-grid">
- 
-    <div>
-      <label>Name</label>
-      <input type="text" id="clientName">
-    </div>
- 
-    <div>
-      <label>Contact</label>
-      <input type="text" id="clientContact">
-    </div>
- 
-    <div>
-      <label>Email</label>
-      <input type="email" id="clientEmail">
-    </div>
- 
-    <div>
-      <label>Address</label>
-      <input type="text" id="clientAddress">
-    </div>
- 
-    <div>
-      <label>City</label>
-      <select id="clientCity">
-        <option value="">Select City</option>
-      </select>
-    </div>
- 
-    <div>
-      <label>Region</label>
-      <input type="text" id="clientRegion" readonly>
-      <div class="save-wrapper">
-        <button class="save-btn" id="saveBtn" onclick="saveClient()">Save</button>
-      </div>
-    </div>
- 
+    <div><label>Name</label><input type="text" id="clientName" oninput="checkDuplicates()"></div>
+    <div><label>Contact</label><input type="text" id="clientContact" oninput="checkDuplicates()"></div>
+    <div><label>Email</label><input type="email" id="clientEmail" oninput="checkDuplicates()"></div>
+    <div><label>Address</label><input type="text" id="clientAddress"></div>
+    <div><label>City</label><select id="clientCity"><option value="">Select City</option></select></div>
+    <div><label>Region</label><input type="text" id="clientRegion" readonly><div class="save-wrapper"><button class="save-btn" id="saveBtn" onclick="saveClient()">Save</button></div></div>
   </div>
 </div>
+
+<div id="duplicateContainer" style="display:none;">
+  <h4 style="margin-bottom:10px; color:#ef4444;">⚠️ Similar profiles found (Read-Only):</h4>
+  <div id="duplicateResults"></div>
+</div>
  
-<!-- ===== HISTORY INDICATOR ===== -->
 <div class="history-wrapper" id="historyIndicator">
- 
-  <div class="history-top-frame">
-    <h3>History Indicator</h3>
-    <select class="history-sort">
-      <option>Newest → Oldest</option>
-      <option>Oldest → Newest</option>
-    </select>
+  <div class="history-top-frame"><h3>History Indicator</h3><select class="history-sort"><option>Newest → Oldest</option><option>Oldest → Newest</option></select></div>
+  <div class="history-section"><div class="history-section-header" onclick="toggleSection('requests')"><h3>Requests</h3></div><div class="history-section-body" id="requests"></div></div>
+  <div class="history-section"><div class="history-section-header" onclick="toggleSection('interactions')"><h3>Interactions</h3></div><div class="history-section-body" id="interactions"></div></div>
+  <div class="history-section"><div class="history-section-header" onclick="toggleSection('invoice')"><h3>Invoice</h3></div><div class="history-section-body" id="invoice"></div></div>
+</div>
+
+<div id="noteModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#fff; padding:20px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:1000; width:300px;">
+  <h3 id="noteModalTitle" style="margin-bottom:10px; font-size:16px;">Mandatory Note</h3>
+  <textarea id="noteInput" style="width:100%; height:80px; padding:8px; border:1px solid #d1d5db; border-radius:6px; resize:none; margin-bottom:10px;"></textarea>
+  <div style="display:flex; gap:10px; justify-content:flex-end;">
+    <button onclick="closeNoteModal()" style="background:#e5e7eb; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Cancel</button>
+    <button id="noteSaveBtn" onclick="confirmAction()" style="background:#111827; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Save</button>
   </div>
- 
-  <div class="history-section">
-    <div class="history-section-header" onclick="toggleSection('requests')">
-      <h3>Requests</h3>
-    </div>
-    <div class="history-section-body" id="requests"></div>
-  </div>
- 
-  <div class="history-section">
-    <div class="history-section-header" onclick="toggleSection('interactions')">
-      <h3>Interactions</h3>
-    </div>
-    <div class="history-section-body" id="interactions"></div>
-  </div>
- 
-  <div class="history-section">
-    <div class="history-section-header" onclick="toggleSection('invoice')">
-      <h3>Invoice</h3>
-    </div>
-    <div class="history-section-body" id="invoice"></div>
-  </div>
- 
 </div>
  
 </div>
  
 <script>
-// ===== 1. GLOBAL FUNCTIONS =====
+window.currentMode = null;
+window.currentClientId = null;
+window.currentAction = null;
+window.supabaseClient = null;
+window.duplicateCheckToken = 0;
+
+function clearDuplicates() {
+  var container = document.getElementById("duplicateContainer");
+  var results = document.getElementById("duplicateResults");
+  if (container) container.style.display = "none";
+  if (results) results.innerHTML = '';
+}
+
 window.openClient = function(mode) {
+  window.currentMode = mode;
   document.getElementById("mainView").style.display = "none";
   document.getElementById("clientView").style.display = "block";
   
+  clearDuplicates();
+
   if (mode === "search") {
     document.getElementById("searchTools").style.display = "block";
-    document.getElementById("searchResults").style.display = "block";
+    document.getElementById("searchResults").style.display = "none";
     document.getElementById("clientForm").style.display = "none";
     document.getElementById("historyIndicator").style.display = "none";
+    document.getElementById("rightActions").style.display = "none";
     document.getElementById("saveBtn").style.display = "none";
+
+    clearSearchTools();
+    document.getElementById("resultsList").innerHTML = '';
+    document.getElementById("resultCount").textContent = '0';
+    
     performSearch();
   } else {
     document.getElementById("searchTools").style.display = "none";
@@ -364,6 +150,11 @@ window.openClient = function(mode) {
     document.getElementById("clientForm").style.display = "block";
     document.getElementById("historyIndicator").style.display = "none";
     document.getElementById("saveBtn").style.display = "inline-block";
+    document.getElementById("profileActions").style.display = "none";
+    document.getElementById("clientModeIndicator").style.display = "inline-flex";
+    document.getElementById("rightActions").style.display = "flex";
+    
+    setFormState('edit');
     clearForm();
   }
 };
@@ -372,6 +163,9 @@ window.goBack = function() {
   document.getElementById("clientView").style.display = "none";
   document.getElementById("mainView").style.display = "flex";
   window.currentClientId = null;
+  setFormState('readonly');
+  clearSearchTools();
+  clearDuplicates();
 };
 
 window.toggleSection = function(id) {
@@ -383,10 +177,56 @@ window.clearForm = function() {
   document.querySelectorAll("#clientForm input:not([readonly]), #clientForm select").forEach(el => el.value = "");
   document.getElementById("clientRegion").value = "";
   window.currentClientId = null;
+  clearDuplicates();
 };
 
-window.loadClient = function(client) {
+window.clearSearchTools = function() {
+  document.getElementById("searchName").value = "";
+  document.getElementById("searchContact").value = "";
+  document.getElementById("searchEmail").value = "";
+  document.getElementById("searchAddress").value = "";
+  document.getElementById("searchCity").value = "";
+  document.getElementById("searchRegion").value = "";
+};
+
+window.setFormState = function(state) {
+  const inputs = document.querySelectorAll("#clientForm input, #clientForm select");
+  inputs.forEach(el => {
+    if (el.id !== "clientRegion") { 
+        if (state === 'edit') {
+            el.disabled = false;
+            el.style.backgroundColor = "";
+            el.style.cursor = "";
+            el.style.opacity = "1";
+        } else {
+            el.disabled = true;
+            el.style.backgroundColor = "#f3f4f6";
+            el.style.cursor = "not-allowed";
+            el.style.opacity = "0.6";
+        }
+    }
+  });
+};
+
+window.enableEditMode = function() { setFormState('edit'); };
+
+window.openInvoice = function() {
+  if (!window.currentClientId) return;
+  const name = encodeURIComponent(document.getElementById("clientName").value || "");
+  const phone = encodeURIComponent(document.getElementById("clientContact").value || "");
+  const email = encodeURIComponent(document.getElementById("clientEmail").value || "");
+  const address = encodeURIComponent(document.getElementById("clientAddress").value || "");
+  const city = encodeURIComponent(document.getElementById("clientCity").value || "");
+  const url = `admininvoice.html?mode=client&name=${name}&phone=${phone}&email=${email}&address=${address}&city=${city}`;
+  window.open(url, '_blank');
+};
+
+window.loadClient = async function(client) {
+  clearDuplicates();
+  
   window.currentClientId = client.id;
+  window.currentMode = 'view';
+  
   document.getElementById("clientName").value = client.name || '';
   document.getElementById("clientContact").value = client.contact || '';
   document.getElementById("clientEmail").value = client.email || '';
@@ -394,10 +234,27 @@ window.loadClient = function(client) {
   document.getElementById("clientCity").value = client.city || '';
   document.getElementById("clientRegion").value = client.region || '';
   
+  clearSearchTools();
+  
   document.getElementById("searchTools").style.display = "none";
   document.getElementById("searchResults").style.display = "none";
   document.getElementById("clientForm").style.display = "block";
   document.getElementById("historyIndicator").style.display = "block";
+  
+  document.getElementById("profileActions").style.display = "flex";
+  document.getElementById("clientModeIndicator").style.display = "none";
+  document.getElementById("rightActions").style.display = "flex";
+  
+  const blockBtn = document.getElementById("blockUnblockBtn");
+  if (client.blocked) {
+    blockBtn.textContent = "Unblock";
+    blockBtn.onclick = handleUnblock;
+  } else {
+    blockBtn.textContent = "Block";
+    blockBtn.onclick = handleBlock;
+  }
+  
+  setFormState('readonly');
   
   document.getElementById("requests").innerHTML = '<p>No requests found</p>';
   document.getElementById("interactions").innerHTML = '<p>No interactions found</p>';
@@ -421,7 +278,6 @@ window.saveClient = async function() {
   
   try {
     if (!window.supabaseClient) throw new Error("Database not connected");
-    
     if (window.currentClientId) {
       const { error } = await window.supabaseClient.from('clients').update(clientData).eq('id', window.currentClientId);
       if (error) throw error;
@@ -440,23 +296,89 @@ window.saveClient = async function() {
   }
 };
 
+window.checkDuplicates = async function() {
+  if (window.currentMode !== 'new') return;
+
+  const name = document.getElementById("clientName").value.trim();
+  const contact = document.getElementById("clientContact").value.trim();
+  const email = document.getElementById("clientEmail").value.trim();
+
+  if (!name && !contact && !email) {
+    clearDuplicates();
+    return;
+  }
+
+  const myToken = ++window.duplicateCheckToken;
+
+  document.getElementById("duplicateContainer").style.display = "block";
+  document.getElementById("duplicateResults").innerHTML = '<div style="padding:10px;color:#9ca3af;">Searching...</div>';
+
+  try {
+    if (!window.supabaseClient) throw new Error("DB not connected");
+    
+    let query = window.supabaseClient.from('clients').select('*');
+    if (name) query = query.ilike('name', `%${name}%`);
+    if (contact) query = query.ilike('contact', `%${contact}%`);
+    if (email) query = query.ilike('email', `%${email}%`);
+    
+    const { data, error } = await query;
+    if (error) throw error;
+
+    if (myToken !== window.duplicateCheckToken) return;
+
+    const stillValid =
+      document.getElementById("clientName").value.trim() ||
+      document.getElementById("clientContact").value.trim() ||
+      document.getElementById("clientEmail").value.trim();
+
+    if (!stillValid) {
+      clearDuplicates();
+      return;
+    }
+
+    if (data && data.length > 0) {
+      const list = document.getElementById("duplicateResults");
+      list.innerHTML = '';
+      
+      data.forEach(client => {
+        const item = document.createElement('div');
+        item.style.padding = "10px";
+        item.style.borderBottom = "1px solid #eee";
+        item.style.cursor = "pointer";
+        item.innerHTML = `<strong>${client.name}</strong> | <small>${client.email || 'No email'}</small>`;
+        item.onclick = () => window.loadClient(client);
+        list.appendChild(item);
+      });
+    } else {
+      clearDuplicates();
+    }
+
+  } catch (err) {
+    console.error("Duplicate check error:", err);
+    clearDuplicates();
+  }
+};
+
 window.performSearch = async function() {
   const name = document.getElementById("searchName").value.trim().toLowerCase();
   const contact = document.getElementById("searchContact").value.trim().toLowerCase();
   const email = document.getElementById("searchEmail").value.trim().toLowerCase();
   const address = document.getElementById("searchAddress").value.trim().toLowerCase();
-  const city = document.getElementById("searchCity").value.trim();
+  const city = document.getElementById("searchCity").value.trim().toLowerCase();
   const region = document.getElementById("searchRegion").value.trim().toLowerCase();
   
   const resultsList = document.getElementById("resultsList");
   const resultCount = document.getElementById("resultCount");
-  
+
   if (!name && !contact && !email && !address && !city && !region) {
     resultsList.innerHTML = '';
     resultCount.textContent = '0';
+    document.getElementById("searchResults").style.display = "none";
     return;
   }
   
+  document.getElementById("searchResults").style.display = "block";
+
   try {
     if (!window.supabaseClient) throw new Error("Database not connected");
     
@@ -465,7 +387,7 @@ window.performSearch = async function() {
     if (contact) query = query.ilike('contact', `%${contact}%`);
     if (email) query = query.ilike('email', `%${email}%`);
     if (address) query = query.ilike('address', `%${address}%`);
-    if (city) query = query.eq('city', city);
+    if (city) query = query.ilike('city', `%${city}%`);
     if (region) query = query.ilike('region', `%${region}%`);
     
     const { data, error } = await query;
@@ -492,9 +414,89 @@ window.performSearch = async function() {
   }
 };
 
-// ===== 2. DATA & INITIALIZATION =====
-window.currentClientId = null;
-window.supabaseClient = null;
+window.handleBlock = function() {
+  if (!window.currentClientId) return;
+  window.currentAction = 'block';
+  document.getElementById("noteModalTitle").textContent = "Block User - Mandatory Note";
+  document.getElementById("noteInput").value = '';
+  document.getElementById("noteModal").style.display = 'block';
+};
+
+window.handleUnblock = async function() {
+  if (!window.currentClientId) return;
+  
+  try {
+    if (!window.supabaseClient) throw new Error("DB not connected");
+    const { error } = await window.supabaseClient.from('clients')
+      .update({ blocked: false, block_note: null })
+      .eq('id', window.currentClientId);
+    if (error) throw error;
+    
+    alert("User unblocked successfully!");
+    const { data } = await window.supabaseClient.from('clients').select('*').eq('id', window.currentClientId).single();
+    if (data) window.loadClient(data);
+  } catch (err) {
+    console.error(err);
+    alert("Error: " + err.message);
+  }
+};
+
+window.handleBlockUnblock = function() {
+  const blockBtn = document.getElementById("blockUnblockBtn");
+  if (blockBtn.textContent === "Block") {
+    handleBlock();
+  } else {
+    handleUnblock();
+  }
+};
+
+window.showDeleteModal = function() {
+  if (!window.currentClientId) return;
+  window.currentAction = 'delete';
+  document.getElementById("noteModalTitle").textContent = "Delete User - Mandatory Note";
+  document.getElementById("noteInput").value = '';
+  document.getElementById("noteModal").style.display = 'block';
+};
+
+window.closeNoteModal = function() {
+  document.getElementById('noteModal').style.display = 'none';
+  window.currentAction = null;
+};
+
+window.confirmAction = async function() {
+  const note = document.getElementById('noteInput').value.trim();
+  
+  if (!note) {
+    alert("Note is mandatory.");
+    return;
+  }
+  
+  try {
+    if (!window.supabaseClient) throw new Error("DB not connected");
+    
+    if (window.currentAction === 'block') {
+      const { error } = await window.supabaseClient.from('clients')
+        .update({ blocked: true, block_note: note })
+        .eq('id', window.currentClientId);
+      if (error) throw error;
+      alert("Profile Blocked with note.");
+      const { data } = await window.supabaseClient.from('clients').select('*').eq('id', window.currentClientId).single();
+      if (data) window.loadClient(data);
+    } else if (window.currentAction === 'delete') {
+      const { error } = await window.supabaseClient.from('clients')
+        .delete()
+        .eq('id', window.currentClientId);
+      if (error) throw error;
+      alert("Profile Deleted with note.");
+      goBack();
+    }
+    
+    closeNoteModal();
+  } catch (err) {
+    console.error(err);
+    alert("Error: " + err.message);
+  }
+};
 
 const cityData = [
   { city: "Agadir", region: "Souss-Massa", distance_km: 500 },
@@ -507,7 +509,6 @@ const cityData = [
   { city: "Azemmour", region: "Casablanca-Settat", distance_km: 150 },
   { city: "Azilal", region: "Béni Mellal-Khénifra", distance_km: 340 },
   { city: "Azrou", region: "Fès-Meknès", distance_km: 180 },
- 
   { city: "Ben Guerir", region: "Marrakech-Safi", distance_km: 250 },
   { city: "Ben Slimane", region: "Casablanca-Settat", distance_km: 70 },
   { city: "Beni Mellal", region: "Béni Mellal-Khénifra", distance_km: 270 },
@@ -519,48 +520,38 @@ const cityData = [
   { city: "Boujdour", region: "Laâyoune-Sakia El Hamra", distance_km: 1200 },
   { city: "Boulemane", region: "Fès-Meknès", distance_km: 280 },
   { city: "Bouznika", region: "Casablanca-Settat", distance_km: 45 },
- 
   { city: "Casablanca", region: "Casablanca-Settat", distance_km: 90 },
   { city: "Chefchaouen", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 230 },
   { city: "Chichaoua", region: "Marrakech-Safi", distance_km: 380 },
- 
   { city: "Dakhla", region: "Dakhla-Oued Ed-Dahab", distance_km: 1700 },
   { city: "Dar Bouazza", region: "Casablanca-Settat", distance_km: 110 },
   { city: "Dcheira El Jihadia", region: "Souss-Massa", distance_km: 500 },
   { city: "Driouch", region: "Oriental", distance_km: 480 },
- 
   { city: "El Hajeb", region: "Fès-Meknès", distance_km: 160 },
   { city: "El Jadida", region: "Casablanca-Settat", distance_km: 170 },
   { city: "El Kelaa Des Sraghna", region: "Marrakech-Safi", distance_km: 230 },
   { city: "Errachidia", region: "Drâa-Tafilalet", distance_km: 550 },
   { city: "Essaouira", region: "Marrakech-Safi", distance_km: 470 },
- 
   { city: "Fes (Fès)", region: "Fès-Meknès", distance_km: 200 },
   { city: "Figuig", region: "Oriental", distance_km: 750 },
   { city: "Fnideq", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 290 },
   { city: "Fquih Ben Salah", region: "Béni Mellal-Khénifra", distance_km: 240 },
- 
   { city: "Guelmim", region: "Guelmim-Oued Noun", distance_km: 750 },
   { city: "Guercif", region: "Oriental", distance_km: 400 },
- 
   { city: "Ifrane", region: "Fès-Meknès", distance_km: 190 },
   { city: "Imzouren", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 410 },
   { city: "Inezgane", region: "Souss-Massa", distance_km: 505 },
- 
   { city: "Jerada", region: "Oriental", distance_km: 640 },
- 
   { city: "Kasbat Tadla", region: "Béni Mellal-Khénifra", distance_km: 210 },
   { city: "Kenitra (Kénitra)", region: "Rabat-Salé-Kénitra", distance_km: 45 },
   { city: "Khenifra", region: "Béni Mellal-Khénifra", distance_km: 280 },
   { city: "Khemisset", region: "Rabat-Salé-Kénitra", distance_km: 85 },
   { city: "Khouribga", region: "Béni Mellal-Khénifra", distance_km: 160 },
   { city: "Ksar El Kebir", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 180 },
- 
   { city: "L'Aaioune Sidi Mellouk", region: "Oriental", distance_km: 600 },
   { city: "Laâyoune", region: "Laâyoune-Sakia El Hamra", distance_km: 1050 },
   { city: "Larache", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 160 },
   { city: "Lqliaa", region: "Souss-Massa", distance_km: 500 },
- 
   { city: "M'Rirt", region: "Béni Mellal-Khénifra", distance_km: 220 },
   { city: "M'diq", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 270 },
   { city: "Marrakesh (Marrakech)", region: "Marrakech-Safi", distance_km: 330 },
@@ -569,18 +560,14 @@ const cityData = [
   { city: "Midelt", region: "Drâa-Tafilalet", distance_km: 350 },
   { city: "Mohammedia", region: "Casablanca-Settat", distance_km: 60 },
   { city: "Moulay Yacoub", region: "Fès-Meknès", distance_km: 210 },
- 
   { city: "Nador", region: "Oriental", distance_km: 520 },
- 
   { city: "Ouarzazate", region: "Drâa-Tafilalet", distance_km: 450 },
   { city: "Ouezzane", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 150 },
   { city: "Oued Zem", region: "Béni Mellal-Khénifra", distance_km: 190 },
   { city: "Ouazzane", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 150 },
   { city: "Oujda", region: "Oriental", distance_km: 600 },
   { city: "Oulad Teima", region: "Souss-Massa", distance_km: 490 },
- 
   { city: "Rabat", region: "Rabat-Salé-Kénitra", distance_km: 0 },
- 
   { city: "Safi", region: "Marrakech-Safi", distance_km: 320 },
   { city: "Salé", region: "Rabat-Salé-Kénitra", distance_km: 0 },
   { city: "Sefrou", region: "Fès-Meknès", distance_km: 220 },
@@ -593,7 +580,6 @@ const cityData = [
   { city: "Skhirat", region: "Rabat-Salé-Kénitra", distance_km: 30 },
   { city: "Smara", region: "Laâyoune-Sakia El Hamra", distance_km: 1000 },
   { city: "Souk El Arbaa", region: "Rabat-Salé-Kénitra", distance_km: 90 },
- 
   { city: "Tahannaout", region: "Marrakech-Safi", distance_km: 350 },
   { city: "Tan-Tan", region: "Guelmim-Oued Noun", distance_km: 850 },
   { city: "Tangier (Tanger)", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 280 },
@@ -607,9 +593,7 @@ const cityData = [
   { city: "Tifelt", region: "Rabat-Salé-Kénitra", distance_km: 70 },
   { city: "Tinghir", region: "Drâa-Tafilalet", distance_km: 490 },
   { city: "Tiznit", region: "Souss-Massa", distance_km: 590 },
- 
   { city: "Youssoufia", region: "Marrakech-Safi", distance_km: 250 },
- 
   { city: "Zaio", region: "Oriental", distance_km: 560 },
   { city: "Zagora", region: "Drâa-Tafilalet", distance_km: 650 }
 ];
@@ -625,25 +609,31 @@ document.addEventListener('DOMContentLoaded', function() {
   } catch(e) { console.warn("Supabase init skipped"); }
 
   const clientSelect = document.getElementById("clientCity");
-  const searchSelect = document.getElementById("searchCity");
-  
   cityData.forEach(item => {
     const o1 = document.createElement("option"); o1.value = item.city; o1.textContent = item.city; clientSelect.appendChild(o1);
-    const o2 = document.createElement("option"); o2.value = item.city; o2.textContent = item.city; searchSelect.appendChild(o2);
   });
 
   clientSelect.onchange = function() {
     const match = cityData.find(c => c.city === this.value);
     document.getElementById("clientRegion").value = match ? match.region : "";
   };
-  
-  searchSelect.onchange = function() {
-    const match = cityData.find(c => c.city === this.value);
-    document.getElementById("searchRegion").value = match ? match.region : "";
-    performSearch();
-  };
+
+  const newBtn = document.getElementById('btnNew');
+  const searchBtn = document.getElementById('btnSearch');
+  newBtn.removeAttribute('style');
+  searchBtn.removeAttribute('style');
+
+  function restoreBtnStyle() { this.removeAttribute('style'); }
+  [newBtn, searchBtn].forEach(btn => {
+    if (!btn) return;
+    btn.addEventListener('mousedown', function() {
+      this.style.background = '#e5e7eb';
+      this.style.borderColor = '#d1d5db';
+    });
+    btn.addEventListener('mouseup', restoreBtnStyle);
+    btn.addEventListener('mouseleave', restoreBtnStyle);
+  });
 });
 </script>
- 
 </body>
 </html>
