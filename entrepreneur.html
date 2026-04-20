@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Entrepreneurs</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+ 
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+body { background: transparent; color: #111827; }
+#mainView { display: flex; justify-content: center; gap: 12px; padding: 40px 0; }
+.main-btn { flex: 1; max-width: 180px; padding: 16px 20px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.2s; color: #374151; }
+.main-btn:hover { background: #e5e7eb; border-color: #d1d5db; }
+.main-btn.primary { background: #f3f4f6; color: #374151; border-color: #e5e7eb; }
+.main-btn.primary:hover { background: #e5e7eb; border-color: #d1d5db; }
+#entrepreneurView { display: none; padding: 24px; }
+.back-btn { width: 74px; height: 30px; background: #e5e7eb; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+.client-info { background: #ffffff; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+.input-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+label { font-size: 13px; font-weight: 500; margin-bottom: 4px; display: block; }
+input, select { width: 100%; padding: 8px; border: 1px solid rgba(204,204,204,0.8); border-radius: 6px; font-size: 14px; }
+.save-wrapper { width: 100%; display: flex; justify-content: flex-end; margin-top: 10px; }
+.save-btn { width: 120px; height: 34px; background: #111827; color: #ffffff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+#searchTools { display: none; }
+#searchResults { display: none; }
+.result-count { font-size: 13px; color: #6b7280; margin-bottom: 12px; }
+.result-item { padding: 12px; border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: background 0.2s; }
+.result-item:hover { background: #f3f4f6; }
+.result-item:last-child { border-bottom: none; }
+.history-wrapper { display: none; }
+.history-top-frame { background: #e9eaec; border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; display: flex; justify-content:space-between; align-items: center; }
+.history-top-frame h3 { font-size: 14px; font-weight: 600; color: #111827; }
+.history-sort { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 10px; font-size: 12px; width: auto; max-width: max-content; flex: 0 0 auto; }
+.history-section { margin-bottom: 16px; }
+.history-section-header { background: #e9eaec; border-radius: 10px; padding: 14px 20px; cursor: pointer; }
+.history-section-header h3 { font-size: 14px; font-weight: 600; color: #111827; }
+.history-section-body { background: #f3f4f6; border-radius: 10px; min-height: 120px; margin-top: 6px; padding: 20px; display: none; font-size: 13px; color: #9ca3af; }
+</style>
+</head>
+ 
+<body>
+ 
+<div id="mainView">
+  <button class="main-btn primary" id="btnNew" onclick="openEntrepreneur('new')">✨ New</button>
+  <button class="main-btn" id="btnSearch" onclick="openEntrepreneur('search')">🔍 Search</button>
+</div>
+ 
+<div id="entrepreneurView">
+ 
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+  <button class="back-btn" onclick="goBack()">← Return</button>
+  <div id="rightActions" style="display:none; gap:8px;">
+    <div id="profileActions" style="display:none; gap:8px;">
+      <button onclick="openInvoice()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Invoice</button>
+      <button onclick="enableEditMode()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Edit</button>
+      <button id="blockUnblockBtn" onclick="handleBlockUnblock()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Block</button>
+      <button onclick="showDeleteModal()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Delete</button>
+    </div>
+    <button id="entrepreneurModeIndicator" style="display:none; width:100px; height:30px; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:6px; font-size:12px; font-weight:600; cursor:default; pointer-events:none; color:#9ca3af; display:inline-flex; align-items:center; justify-content:center;">Entrepreneur Mode</button>
+  </div>
+</div>
+ 
+<div class="client-info" id="searchTools">
+  <div class="input-grid">
+    <div><label>Name</label><input type="text" id="searchName" oninput="performSearch()"></div>
+    <div><label>Contact</label><input type="text" id="searchContact" oninput="performSearch()"></div>
+    <div><label>Email</label><input type="email" id="searchEmail" oninput="performSearch()"></div>
+    <div><label>Address</label><input type="text" id="searchAddress" oninput="performSearch()"></div>
+    <div><label>City</label><input type="text" id="searchCity" oninput="performSearch()"></div>
+    <div><label>Region</label><input type="text" id="searchRegion" readonly></div>
+  </div>
+</div>
+
+<div class="client-info" id="searchResults" style="display:none;">
+  <div class="result-count">🔍 Showing: <span id="resultCount">0</span></div>
+  <div id="resultsList"></div>
+</div>
+ 
+<div class="client-info" id="entrepreneurForm" style="display:none;">
+  <div class="input-grid">
+    <div><label>Name</label><input type="text" id="entrepreneurName" oninput="checkEntrepreneurDuplicates()"></div>
+    <div><label>Contact</label><input type="text" id="entrepreneurContact" oninput="checkEntrepreneurDuplicates()"></div>
+    <div><label>Email</label><input type="email" id="entrepreneurEmail" oninput="checkEntrepreneurDuplicates()"></div>
+    <div><label>Address</label><input type="text" id="entrepreneurAddress"></div>
+    <div><label>City</label><select id="entrepreneurCity"><option value="">Select City</option></select></div>
+    <div><label>Region</label><input type="text" id="entrepreneurRegion" readonly><div class="save-wrapper"><button class="save-btn" id="saveBtn" onclick="saveEntrepreneur()">Save</button></div></div>
+  </div>
+</div>
+
+<div id="duplicateContainer" style="display:none;">
+  <h4 style="margin-bottom:10px; color:#ef4444;">⚠️ Similar profiles found (Read-Only):</h4>
+  <div id="duplicateResults"></div>
+</div>
+ 
+<div class="history-wrapper" id="historyIndicator">
+  <div class="history-top-frame"><h3>History Indicator</h3><select class="history-sort"><option>Newest → Oldest</option><option>Oldest → Newest</option></select></div>
+  <div class="history-section"><div class="history-section-header" onclick="toggleSection('requests')"><h3>Requests</h3></div><div class="history-section-body" id="requests"></div></div>
+  <div class="history-section"><div class="history-section-header" onclick="toggleSection('interactions')"><h3>Interactions</h3></div><div class="history-section-body" id="interactions"></div></div>
+  <div class="history-section"><div class="history-section-header" onclick="toggleSection('invoice')"><h3>Invoice</h3></div><div class="history-section-body" id="invoice"></div></div>
+</div>
+
+<div id="noteModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#fff; padding:20px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:1000; width:300px;">
+  <h3 id="noteModalTitle" style="margin-bottom:10px; font-size:16px;">Mandatory Note</h3>
+  <textarea id="noteInput" style="width:100%; height:80px; padding:8px; border:1px solid #d1d5db; border-radius:6px; resize:none; margin-bottom:10px;"></textarea>
+  <div style="display:flex; gap:10px; justify-content:flex-end;">
+    <button onclick="closeNoteModal()" style="background:#e5e7eb; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Cancel</button>
+    <button id="noteSaveBtn" onclick="confirmAction()" style="background:#111827; color:#fff; border:none; padding:6px 12px; border-radius:4px; cursor:pointer;">Save</button>
+  </div>
+</div>
+ 
+</div>
+ 
+<script>
+window.currentMode = null;
+window.currentEntrepreneurId = null;
+window.currentAction = null;
+window.supabaseClient = null;
+window.duplicateCheckToken = 0;
+
+function clearDuplicates() {
+  var container = document.getElementById("duplicateContainer");
+  var results = document.getElementById("duplicateResults");
+  if (container) container.style.display = "none";
+  if (results) results.innerHTML = '';
+}
+
+window.openEntrepreneur = function(mode) {
+  window.currentMode = mode;
+  document.getElementById("mainView").style.display = "none";
+  document.getElementById("entrepreneurView").style.display = "block";
+  
+  clearDuplicates();
+
+  if (mode === "search") {
+    document.getElementById("searchTools").style.display = "block";
+    document.getElementById("searchResults").style.display = "none";
+    document.getElementById("entrepreneurForm").style.display = "none";
+    document.getElementById("historyIndicator").style.display = "none";
+    document.getElementById("rightActions").style.display = "none";
+    document.getElementById("saveBtn").style.display = "none";
+
+    clearSearchTools();
+    document.getElementById("resultsList").innerHTML = '';
+    document.getElementById("resultCount").textContent = '0';
+    
+    performSearch();
+  } else {
+    document.getElementById("searchTools").style.display = "none";
+    document.getElementById("searchResults").style.display = "none";
+    document.getElementById("entrepreneurForm").style.display = "block";
+    document.getElementById("historyIndicator").style.display = "none";
+    document.getElementById("saveBtn").style.display = "inline-block";
+    document.getElementById("profileActions").style.display = "none";
+    document.getElementById("entrepreneurModeIndicator").style.display = "inline-flex";
+    document.getElementById("rightActions").style.display = "flex";
+    
+    setFormState('edit');
+    clearEntrepreneurForm();
+  }
+};
+
+window.goBack = function() {
+  document.getElementById("entrepreneurView").style.display = "none";
+  document.getElementById("mainView").style.display = "flex";
+  window.currentEntrepreneurId = null;
+  setFormState('readonly');
+  clearSearchTools();
+  clearDuplicates();
+};
+
+window.toggleSection = function(id) {
+  const section = document.getElementById(id);
+  section.style.display = section.style.display === "block" ? "none" : "block";
+};
+
+window.clearEntrepreneurForm = function() {
+  document.querySelectorAll("#entrepreneurForm input:not([readonly]), #entrepreneurForm select").forEach(el => el.value = "");
+  document.getElementById("entrepreneurRegion").value = "";
+  window.currentEntrepreneurId = null;
+  clearDuplicates();
+};
+
+window.clearSearchTools = function() {
+  document.getElementById("searchName").value = "";
+  document.getElementById("searchContact").value = "";
+  document.getElementById("searchEmail").value = "";
+  document.getElementById("searchAddress").value = "";
+  document.getElementById("searchCity").value = "";
+  document.getElementById("searchRegion").value = "";
+};
+
+window.setFormState = function(state) {
+  const inputs = document.querySelectorAll("#entrepreneurForm input, #entrepreneurForm select");
+  inputs.forEach(el => {
+    if (el.id !== "entrepreneurRegion") { 
+        if (state === 'edit') {
+            el.disabled = false;
+            el.style.backgroundColor = "";
+            el.style.cursor = "";
+            el.style.opacity = "1";
+        } else {
+            el.disabled = true;
+            el.style.backgroundColor = "#f3f4f6";
+            el.style.cursor = "not-allowed";
+            el.style.opacity = "0.6";
+        }
+    }
+  });
+};
+
+window.enableEditMode = function() { setFormState('edit'); };
+
+// ✅ Opens admininvoice.html in ENTREPRENEUR MODE
+window.openInvoice = function() {
+  if (!window.currentEntrepreneurId) return;
+  const name = encodeURIComponent(document.getElementById("entrepreneurName").value || "");
+  const phone = encodeURIComponent(document.getElementById("entrepreneurContact").value || "");
+  const email = encodeURIComponent(document.getElementById("entrepreneurEmail").value || "");
+  const address = encodeURIComponent(document.getElementById("entrepreneurAddress").value || "");
+  const city = encodeURIComponent(document.getElementById("entrepreneurCity").value || "");
+  const url = `admininvoice.html?mode=entrepreneur&name=${name}&phone=${phone}&email=${email}&address=${address}&city=${city}`;
+  
+  if (window.parent && window.parent !== window) {
+    const frame = window.parent.document.getElementById('content-frame');
+    if (frame) { frame.src = url; return; }
+  }
+  window.open(url, '_blank');
+};
+
+window.loadEntrepreneur = async function(entrepreneur) {
+  clearDuplicates();
+  
+  window.currentEntrepreneurId = entrepreneur.id;
+  window.currentMode = 'view';
+  
+  document.getElementById("entrepreneurName").value = entrepreneur.name || '';
+  document.getElementById("entrepreneurContact").value = entrepreneur.contact || '';
+  document.getElementById("entrepreneurEmail").value = entrepreneur.email || '';
+  document.getElementById("entrepreneurAddress").value = entrepreneur.address || '';
+  document.getElementById("entrepreneurCity").value = entrepreneur.city || '';
+  document.getElementById("entrepreneurRegion").value = entrepreneur.region || '';
+  
+  clearSearchTools();
+  
+  document.getElementById("searchTools").style.display = "none";
+  document.getElementById("searchResults").style.display = "none";
+  document.getElementById("entrepreneurForm").style.display = "block";
+  document.getElementById("historyIndicator").style.display = "block";
+  
+  document.getElementById("profileActions").style.display = "flex";
+  document.getElementById("entrepreneurModeIndicator").style.display = "none";
+  document.getElementById("rightActions").style.display = "flex";
+  
+  const blockBtn = document.getElementById("blockUnblockBtn");
+  if (entrepreneur.blocked) {
+    blockBtn.textContent = "Unblock";
+    blockBtn.onclick = handleUnblock;
+  } else {
+    blockBtn.textContent = "Block";
+    blockBtn.onclick = handleBlock;
+  }
+  
+  setFormState('readonly');
+  
+  document.getElementById("requests").innerHTML = '<p>No requests found</p>';
+  document.getElementById("interactions").innerHTML = '<p>No interactions found</p>';
+  document.getElementById("invoice").innerHTML = '<p>No invoices found</p>';
+};
+
+window.saveEntrepreneur = async function() {
+  const btn = document.getElementById("saveBtn");
+  const originalText = btn.textContent;
+  btn.textContent = "Saving...";
+  btn.disabled = true;
+  
+  const entrepreneurData = {
+    name: document.getElementById("entrepreneurName").value,
+    contact: document.getElementById("entrepreneurContact").value,
+    email: document.getElementById("entrepreneurEmail").value,
+    address: document.getElementById("entrepreneurAddress").value,
+    city: document.getElementById("entrepreneurCity").value,
+    region: document.getElementById("entrepreneurRegion").value
+  };
+  
+  try {
+    if (!window.supabaseClient) throw new Error("Database not connected");
+    if (window.currentEntrepreneurId) {
+      // ✅ UPDATE FROM 'entrepreneurs' TABLE
+      const { error } = await window.supabaseClient.from('entrepreneurs').update(entrepreneurData).eq('id', window.currentEntrepreneurId);
+      if (error) throw error;
+    } else {
+      // ✅ INSERT INTO 'entrepreneurs' TABLE
+      const { error } = await window.supabaseClient.from('entrepreneurs').insert([entrepreneurData]);
+      if (error) throw error;
+    }
+    alert("Entrepreneur saved successfully!");
+    openEntrepreneur('new');
+  } catch (err) {
+    console.error("Save error:", err);
+    alert("Error saving entrepreneur. Check console.");
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+};
+
+window.checkEntrepreneurDuplicates = async function() {
+  if (window.currentMode !== 'new') return;
+
+  const name = document.getElementById("entrepreneurName").value.trim();
+  const contact = document.getElementById("entrepreneurContact").value.trim();
+  const email = document.getElementById("entrepreneurEmail").value.trim();
+
+  if (!name && !contact && !email) {
+    clearDuplicates();
+    return;
+  }
+
+  const myToken = ++window.duplicateCheckToken;
+
+  document.getElementById("duplicateContainer").style.display = "block";
+  document.getElementById("duplicateResults").innerHTML = '<div style="padding:10px;color:#9ca3af;">Searching...</div>';
+
+  try {
+    if (!window.supabaseClient) throw new Error("DB not connected");
+    
+    // ✅ SEARCH IN 'entrepreneurs' TABLE
+    let query = window.supabaseClient.from('entrepreneurs').select('*');
+    if (name) query = query.ilike('name', `%${name}%`);
+    if (contact) query = query.ilike('contact', `%${contact}%`);
+    if (email) query = query.ilike('email', `%${email}%`);
+    
+    const { data, error } = await query;
+    if (error) throw error;
+
+    if (myToken !== window.duplicateCheckToken) return;
+
+    const stillValid =
+      document.getElementById("entrepreneurName").value.trim() ||
+      document.getElementById("entrepreneurContact").value.trim() ||
+      document.getElementById("entrepreneurEmail").value.trim();
+
+    if (!stillValid) {
+      clearDuplicates();
+      return;
+    }
+
+    if (data && data.length > 0) {
+      const list = document.getElementById("duplicateResults");
+      list.innerHTML = '';
+      
+      data.forEach(entrepreneur => {
+        const item = document.createElement('div');
+        item.style.padding = "10px";
+        item.style.borderBottom = "1px solid #eee";
+        item.style.cursor = "pointer";
+        item.innerHTML = `<strong>${entrepreneur.name}</strong> | <small>${entrepreneur.email || 'No email'}</small>`;
+        item.onclick = () => window.loadEntrepreneur(entrepreneur);
+        list.appendChild(item);
+      });
+    } else {
+      clearDuplicates();
+    }
+
+  } catch (err) {
+    console.error("Duplicate check error:", err);
+    clearDuplicates();
+  }
+};
+
+window.performSearch = async function() {
+  const name = document.getElementById("searchName").value.trim().toLowerCase();
+  const contact = document.getElementById("searchContact").value.trim().toLowerCase();
+  const email = document.getElementById("searchEmail").value.trim().toLowerCase();
+  const address = document.getElementById("searchAddress").value.trim().toLowerCase();
+  const city = document.getElementById("searchCity").value.trim().toLowerCase();
+  const region = document.getElementById("searchRegion").value.trim().toLowerCase();
+  
+  const resultsList = document.getElementById("resultsList");
+  const resultCount = document.getElementById("resultCount");
+
+  if (!name && !contact && !email && !address && !city && !region) {
+    resultsList.innerHTML = '';
+    resultCount.textContent = '0';
+    document.getElementById("searchResults").style.display = "none";
+    return;
+  }
+  
+  document.getElementById("searchResults").style.display = "block";
+
+  try {
+    if (!window.supabaseClient) throw new Error("Database not connected");
+    
+    // ✅ SEARCH IN 'entrepreneurs' TABLE
+    let query = window.supabaseClient.from('entrepreneurs').select('*');
+    if (name) query = query.ilike('name', `%${name}%`);
+    if (contact) query = query.ilike('contact', `%${contact}%`);
+    if (email) query = query.ilike('email', `%${email}%`);
+    if (address) query = query.ilike('address', `%${address}%`);
+    if (city) query = query.ilike('city', `%${city}%`);
+    if (region) query = query.ilike('region', `%${region}%`);
+    
+    const { data, error } = await query;
+    if (error) throw error;
+    
+    if (!data || data.length === 0) {
+      resultsList.innerHTML = '<div style="padding:20px;text-align:center;color:#9ca3af;">No entrepreneurs found</div>';
+      resultCount.textContent = '0';
+    } else {
+      resultCount.textContent = data.length;
+      resultsList.innerHTML = '';
+      data.forEach(entrepreneur => {
+        const item = document.createElement('div');
+        item.className = 'result-item';
+        item.innerHTML = `<strong>${entrepreneur.name}</strong><br><small>${entrepreneur.email || 'No email'} | ${entrepreneur.city || 'No city'}</small>`;
+        item.onclick = () => window.loadEntrepreneur(entrepreneur);
+        resultsList.appendChild(item);
+      });
+    }
+  } catch (err) {
+    console.error("Search error:", err);
+    resultsList.innerHTML = '<div style="padding:20px;text-align:center;color:#ef4444;">Error searching</div>';
+    resultCount.textContent = '0';
+  }
+};
+
+window.handleBlock = function() {
+  if (!window.currentEntrepreneurId) return;
+  window.currentAction = 'block';
+  document.getElementById("noteModalTitle").textContent = "Block User - Mandatory Note";
+  document.getElementById("noteInput").value = '';
+  document.getElementById("noteModal").style.display = 'block';
+};
+
+window.handleUnblock = async function() {
+  if (!window.currentEntrepreneurId) return;
+  
+  try {
+    if (!window.supabaseClient) throw new Error("DB not connected");
+    // ✅ UPDATE BLOCK STATUS IN 'entrepreneurs' TABLE
+    const { error } = await window.supabaseClient.from('entrepreneurs')
+      .update({ blocked: false, block_note: null })
+      .eq('id', window.currentEntrepreneurId);
+    if (error) throw error;
+    
+    alert("User unblocked successfully!");
+    const { data } = await window.supabaseClient.from('entrepreneurs').select('*').eq('id', window.currentEntrepreneurId).single();
+    if (data) window.loadEntrepreneur(data);
+  } catch (err) {
+    console.error(err);
+    alert("Error: " + err.message);
+  }
+};
+
+window.handleBlockUnblock = function() {
+  const blockBtn = document.getElementById("blockUnblockBtn");
+  if (blockBtn.textContent === "Block") {
+    handleBlock();
+  } else {
+    handleUnblock();
+  }
+};
+
+window.showDeleteModal = function() {
+  if (!window.currentEntrepreneurId) return;
+  window.currentAction = 'delete';
+  document.getElementById("noteModalTitle").textContent = "Delete User - Mandatory Note";
+  document.getElementById("noteInput").value = '';
+  document.getElementById("noteModal").style.display = 'block';
+};
+
+window.closeNoteModal = function() {
+  document.getElementById('noteModal').style.display = 'none';
+  window.currentAction = null;
+};
+
+window.confirmAction = async function() {
+  const note = document.getElementById('noteInput').value.trim();
+  
+  if (!note) {
+    alert("Note is mandatory.");
+    return;
+  }
+  
+  try {
+    if (!window.supabaseClient) throw new Error("DB not connected");
+    
+    if (window.currentAction === 'block') {
+      // ✅ BLOCK IN 'entrepreneurs' TABLE
+      const { error } = await window.supabaseClient.from('entrepreneurs')
+        .update({ blocked: true, block_note: note })
+        .eq('id', window.currentEntrepreneurId);
+      if (error) throw error;
+      alert("Profile Blocked with note.");
+      const { data } = await window.supabaseClient.from('entrepreneurs').select('*').eq('id', window.currentEntrepreneurId).single();
+      if (data) window.loadEntrepreneur(data);
+    } else if (window.currentAction === 'delete') {
+      // ✅ DELETE FROM 'entrepreneurs' TABLE
+      const { error } = await window.supabaseClient.from('entrepreneurs')
+        .delete()
+        .eq('id', window.currentEntrepreneurId);
+      if (error) throw error;
+      alert("Profile Deleted with note.");
+      goBack();
+    }
+    
+    closeNoteModal();
+  } catch (err) {
+    console.error(err);
+    alert("Error: " + err.message);
+  }
+};
+
+const cityData = [
+  { city: "Agadir", region: "Souss-Massa", distance_km: 500 },
+  { city: "Ain Harrouda", region: "Casablanca-Settat", distance_km: 80 },
+  { city: "Ait Melloul", region: "Souss-Massa", distance_km: 510 },
+  { city: "Al Aaroui", region: "Oriental", distance_km: 510 },
+  { city: "Al Hoceima", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 400 },
+  { city: "Arfoud", region: "Drâa-Tafilalet", distance_km: 590 },
+  { city: "Asilah", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 170 },
+  { city: "Azemmour", region: "Casablanca-Settat", distance_km: 150 },
+  { city: "Azilal", region: "Béni Mellal-Khénifra", distance_km: 340 },
+  { city: "Azrou", region: "Fès-Meknès", distance_km: 180 },
+  { city: "Ben Guerir", region: "Marrakech-Safi", distance_km: 250 },
+  { city: "Ben Slimane", region: "Casablanca-Settat", distance_km: 70 },
+  { city: "Beni Mellal", region: "Béni Mellal-Khénifra", distance_km: 270 },
+  { city: "Benslimane", region: "Casablanca-Settat", distance_km: 70 },
+  { city: "Berrechid", region: "Casablanca-Settat", distance_km: 120 },
+  { city: "Biougra", region: "Souss-Massa", distance_km: 490 },
+  { city: "Bni Anṣār (Beni Ensar)", region: "Oriental", distance_km: 540 },
+  { city: "Bouarfa", region: "Oriental", distance_km: 680 },
+  { city: "Boujdour", region: "Laâyoune-Sakia El Hamra", distance_km: 1200 },
+  { city: "Boulemane", region: "Fès-Meknès", distance_km: 280 },
+  { city: "Bouznika", region: "Casablanca-Settat", distance_km: 45 },
+  { city: "Casablanca", region: "Casablanca-Settat", distance_km: 90 },
+  { city: "Chefchaouen", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 230 },
+  { city: "Chichaoua", region: "Marrakech-Safi", distance_km: 380 },
+  { city: "Dakhla", region: "Dakhla-Oued Ed-Dahab", distance_km: 1700 },
+  { city: "Dar Bouazza", region: "Casablanca-Settat", distance_km: 110 },
+  { city: "Dcheira El Jihadia", region: "Souss-Massa", distance_km: 500 },
+  { city: "Driouch", region: "Oriental", distance_km: 480 },
+  { city: "El Hajeb", region: "Fès-Meknès", distance_km: 160 },
+  { city: "El Jadida", region: "Casablanca-Settat", distance_km: 170 },
+  { city: "El Kelaa Des Sraghna", region: "Marrakech-Safi", distance_km: 230 },
+  { city: "Errachidia", region: "Drâa-Tafilalet", distance_km: 550 },
+  { city: "Essaouira", region: "Marrakech-Safi", distance_km: 470 },
+  { city: "Fes (Fès)", region: "Fès-Meknès", distance_km: 200 },
+  { city: "Figuig", region: "Oriental", distance_km: 750 },
+  { city: "Fnideq", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 290 },
+  { city: "Fquih Ben Salah", region: "Béni Mellal-Khénifra", distance_km: 240 },
+  { city: "Guelmim", region: "Guelmim-Oued Noun", distance_km: 750 },
+  { city: "Guercif", region: "Oriental", distance_km: 400 },
+  { city: "Ifrane", region: "Fès-Meknès", distance_km: 190 },
+  { city: "Imzouren", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 410 },
+  { city: "Inezgane", region: "Souss-Massa", distance_km: 505 },
+  { city: "Jerada", region: "Oriental", distance_km: 640 },
+  { city: "Kasbat Tadla", region: "Béni Mellal-Khénifra", distance_km: 210 },
+  { city: "Kenitra (Kénitra)", region: "Rabat-Salé-Kénitra", distance_km: 45 },
+  { city: "Khenifra", region: "Béni Mellal-Khénifra", distance_km: 280 },
+  { city: "Khemisset", region: "Rabat-Salé-Kénitra", distance_km: 85 },
+  { city: "Khouribga", region: "Béni Mellal-Khénifra", distance_km: 160 },
+  { city: "Ksar El Kebir", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 180 },
+  { city: "L'Aaioune Sidi Mellouk", region: "Oriental", distance_km: 600 },
+  { city: "Laâyoune", region: "Laâyoune-Sakia El Hamra", distance_km: 1050 },
+  { city: "Larache", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 160 },
+  { city: "Lqliaa", region: "Souss-Massa", distance_km: 500 },
+  { city: "M'Rirt", region: "Béni Mellal-Khénifra", distance_km: 220 },
+  { city: "M'diq", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 270 },
+  { city: "Marrakesh (Marrakech)", region: "Marrakech-Safi", distance_km: 330 },
+  { city: "Martil", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 260 },
+  { city: "Meknes (Meknès)", region: "Fès-Meknès", distance_km: 145 },
+  { city: "Midelt", region: "Drâa-Tafilalet", distance_km: 350 },
+  { city: "Mohammedia", region: "Casablanca-Settat", distance_km: 60 },
+  { city: "Moulay Yacoub", region: "Fès-Meknès", distance_km: 210 },
+  { city: "Nador", region: "Oriental", distance_km: 520 },
+  { city: "Ouarzazate", region: "Drâa-Tafilalet", distance_km: 450 },
+  { city: "Ouezzane", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 150 },
+  { city: "Oued Zem", region: "Béni Mellal-Khénifra", distance_km: 190 },
+  { city: "Ouazzane", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 150 },
+  { city: "Oujda", region: "Oriental", distance_km: 600 },
+  { city: "Oulad Teima", region: "Souss-Massa", distance_km: 490 },
+  { city: "Rabat", region: "Rabat-Salé-Kénitra", distance_km: 0 },
+  { city: "Safi", region: "Marrakech-Safi", distance_km: 320 },
+  { city: "Salé", region: "Rabat-Salé-Kénitra", distance_km: 0 },
+  { city: "Sefrou", region: "Fès-Meknès", distance_km: 220 },
+  { city: "Settat", region: "Casablanca-Settat", distance_km: 140 },
+  { city: "Sidi Bennour", region: "Casablanca-Settat", distance_km: 190 },
+  { city: "Sidi Ifni", region: "Guelmim-Oued Noun", distance_km: 670 },
+  { city: "Sidi Kacem", region: "Rabat-Salé-Kénitra", distance_km: 100 },
+  { city: "Sidi Slimane", region: "Rabat-Salé-Kénitra", distance_km: 80 },
+  { city: "Sidi Yahya El Gharb", region: "Rabat-Salé-Kénitra", distance_km: 60 },
+  { city: "Skhirat", region: "Rabat-Salé-Kénitra", distance_km: 30 },
+  { city: "Smara", region: "Laâyoune-Sakia El Hamra", distance_km: 1000 },
+  { city: "Souk El Arbaa", region: "Rabat-Salé-Kénitra", distance_km: 90 },
+  { city: "Tahannaout", region: "Marrakech-Safi", distance_km: 350 },
+  { city: "Tan-Tan", region: "Guelmim-Oued Noun", distance_km: 850 },
+  { city: "Tangier (Tanger)", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 280 },
+  { city: "Taounate", region: "Fès-Meknès", distance_km: 280 },
+  { city: "Taroudant", region: "Souss-Massa", distance_km: 470 },
+  { city: "Tarfaya", region: "Laâyoune-Sakia El Hamra", distance_km: 950 },
+  { city: "Tata", region: "Souss-Massa", distance_km: 600 },
+  { city: "Taza", region: "Fès-Meknès", distance_km: 350 },
+  { city: "Temara", region: "Rabat-Salé-Kénitra", distance_km: 15 },
+  { city: "Tetouan (Tétouan)", region: "Tanger-Tétouan-Al Hoceïma", distance_km: 250 },
+  { city: "Tifelt", region: "Rabat-Salé-Kénitra", distance_km: 70 },
+  { city: "Tinghir", region: "Drâa-Tafilalet", distance_km: 490 },
+  { city: "Tiznit", region: "Souss-Massa", distance_km: 590 },
+  { city: "Youssoufia", region: "Marrakech-Safi", distance_km: 250 },
+  { city: "Zaio", region: "Oriental", distance_km: 560 },
+  { city: "Zagora", region: "Drâa-Tafilalet", distance_km: 650 }
+];
+
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    if (window.supabase) {
+      window.supabaseClient = window.supabase.createClient(
+        'https://puymabrkwtpvhropcvqk.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk'
+      );
+    }
+  } catch(e) { console.warn("Supabase init skipped"); }
+
+  const entrepreneurSelect = document.getElementById("entrepreneurCity");
+  cityData.forEach(item => {
+    const o1 = document.createElement("option"); o1.value = item.city; o1.textContent = item.city; entrepreneurSelect.appendChild(o1);
+  });
+
+  entrepreneurSelect.onchange = function() {
+    const match = cityData.find(c => c.city === this.value);
+    document.getElementById("entrepreneurRegion").value = match ? match.region : "";
+  };
+
+  const newBtn = document.getElementById('btnNew');
+  const searchBtn = document.getElementById('btnSearch');
+  newBtn.removeAttribute('style');
+  searchBtn.removeAttribute('style');
+
+  function restoreBtnStyle() { this.removeAttribute('style'); }
+  [newBtn, searchBtn].forEach(btn => {
+    if (!btn) return;
+    btn.addEventListener('mousedown', function() {
+      this.style.background = '#e5e7eb';
+      this.style.borderColor = '#d1d5db';
+    });
+    btn.addEventListener('mouseup', restoreBtnStyle);
+    btn.addEventListener('mouseleave', restoreBtnStyle);
+  });
+});
+</script>
+</body>
+</html>
