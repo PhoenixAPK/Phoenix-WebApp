@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Clients</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
  
 <style>
 /* ===== RESET ===== */
@@ -26,20 +27,44 @@ body {
   padding: 40px 0;
 }
  
+/* UPDATED BUTTON STYLES TO MATCH INTERACTIONS PAGE */
 .main-btn {
-  width: 160px;
-  height: 44px;
-  line-height: 44px;
-  background: #e5e7eb;
-  border: none;
+  /* Fixed dimensions for uniformity */
+  width: 150px;
+  height: 42px;
+  
+  /* Flexbox for perfect icon + text alignment */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Space between icon and text */
+  
+  /* Default Light Style (for Search) */
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
  
 .main-btn:hover {
-  background: #d1d5db;
+  background: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+/* Dark/Active Style (for New) - Matches Interactions Page */
+.main-btn.primary {
+  background: #111827;
+  color: #ffffff;
+  border-color: #111827;
+}
+
+.main-btn.primary:hover {
+  background: #1f2937;
+  border-color: #1f2937;
 }
  
 /* ===== CLIENT VIEW ===== */
@@ -113,13 +138,30 @@ select {
   font-weight: 600;
   cursor: pointer;
 }
+
+/* ===== SEARCH TOOLS & RESULTS ===== */
+#searchTools { display: none; }
+#searchResults { display: none; }
+
+.result-count {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.result-item {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.result-item:hover { background: #f3f4f6; }
+.result-item:last-child { border-bottom: none; }
  
 /* ===== HISTORY INDICATOR ===== */
-.history-wrapper {
-  display: none;
-}
+.history-wrapper { display: none; }
  
-/* FIXED TOP FRAME */
 .history-top-frame {
   background: #e9eaec;
   border-radius: 10px;
@@ -136,7 +178,6 @@ select {
   color: #111827;
 }
  
-/* DROPDOWN */
 .history-sort {
   border: 1px solid #d1d5db;
   border-radius: 6px;
@@ -147,12 +188,8 @@ select {
   flex: 0 0 auto;
 }
  
-/* SECTION */
-.history-section {
-  margin-bottom: 16px;
-}
+.history-section { margin-bottom: 16px; }
  
-/* HEADER FRAME */
 .history-section-header {
   background: #e9eaec;
   border-radius: 10px;
@@ -166,7 +203,6 @@ select {
   color: #111827;
 }
  
-/* CONTAINER FRAME */
 .history-section-body {
   background: #f3f4f6;
   border-radius: 10px;
@@ -184,8 +220,8 @@ select {
  
 <!-- ===== MAIN VIEW ===== -->
 <div id="mainView">
-  <button class="main-btn" onclick="openClient('new')">New</button>
-  <button class="main-btn" onclick="openClient('search')">Search</button>
+  <button class="main-btn primary" onclick="openClient('new')">✨ New</button>
+  <button class="main-btn" onclick="openClient('search')">🔍 Search</button>
 </div>
  
 <!-- ===== CLIENT VIEW ===== -->
@@ -193,27 +229,66 @@ select {
  
 <button class="back-btn" onclick="goBack()">← Return</button>
  
-<div class="client-info">
+<!-- ===== SEARCH TOOLS ===== -->
+<div class="client-info" id="searchTools">
+  <div class="input-grid">
+    <div>
+      <label>Name</label>
+      <input type="text" id="searchName" oninput="performSearch()">
+    </div>
+    <div>
+      <label>Contact</label>
+      <input type="text" id="searchContact" oninput="performSearch()">
+    </div>
+    <div>
+      <label>Email</label>
+      <input type="email" id="searchEmail" oninput="performSearch()">
+    </div>
+    <div>
+      <label>Address</label>
+      <input type="text" id="searchAddress" oninput="performSearch()">
+    </div>
+    <div>
+      <label>City</label>
+      <select id="searchCity" onchange="performSearch()">
+        <option value="">Select City</option>
+      </select>
+    </div>
+    <div>
+      <label>Region</label>
+      <input type="text" id="searchRegion" readonly>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SEARCH RESULTS ===== -->
+<div class="client-info" id="searchResults" style="display:none;">
+  <div class="result-count">🔍 Showing: <span id="resultCount">0</span></div>
+  <div id="resultsList"></div>
+</div>
+ 
+<!-- ===== CLIENT INFO FORM ===== -->
+<div class="client-info" id="clientForm" style="display:none;">
   <div class="input-grid">
  
     <div>
       <label>Name</label>
-      <input type="text">
+      <input type="text" id="clientName">
     </div>
  
     <div>
       <label>Contact</label>
-      <input type="text">
+      <input type="text" id="clientContact">
     </div>
  
     <div>
       <label>Email</label>
-      <input type="email">
+      <input type="email" id="clientEmail">
     </div>
  
     <div>
       <label>Address</label>
-      <input type="text">
+      <input type="text" id="clientAddress">
     </div>
  
     <div>
@@ -227,7 +302,7 @@ select {
       <label>Region</label>
       <input type="text" id="clientRegion" readonly>
       <div class="save-wrapper">
-        <button class="save-btn" id="saveBtn">Save</button>
+        <button class="save-btn" id="saveBtn" onclick="saveClient()">Save</button>
       </div>
     </div>
  
@@ -237,7 +312,6 @@ select {
 <!-- ===== HISTORY INDICATOR ===== -->
 <div class="history-wrapper" id="historyIndicator">
  
-  <!-- TOP FRAME: History Indicator + sort -->
   <div class="history-top-frame">
     <h3>History Indicator</h3>
     <select class="history-sort">
@@ -246,7 +320,6 @@ select {
     </select>
   </div>
  
-  <!-- REQUESTS -->
   <div class="history-section">
     <div class="history-section-header" onclick="toggleSection('requests')">
       <h3>Requests</h3>
@@ -254,7 +327,6 @@ select {
     <div class="history-section-body" id="requests"></div>
   </div>
  
-  <!-- INTERACTIONS -->
   <div class="history-section">
     <div class="history-section-header" onclick="toggleSection('interactions')">
       <h3>Interactions</h3>
@@ -262,7 +334,6 @@ select {
     <div class="history-section-body" id="interactions"></div>
   </div>
  
-  <!-- INVOICE -->
   <div class="history-section">
     <div class="history-section-header" onclick="toggleSection('invoice')">
       <h3>Invoice</h3>
@@ -275,31 +346,156 @@ select {
 </div>
  
 <script>
-/* ===== MODE HANDLING ===== */
-function openClient(mode) {
+// ===== 1. GLOBAL FUNCTIONS =====
+window.openClient = function(mode) {
   document.getElementById("mainView").style.display = "none";
   document.getElementById("clientView").style.display = "block";
- 
+  
   if (mode === "search") {
-    document.getElementById("historyIndicator").style.display = "block";
+    document.getElementById("searchTools").style.display = "block";
+    document.getElementById("searchResults").style.display = "block";
+    document.getElementById("clientForm").style.display = "none";
+    document.getElementById("historyIndicator").style.display = "none";
     document.getElementById("saveBtn").style.display = "none";
+    performSearch();
   } else {
+    document.getElementById("searchTools").style.display = "none";
+    document.getElementById("searchResults").style.display = "none";
+    document.getElementById("clientForm").style.display = "block";
     document.getElementById("historyIndicator").style.display = "none";
     document.getElementById("saveBtn").style.display = "inline-block";
+    clearForm();
   }
-}
- 
-function goBack() {
+};
+
+window.goBack = function() {
   document.getElementById("clientView").style.display = "none";
   document.getElementById("mainView").style.display = "flex";
-}
- 
-function toggleSection(id) {
+  window.currentClientId = null;
+};
+
+window.toggleSection = function(id) {
   const section = document.getElementById(id);
   section.style.display = section.style.display === "block" ? "none" : "block";
-}
- 
-/* ===== CITY → REGION DATA (99 ENTRIES) ===== */
+};
+
+window.clearForm = function() {
+  document.querySelectorAll("#clientForm input:not([readonly]), #clientForm select").forEach(el => el.value = "");
+  document.getElementById("clientRegion").value = "";
+  window.currentClientId = null;
+};
+
+window.loadClient = function(client) {
+  window.currentClientId = client.id;
+  document.getElementById("clientName").value = client.name || '';
+  document.getElementById("clientContact").value = client.contact || '';
+  document.getElementById("clientEmail").value = client.email || '';
+  document.getElementById("clientAddress").value = client.address || '';
+  document.getElementById("clientCity").value = client.city || '';
+  document.getElementById("clientRegion").value = client.region || '';
+  
+  document.getElementById("searchTools").style.display = "none";
+  document.getElementById("searchResults").style.display = "none";
+  document.getElementById("clientForm").style.display = "block";
+  document.getElementById("historyIndicator").style.display = "block";
+  
+  document.getElementById("requests").innerHTML = '<p>No requests found</p>';
+  document.getElementById("interactions").innerHTML = '<p>No interactions found</p>';
+  document.getElementById("invoice").innerHTML = '<p>No invoices found</p>';
+};
+
+window.saveClient = async function() {
+  const btn = document.getElementById("saveBtn");
+  const originalText = btn.textContent;
+  btn.textContent = "Saving...";
+  btn.disabled = true;
+  
+  const clientData = {
+    name: document.getElementById("clientName").value,
+    contact: document.getElementById("clientContact").value,
+    email: document.getElementById("clientEmail").value,
+    address: document.getElementById("clientAddress").value,
+    city: document.getElementById("clientCity").value,
+    region: document.getElementById("clientRegion").value
+  };
+  
+  try {
+    if (!window.supabaseClient) throw new Error("Database not connected");
+    
+    if (window.currentClientId) {
+      const { error } = await window.supabaseClient.from('clients').update(clientData).eq('id', window.currentClientId);
+      if (error) throw error;
+    } else {
+      const { error } = await window.supabaseClient.from('clients').insert([clientData]);
+      if (error) throw error;
+    }
+    alert("Client saved successfully!");
+    openClient('new');
+  } catch (err) {
+    console.error("Save error:", err);
+    alert("Error saving client. Check console.");
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+};
+
+window.performSearch = async function() {
+  const name = document.getElementById("searchName").value.trim().toLowerCase();
+  const contact = document.getElementById("searchContact").value.trim().toLowerCase();
+  const email = document.getElementById("searchEmail").value.trim().toLowerCase();
+  const address = document.getElementById("searchAddress").value.trim().toLowerCase();
+  const city = document.getElementById("searchCity").value.trim();
+  const region = document.getElementById("searchRegion").value.trim().toLowerCase();
+  
+  const resultsList = document.getElementById("resultsList");
+  const resultCount = document.getElementById("resultCount");
+  
+  if (!name && !contact && !email && !address && !city && !region) {
+    resultsList.innerHTML = '';
+    resultCount.textContent = '0';
+    return;
+  }
+  
+  try {
+    if (!window.supabaseClient) throw new Error("Database not connected");
+    
+    let query = window.supabaseClient.from('clients').select('*');
+    if (name) query = query.ilike('name', `%${name}%`);
+    if (contact) query = query.ilike('contact', `%${contact}%`);
+    if (email) query = query.ilike('email', `%${email}%`);
+    if (address) query = query.ilike('address', `%${address}%`);
+    if (city) query = query.eq('city', city);
+    if (region) query = query.ilike('region', `%${region}%`);
+    
+    const { data, error } = await query;
+    if (error) throw error;
+    
+    if (!data || data.length === 0) {
+      resultsList.innerHTML = '<div style="padding:20px;text-align:center;color:#9ca3af;">No clients found</div>';
+      resultCount.textContent = '0';
+    } else {
+      resultCount.textContent = data.length;
+      resultsList.innerHTML = '';
+      data.forEach(client => {
+        const item = document.createElement('div');
+        item.className = 'result-item';
+        item.innerHTML = `<strong>${client.name}</strong><br><small>${client.email || 'No email'} | ${client.city || 'No city'}</small>`;
+        item.onclick = () => window.loadClient(client);
+        resultsList.appendChild(item);
+      });
+    }
+  } catch (err) {
+    console.error("Search error:", err);
+    resultsList.innerHTML = '<div style="padding:20px;text-align:center;color:#ef4444;">Error searching</div>';
+    resultCount.textContent = '0';
+  }
+};
+
+// ===== 2. DATA & INITIALIZATION =====
+window.currentClientId = null;
+window.supabaseClient = null;
+
 const cityData = [
   { city: "Agadir", region: "Souss-Massa", distance_km: 500 },
   { city: "Ain Harrouda", region: "Casablanca-Settat", distance_km: 80 },
@@ -417,34 +613,36 @@ const cityData = [
   { city: "Zaio", region: "Oriental", distance_km: 560 },
   { city: "Zagora", region: "Drâa-Tafilalet", distance_km: 650 }
 ];
- 
-/* ===== CITY DROPDOWN POPULATION ===== */
-const citySelect = document.getElementById("clientCity");
-const regionInput = document.getElementById("clientRegion");
- 
-cityData.forEach(function(item) {
-  const option = document.createElement("option");
-  option.value = item.city;
-  option.textContent = item.city;
-  citySelect.appendChild(option);
-});
- 
-citySelect.addEventListener("change", function() {
-  const selectedCity = this.value;
-  const match = cityData.find(c => c.city === selectedCity);
-  regionInput.value = match ? match.region : "";
-});
- 
-/* ===== SAVE ACTION ===== */
-document.getElementById("saveBtn").onclick = function () {
-  document.querySelectorAll(".client-info input").forEach(function (input) {
-    if (!input.hasAttribute("readonly")) {
-      input.value = "";
+
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    if (window.supabase) {
+      window.supabaseClient = window.supabase.createClient(
+        'https://puymabrkwtpvhropcvqk.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk'
+      );
     }
+  } catch(e) { console.warn("Supabase init skipped"); }
+
+  const clientSelect = document.getElementById("clientCity");
+  const searchSelect = document.getElementById("searchCity");
+  
+  cityData.forEach(item => {
+    const o1 = document.createElement("option"); o1.value = item.city; o1.textContent = item.city; clientSelect.appendChild(o1);
+    const o2 = document.createElement("option"); o2.value = item.city; o2.textContent = item.city; searchSelect.appendChild(o2);
   });
-  citySelect.value = "";
-  regionInput.value = "";
-};
+
+  clientSelect.onchange = function() {
+    const match = cityData.find(c => c.city === this.value);
+    document.getElementById("clientRegion").value = match ? match.region : "";
+  };
+  
+  searchSelect.onchange = function() {
+    const match = cityData.find(c => c.city === this.value);
+    document.getElementById("searchRegion").value = match ? match.region : "";
+    performSearch();
+  };
+});
 </script>
  
 </body>
