@@ -70,53 +70,66 @@
  border: 1px solid transparent;
  }
  .nav-btn:hover { color: var(--electric-lime); border-color: var(--electric-lime); background: rgba(0, 255, 135, 0.1); }
+
+/* ✅ FIXED: Match Clients/Interactions Position & Background */
 .mode-selection-vertical {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 60px;
+  justify-content: flex-start; /* Moves buttons to TOP */
+  gap: 12px;
   width: 100%;
-  height: 100vh;
-  position: relative;
+  padding-top: 40px; /* Spacing from top edge to match #mainView padding */
+  background: transparent; /* Removes the gray background */
+  min-height: auto;
 }
-.mode-title {
- font-family: 'Syncopate', sans-serif;
- font-size: 48px;
- font-weight: 700;
- color: #ffe7a3;
- text-align: center;
- text-transform: uppercase;
- letter-spacing: 3px;
- text-shadow: 0 0 6px rgba(255,204,0,.35), 0 0 18px rgba(255,77,0,.25);
- }
- .buttons-container { display: flex; gap: 60px; }
- .mode-button {
- width: 220px;
- height: 72px;
- background: linear-gradient(45deg, #FFD700, #FFA500, #FF7A29, #FFD700);
- background-size: 300% 300%;
- color: #fff;
- border: none;
- border-radius: 14px;
- font-family: 'Plus Jakarta Sans', sans-serif;
- font-size: 18px;
- font-weight: 700;
- cursor: pointer;
- box-shadow: 0 8px 22px rgba(255,180,0,.28);
- transition: 0.3s;
- animation: shiningGradient 4s ease infinite;
- }
- @keyframes shiningGradient {
- 0% { background-position: 0% 50%; }
- 50% { background-position: 100% 50%; }
- 100% { background-position: 0% 50%; }
- }
+
+/* ✅ FIXED: Container matches interactions.html nav-container */
+.buttons-container { 
+  display: flex; 
+  justify-content: center; 
+  gap: 12px; 
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 400px;
+}
+
+/* ✅ FIXED: Mode buttons match interactions.html .main-btn EXACTLY */
+.mode-button {
+  flex: 1;
+  max-width: 180px;
+  padding: 16px 20px;
+  background: #f3f4f6; /* Light gray button background */
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  color: #374151;
+  min-width: 150px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+.mode-button:hover { 
+  background: #e5e7eb; 
+  border-color: #d1d5db; 
+}
+
+.mode-button:active,
+.mode-button.active {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
  .container {
  max-width: 960px;
- margin: 0 auto 40px; /* Removed the 120px/24px/84px push */
+ margin: 0 auto 40px;
  padding: 25px;
- padding-top: 24px !important; /* Matches Overview.html exactly */
+ padding-top: 24px !important;
  background: #cccccc;
  border-radius: 12px;
  color: #333;
@@ -352,13 +365,13 @@
  #calculatorPage .client-info > div, #calculatorPage .costs > div{ min-width:0 !important; }
  /* Reduce top margin only for client/entrepreneur mode */
 #invoiceDisplay .container {
-    margin-top: 24px !important; /* adjust 24px as needed */
+    margin-top: 24px !important;
 }
  </style>
 
 <style id="admininvoice-shell-normalization">
 /* ===== GLOBAL BASE ===== */
-html, body { background:#f2f3f5 !important; }
+html, body { background:transparent !important; } /* Changed to transparent */
 * { box-shadow:none !important; text-shadow:none !important; animation:none !important; }
 
 /* ===== REMOVE HEADER / FOOTER / STANDALONE CHROME ===== */
@@ -366,21 +379,20 @@ nav, header, footer, .header, .footer { display:none !important; }
 
 /* ===== REMOVE OVERLAYS / PANELS ===== */
 body::before { display:none !important; }
-.container, .main-content, .mode-selection-vertical,
-.queue-container, .invoice-container {
+.container, .main-content, .queue-container, .invoice-container {
   background:transparent !important;
 }
 
 /* ===== BUTTONS : COPY SHELL STYLE ===== */
 button, .btn, .mode-button, .nav-btn, .return-btn {
-  background:#e5e7eb !important;
+  background:#f3f4f6 !important; /* Matches the light gray button color */
   color:#111827 !important;
-  border:none !important;
+  border: 1px solid #e5e7eb !important;
 }
 button:hover, .btn:hover, .mode-button:hover, .nav-btn:hover,
 button:focus, .btn:focus, .mode-button:focus, .nav-btn:focus,
 button:active, .btn:active, .mode-button:active, .nav-btn:active {
-  background:#d1d5db !important;
+  background:#e5e7eb !important;
   color:#111827 !important;
 }
 
@@ -765,7 +777,7 @@ async function downloadInvoice() {
         }
       });
       calculateAreas();
-    }, 300); // Increased delay to ensure handleCity() finishes DOM updates
+    }, 300);
   }
 
   window.addEventListener("load", prefill);
