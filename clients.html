@@ -210,6 +210,7 @@ window.setFormState = function(state) {
 
 window.enableEditMode = function() { setFormState('edit'); };
 
+// ✅ FIXED: Open invoice inside iframe shell (same as interactions.html)
 window.openInvoice = function() {
   if (!window.currentClientId) return;
   const name = encodeURIComponent(document.getElementById("clientName").value || "");
@@ -218,6 +219,13 @@ window.openInvoice = function() {
   const address = encodeURIComponent(document.getElementById("clientAddress").value || "");
   const city = encodeURIComponent(document.getElementById("clientCity").value || "");
   const url = `admininvoice.html?mode=client&name=${name}&phone=${phone}&email=${email}&address=${address}&city=${city}`;
+  
+  // ✅ Open inside iframe shell if available
+  if (window.parent && window.parent !== window) {
+    const frame = window.parent.document.getElementById('content-frame');
+    if (frame) { frame.src = url; return; }
+  }
+  // Fallback: open in new tab only if iframe not available
   window.open(url, '_blank');
 };
 
