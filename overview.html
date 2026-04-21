@@ -195,12 +195,12 @@ for(let d=1;d<=daysInMonth;d++){
 </script>
 
 <script>
-// ✅ HELPER: Normalize status strings to match our keys
+// ✅ HELPER: Normalize status strings to match our keys (for pps_queue)
 function normalizeStatus(status) {
   if (!status) return "pending";
   const s = status.toLowerCase().trim();
   if (s === "in progress") return "in-progress";
-  return s.replace(/\s+/g, '-'); // replace spaces with hyphens
+  return s.replace(/\s+/g, '-');
 }
 
 async function loadChartData(){
@@ -249,12 +249,13 @@ async function loadChartData(){
    });
  }
 
- // Process Interaction Data
+ // Process Interaction Data - DIRECT CASE-INSENSITIVE MATCH
  if(interactionData) {
    interactionData.forEach(r=>{
     const d=new Date(r.created_at).getDate()-1;
-    const key = normalizeStatus(r.status);
-    if(key === 'incomplete' && daily['incomplete'] && d >= 0 && d < daysInMonth) {
+    // Direct match for 'Incomplete' regardless of case
+    const isIncomplete = r.status && r.status.trim().toLowerCase() === 'incomplete';
+    if(isIncomplete && daily['incomplete'] && d >= 0 && d < daysInMonth) {
       daily['incomplete'][d]++;
     }
    });
@@ -281,10 +282,13 @@ async function loadChartData(){
 document.addEventListener("DOMContentLoaded", loadChartData);
 </script>
 
-<!-- ✅ OVERVIEW COUNTERS -->
+<!-- ✅ OVERVIEW COUNTERS - FIXED -->
 <script>
 async function loadOverviewCounters(){
- if(!window.supabaseClient) return;
+ if(!window.supabaseClient) {
+   console.error("❌ Supabase client not initialized");
+   return;
+ }
 
  // 1. Count from pps_queue (Requests)
  const { data: queueData, error: queueError } = await window.supabaseClient
@@ -292,7 +296,7 @@ async function loadOverviewCounters(){
   .select("status");
 
  // 2. Count from interactions (Leads - Incomplete only)
- const {  interactionData, error: interactionError } = await window.supabaseClient
+ const { data: interactionData, error: interactionError } = await window.supabaseClient
   .from("interactions")
   .select("status");
 
@@ -307,7 +311,7 @@ async function loadOverviewCounters(){
   incomplete:0
  };
 
- // Process Queue Counts
+ // Process Queue Counts (uses normalizeStatus for pps_queue formats)
  if(queueData) {
    queueData.forEach(row=>{
     const key = normalizeStatus(row.status);
@@ -315,11 +319,12 @@ async function loadOverviewCounters(){
    });
  }
 
- // Process Interaction Counts (only Incomplete)
+ // Process Interaction Counts - DIRECT CASE-INSENSITIVE MATCH
  if(interactionData) {
    interactionData.forEach(row => {
-     const key = normalizeStatus(row.status);
-     if(key === 'incomplete') {
+     // Direct match: 'Incomplete' regardless of case or spaces
+     const raw = row.status;
+     if(raw && raw.trim().toLowerCase() === 'incomplete') {
        counts.incomplete++;
      }
    });
