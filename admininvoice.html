@@ -71,20 +71,18 @@
  }
  .nav-btn:hover { color: var(--electric-lime); border-color: var(--electric-lime); background: rgba(0, 255, 135, 0.1); }
 
-/* ✅ FIXED: Match Clients/Interactions Position & Background */
 .mode-selection-vertical {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* Moves buttons to TOP */
+  justify-content: flex-start;
   gap: 12px;
   width: 100%;
-  padding-top: 40px; /* Spacing from top edge to match #mainView padding */
-  background: transparent; /* Removes the gray background */
+  padding-top: 40px;
+  background: transparent;
   min-height: auto;
 }
 
-/* ✅ FIXED: Container matches interactions.html nav-container */
 .buttons-container { 
   display: flex; 
   justify-content: center; 
@@ -94,12 +92,11 @@
   max-width: 400px;
 }
 
-/* ✅ FIXED: Mode buttons match interactions.html .main-btn EXACTLY */
 .mode-button {
   flex: 1;
   max-width: 180px;
   padding: 16px 20px;
-  background: #f3f4f6; /* Light gray button background */
+  background: #f3f4f6;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   font-size: 14px;
@@ -363,29 +360,21 @@
  #calculatorPage .client-info{ grid-template-columns: repeat(3, 1fr) !important; }
  #calculatorPage .costs{ grid-template-columns: repeat(3, 1fr) !important; }
  #calculatorPage .client-info > div, #calculatorPage .costs > div{ min-width:0 !important; }
- /* Reduce top margin only for client/entrepreneur mode */
 #invoiceDisplay .container {
     margin-top: 24px !important;
 }
  </style>
 
 <style id="admininvoice-shell-normalization">
-/* ===== GLOBAL BASE ===== */
-html, body { background:transparent !important; } /* Changed to transparent */
+html, body { background:transparent !important; }
 * { box-shadow:none !important; text-shadow:none !important; animation:none !important; }
-
-/* ===== REMOVE HEADER / FOOTER / STANDALONE CHROME ===== */
 nav, header, footer, .header, .footer { display:none !important; }
-
-/* ===== REMOVE OVERLAYS / PANELS ===== */
 body::before { display:none !important; }
 .container, .main-content, .queue-container, .invoice-container {
   background:transparent !important;
 }
-
-/* ===== BUTTONS : COPY SHELL STYLE ===== */
 button, .btn, .mode-button, .nav-btn, .return-btn {
-  background:#f3f4f6 !important; /* Matches the light gray button color */
+  background:#f3f4f6 !important;
   color:#111827 !important;
   border: 1px solid #e5e7eb !important;
 }
@@ -395,20 +384,14 @@ button:active, .btn:active, .mode-button:active, .nav-btn:active {
   background:#e5e7eb !important;
   color:#111827 !important;
 }
-
-/* ===== MODE INDICATOR (NON-CLICKABLE) ===== */
 #modeLabel, .mode-label, .mode-badge {
   background:#e5e7eb !important;
   color:#111827 !important;
   pointer-events:none !important;
 }
-
-/* ===== FORCE DARK TEXT EVERYWHERE ===== */
 body, h1,h2,h3,h4,h5,h6,p,span,div,label,th,td {
   color:#111827 !important;
 }
-
-/* ===== REMOVE ALL GREEN / YELLOW ACCENTS ===== */
 *:where([
   style*="#046C4E"],
   style*="#066d44"],
@@ -421,8 +404,6 @@ body, h1,h2,h3,h4,h5,h6,p,span,div,label,th,td {
   background:#e5e7eb !important;
   color:#111827 !important;
 }
-
-/* ===== INVOICE DOCUMENT ITSELF ===== */
 .invoice-container,
 .invoice-table th,
 .invoice-table td.total,
@@ -432,17 +413,13 @@ body, h1,h2,h3,h4,h5,h6,p,span,div,label,th,td {
   background:#e5e7eb !important;
   color:#111827 !important;
 }
-
 .invoice-table td,
 .invoice-client-line,
 .invoice-footer {
   color:#111827 !important;
   background:transparent !important;
 }
-
-/* REMOVE GREEN TABLE HEADERS / BARS */
 .invoice-table th { border-color:#d1d5db !important; }
-
 </style>
 
 <style>.invoice-container{background: transparent !important;}.invoice-header{background: transparent !important;}.invoice-table{background: transparent !important;}.invoice-table th{background: transparent !important;}.invoice-table td{background: transparent !important;}.invoice-additional-costs{background: transparent !important;}.invoice-grand-total{background: transparent !important;}.invoice-footer{background: transparent !important;}</style>
@@ -505,6 +482,7 @@ body, h1,h2,h3,h4,h5,h6,p,span,div,label,th,td {
 </div>
     
  <script>
+// 🔹 ORIGINAL FUNCTION KEPT (preserved for safety)
 function generateInvoiceID() {
     const now = new Date();
     const yyyy = now.getFullYear();
@@ -513,6 +491,11 @@ function generateInvoiceID() {
     const rand = Math.floor(10000 + Math.random() * 90000);
     return `INV-${yyyy}-${mm}-${dd}-${rand}`;
 }
+
+// 🔹 FALLBACK COUNTER for testing environments (session-based)
+let fallbackCounter = parseInt(sessionStorage.getItem('ir_fallback_counter') || '0') + 1;
+sessionStorage.setItem('ir_fallback_counter', fallbackCounter.toString());
+
  const LOGO_PATH = '../assets/images/PPS logo.png';
 let currentInvoiceID = ""; 
 let isEntrepreneur = false;
@@ -598,7 +581,7 @@ function handleCity() {
   updateTotalPictureCount();
 }
 function resetCalculator() {
-    currentInvoiceID = generateInvoiceID();
+    currentInvoiceID = "";
     document.getElementById("clientName").value = "";
     document.getElementById("clientContact").value = "";
     document.getElementById("clientEmail").value = "";
@@ -628,7 +611,9 @@ function calculateAreas() {
   updateProjectDuration();
   return totalChargeable;
 }
-function generateInvoice() { 
+
+// 🔹 UPDATED: Safe sequential ID generation with EXACT format fallback
+async function generateInvoice() { 
   const total = calculateAreas(); 
   const basePrice = isEntrepreneur ? 200 : 250; 
   const baseCost = total * basePrice; 
@@ -643,13 +628,57 @@ function generateInvoice() {
   const travelLogisticsTotal = fuelCost + toll + accom; 
   const grandTotal = baseCost + travelLogisticsTotal; 
   updateProjectDuration(); 
+
+  // 🔹 1. Generate Sequential ID: IR 000001 (with exact format fallback)
+  try {
+    // Check if Supabase is available (real app) or not (testing environment)
+    if (window.supabaseClient && typeof window.supabaseClient.rpc === 'function') {
+      const {  idData, error: idErr } = await window.supabaseClient.rpc('generate_record_id', { input_prefix: 'IR' });
+      if (idErr) throw idErr;
+      if (!idData) throw new Error("No ID returned");
+      currentInvoiceID = idData;
+      console.log("✅ Generated Sequential Invoice ID:", currentInvoiceID);
+    } else {
+      // 🔹 FALLBACK for testing: EXACT format "IR 000001"
+      console.warn("⚠️ Supabase not available - using fallback ID generator");
+      currentInvoiceID = `IR ${String(fallbackCounter).padStart(6, '0')}`;
+      fallbackCounter++;
+      sessionStorage.setItem('ir_fallback_counter', fallbackCounter.toString());
+      console.log("🔄 Generated Fallback Invoice ID:", currentInvoiceID);
+    }
+  } catch (err) {
+    console.error("❌ ID Generation Failed:", err);
+    // Final fallback with exact format
+    currentInvoiceID = `IR ${String(Date.now() % 1000000).padStart(6, '0')}`;
+  }
+
+  // 🔹 2. Save to invoices table for History Indicator (only if Supabase available)
+  if (window.supabaseClient && typeof window.supabaseClient.from === 'function') {
+    try {
+      const invoiceRecord = {
+        record_id: currentInvoiceID,
+        client_name: document.getElementById("clientName").value,
+        client_phone: document.getElementById("clientContact").value,
+        client_email: document.getElementById("clientEmail").value,
+        client_city: city,
+        client_address: document.getElementById("clientAddress").value,
+        created_at: new Date().toISOString()
+      };
+      await window.supabaseClient.from('invoices').insert([invoiceRecord]);
+      console.log("💾 Invoice saved to database");
+    } catch (dbErr) {
+      console.warn("⚠️ Database save skipped:", dbErr);
+    }
+  }
+
+  // 🔹 3. Render invoice with ID
   document.getElementById("invoiceDisplay").innerHTML = ` 
   <div class="invoice-container"> 
      <div class="invoice-header"> 
          <img src="${LOGO_PATH}" alt="Phoenix Logo" /> 
          <h1>Phoenix Printing Solutions</h1> 
      </div> 
-     <div class="invoice-title">Invoice for: ${document.getElementById("clientName").value}</div> 
+     <div class="invoice-title">Invoice ID: ${currentInvoiceID}</div> 
      <div class="invoice-client-info"> 
          <div class="invoice-client-line"><div class="invoice-client-label">Name:</div><div class="invoice-client-value">${document.getElementById("clientName").value}</div></div> 
          <div class="invoice-client-line"><div class="invoice-client-label">Contact:</div><div class="invoice-client-value">${document.getElementById("clientContact").value}</div></div> 
@@ -697,7 +726,8 @@ function generateInvoice() {
      </div> 
   </div>`; 
   setTimeout(() => { document.getElementById('invoiceDisplay').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100); 
- } 
+} 
+
 async function downloadInvoice() {
   const element = document.querySelector('.invoice-container');
   if (!element) { alert('Please generate the invoice first.'); return; }
@@ -709,7 +739,7 @@ async function downloadInvoice() {
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const imgHeight = (canvas.height * pdfWidth) / canvas.width;
     pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight, undefined, 'FAST');
-    pdf.save(`PPS-Invoice-${document.getElementById('clientName').value || 'Customer'}.pdf`);
+    pdf.save(`PPS-Invoice-${currentInvoiceID || document.getElementById('clientName').value || 'Customer'}.pdf`);
   } catch (error) { console.error('PDF Error:', error); }
 }
 </script>
@@ -738,7 +768,6 @@ async function downloadInvoice() {
     const req = await getRequestFromSupabase(id);
     if (!req) return;
 
-    // 1. Set mode based on database sourceMode
     const mode = (req.sourceMode || "client").toLowerCase();
     if (mode === "entrepreneur") {
       startEntrepreneurMode();
@@ -746,29 +775,23 @@ async function downloadInvoice() {
       startClientMode();
     }
 
-    // 2. Map fields using the nested 'client' and 'location' objects from your DB
     document.getElementById("clientName").value = req.client?.name || "";
     document.getElementById("clientContact").value = req.client?.contact || "";
     document.getElementById("clientEmail").value = req.client?.email || "";
     document.getElementById("clientAddress").value = req.client?.address || "";
     
-    // 3. Set City and trigger row generation
     const citySel = document.getElementById("clientCity");
     if (citySel) { 
       citySel.value = req.location?.city || ""; 
       handleCity(); 
     }
 
-    // 4. Populate measurements after rows are generated
     setTimeout(() => {
       const workspaces = req.workspaces || [];
-      
-      // Ensure enough rows exist for optional workspaces
       const have = document.querySelectorAll(".picture-row").length;
       for (let i = have; i < workspaces.length; i++) {
         addPictureRow(false);
       }
-
       const rows = document.querySelectorAll(".picture-row");
       workspaces.forEach((w, idx) => {
         if (rows[idx]) {
@@ -786,26 +809,22 @@ async function downloadInvoice() {
     const params = new URL(window.location.href).searchParams;
     const urlMode = params.get('mode');
     
-    // 1. Activate Mode
     if (urlMode && !document.getElementById('calculatorPage').offsetParent) {
         if (urlMode === 'entrepreneur') startEntrepreneurMode();
         else startClientMode();
     }
 
-    // 2. Autofill Data
     setTimeout(() => {
         if(params.get('name')) document.getElementById('clientName').value = params.get('name');
         if(params.get('phone')) document.getElementById('clientContact').value = params.get('phone');
         if(params.get('email')) document.getElementById('clientEmail').value = params.get('email');
         if(params.get('address')) document.getElementById('clientAddress').value = params.get('address');
         
-        // City & Workspaces
         if(params.get('city')) {
             document.getElementById('clientCity').value = params.get('city');
             handleCity();
         }
 
-        // Pictures
         if(params.get('units')) {
             const units = parseInt(params.get('units'));
             const currentRows = document.querySelectorAll('.picture-row').length;
