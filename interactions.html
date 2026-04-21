@@ -12,7 +12,7 @@
     display: flex; 
     justify-content: center; 
     gap: 12px; 
-    margin: 20px 0 32px 0; /* ✅ Changed top margin to 20px */
+    margin: 20px 0 32px 0;
     flex-wrap: wrap; 
 }
        .main-btn { flex: 1; max-width: 180px; padding: 16px 20px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.2s; color: #374151; }
@@ -40,7 +40,7 @@
        /* ===== CENTERED INCOMPLETE SECTION ===== */
        .incomplete-topbar { 
            display: flex; 
-           justify-content: center; /* ✅ Centered for professional look */
+           justify-content: center;
            align-items: center; 
            gap: 8px; 
            margin-bottom: 20px; 
@@ -299,8 +299,6 @@
        </div>
    </div>
  
-   <!-- 🔬 Check Schema button REMOVED ENTIRELY AS REQUESTED -->
- 
    <script>
        const SUPABASE_URL = "https://puymabrkwtpvhropcvqk.supabase.co";
        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk";
@@ -358,14 +356,19 @@
            if (!source || !mode || !name) { showToast('⚠️ Please fill in Source, Mode, and Name', 'warning'); return; }
            showLoading(saveBtn, originalText);
            
-           // 🔹 Check for duplicate using identical fields: Name, Phone, Email, City
            try {
-               let dupQuery = supabaseClient.from('interactions').select('id,note,created_at');
+               // 🔹 GENERATE SEQUENTIAL ID: IN 000001, IN 000002, etc.
+               const { data: idData, error: idErr } = await supabaseClient.rpc('generate_record_id', { input_prefix: 'IN' });
+               if (idErr) throw idErr;
+               const recordId = idData;
+               
+               // 🔹 Check for duplicate using identical fields: Name, Phone, Email, City
+               let dupQuery = supabaseClient.from('interactions').select('id,note,created_at,record_id');
                if(name) dupQuery = dupQuery.ilike('name', name);
                if(phone) dupQuery = dupQuery.eq('phone', phone);
                if(email) dupQuery = dupQuery.ilike('email', email);
                if(city) dupQuery = dupQuery.ilike('city', city);
-               const {  dupData, error: dupError } = await dupQuery.limit(1);
+               const { data: dupData, error: dupError } = await dupQuery.limit(1);
                if (dupError) throw dupError;
                
                const note = document.getElementById('note').value.trim();
@@ -380,8 +383,19 @@
                    if (updateError) throw updateError;
                    showToast('⚠️ Duplicate detected. Note appended with timestamp.', 'warning');
                } else {
-                   // 🔹 No duplicate: Create new interaction as normal
-                   const interaction = { source, mode, name, phone: phone || null, email: email || null, address: document.getElementById('address').value.trim() || null, city: city || null, total_pictures: parseInt(document.getElementById('pics').value) || 0, note: note || null };
+                   // 🔹 No duplicate: Create new interaction with Sequential ID
+                   const interaction = { 
+                       record_id: recordId, // ✅ SAVE SEQUENTIAL ID
+                       source, 
+                       mode, 
+                       name, 
+                       phone: phone || null, 
+                       email: email || null, 
+                       address: document.getElementById('address').value.trim() || null, 
+                       city: city || null, 
+                       total_pictures: parseInt(document.getElementById('pics').value) || 0, 
+                       note: note || null 
+                   };
                    const { data, error } = await supabaseClient.from('interactions').insert([interaction]).select().single();
                    if (error) throw error;
                    showToast('✅ Interaction saved successfully!', 'success');
@@ -428,9 +442,9 @@
                if(phone) query = query.ilike('phone', `%${phone}%`);
                if(email) query = query.ilike('email', `%${email}%`);
                if(address) query = query.ilike('city', `%${address}%`);
-               // 🔹 Support Search Request and Invoice in query
-               if(request) query = query.ilike('id', `%${request}%`);
-               if(invoice) query = query.ilike('id', `%${invoice}%`);
+               // 🔹 Support Search Request and Invoice in query (using record_id)
+               if(request) query = query.ilike('record_id', `%${request}%`);
+               if(invoice) query = query.ilike('record_id', `%${invoice}%`);
                
                const { data, error } = await query.order('created_at', { ascending: false }).limit(100);
                // 🔹 FIX: Ignore results if query was aborted
@@ -558,10 +572,11 @@
  
                list.innerHTML = data.map(r => {
                    incRowMap[String(r.id)] = r;
-                   const shortId = String(r.id).slice(0, 8);
+                   // 🔹 DISPLAY SEQUENTIAL ID (Fallback to UUID if missing)
+                   const displayId = r.record_id || String(r.id).slice(0, 8);
                    return `
                    <div class="inc-item-row">
-                       <div style="font-family:monospace;font-size:12px;color:#6b7280">#${shortId}</div>
+                       <div style="font-family:monospace;font-size:12px;color:#6b7280">#${displayId}</div>
                        <div><strong>${escapeHtml(r.name || 'Unnamed')}</strong>${r.phone ? `<br><small style="color:#6b7280">📞 ${escapeHtml(r.phone)}</small>` : ''}${r.email ? `<br><small style="color:#6b7280">✉️ ${escapeHtml(r.email)}</small>` : ''}</div>
                        <div>${escapeHtml(r.city || r.address || '—')}</div>
                        <div style="text-align:center;font-weight:600">${r.total_pictures || 0}</div>
@@ -620,16 +635,6 @@
        function incApplyFilter(year, month) { incActiveFilter = { year, month }; incUpdateYearlyGrid(); document.getElementById('inc-filter-bar').style.display = 'flex'; document.getElementById('inc-filter-text').textContent = `${INC_MONTHS[month]} ${year}`; document.getElementById('inc-month').value = month; document.getElementById('inc-year').value = year; incLoad(year, month); showToast(`📅 Showing ${INC_MONTHS[month]} ${year}`, 'success'); }
        function incClearFilter() { incActiveFilter = null; document.getElementById('inc-filter-bar').style.display = 'none'; incUpdateYearlyGrid(); const m = parseInt(document.getElementById('inc-month').value); const y = parseInt(document.getElementById('inc-year').value); incLoad(y, m); showToast('🔄 Filter cleared', 'success'); }
  
-       async function diagnoseSchema() {
-           showToast('🔬 Checking table schema...', 'success');
-           try {
-               const { data, error } = await supabaseClient.from('interactions').select('*').limit(1);
-               if (error) throw error;
-               const panel = document.createElement('div'); panel.className = 'toast success'; panel.style.top = '10px'; panel.style.bottom = 'auto'; panel.style.right = '10px'; panel.innerHTML = `<div style="max-height:200px;overflow-y:auto"><strong>Table Schema:</strong><br><code style="font-size:11px">${data[0] ? Object.keys(data[0]).join('<br>') : 'Table empty'}</code><br><small>✅ Code updated to match your exact columns</small></div>`;
-               document.body.appendChild(panel); setTimeout(() => panel.remove(), 8000);
-           } catch (err) { console.error(err); showToast('❌ Schema check failed', 'error'); }
-       }
- 
        // 🔹 NO SECTION ACTIVE ON LOAD - Wait for user click
        document.addEventListener('DOMContentLoaded', () => {
            // All sections hidden by default, no button active
@@ -657,4 +662,3 @@
    </script>
 </body>
 </html>
-
