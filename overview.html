@@ -62,6 +62,7 @@ canvas{width:100%;height:260px;display:block}
  margin-top:15px;
  padding-top:10px;
  border-top:1px solid #eee;
+ flex-wrap: wrap;
 }
 
 .legend-item{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#4b5563}
@@ -71,31 +72,51 @@ canvas{width:100%;height:260px;display:block}
 .bg-completed{background:#10b981}
 .bg-archived{background:#6b7280}
 .bg-incomplete{background:#ef4444}
-.bg-interactions{background:#8b5cf6}
 
 .cards-zone{
  flex:1;
  display:flex;
  align-items:center;
  justify-content:center;
+ padding-bottom: 40px;
 }
 
 .cards{
  display:grid;
- grid-template-columns:repeat(3,220px);
- gap:20px;
+ /* ✅ FIX: Force 5 columns in one row using 1fr (equal width) */
+ grid-template-columns: repeat(5, 1fr); 
+ gap:16px;
+ width: 100%;
+ max-width: 1200px;
 }
 
 .card{
  background:#ffffff;
- padding:16px;
+ padding:20px;
  border-radius:8px;
  box-shadow:0 4px 12px rgba(0,0,0,0.08);
  text-align:center;
+ transition: transform 0.2s;
 }
 
-.card h3{font-size:14px;margin-bottom:8px;color:#374151}
-.count{font-size:26px;font-weight:700;color:#111827}
+.card:hover {
+ transform: translateY(-2px);
+}
+
+.card h3{font-size:14px;margin-bottom:8px;color:#374151; font-weight: 600;}
+.count{font-size:28px;font-weight:700;color:#111827}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+ .cards{
+  grid-template-columns: repeat(3, 1fr); /* 3 on tablet */
+ }
+}
+@media (max-width: 768px) {
+ .cards{
+  grid-template-columns: repeat(2, 1fr); /* 2 on mobile */
+ }
+}
 </style>
 </head>
 
@@ -121,7 +142,6 @@ canvas{width:100%;height:260px;display:block}
   <div class="legend-item"><div class="dot bg-completed"></div>Completed</div>
   <div class="legend-item"><div class="dot bg-archived"></div>Archived</div>
   <div class="legend-item"><div class="dot bg-incomplete"></div>Incomplete</div>
-  <div class="legend-item"><div class="dot bg-interactions"></div>Interactions</div>
  </div>
 </div>
 
@@ -132,7 +152,6 @@ canvas{width:100%;height:260px;display:block}
   <div class="card"><h3>Completed</h3><div class="count" id="count-completed">0</div></div>
   <div class="card"><h3>Archived</h3><div class="count" id="count-archived">0</div></div>
   <div class="card"><h3>Incomplete</h3><div class="count" id="count-incomplete">0</div></div>
-  <div class="card"><h3>Interactions</h3><div class="count" id="count-interactions">0</div></div>
  </div>
 </div>
 
@@ -151,7 +170,9 @@ canvas.height=260;
 
 const weekdays=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 const today=new Date();
-const daysInMonth=new Date(today.getFullYear(),today.getMonth()+1,0).getDate();
+const year=today.getFullYear();
+const month=today.getMonth();
+const daysInMonth=new Date(year, month+1, 0).getDate();
 const padding=60;
 
 ctx.strokeStyle="#e5e7eb";
@@ -172,7 +193,16 @@ for(let d=1;d<=daysInMonth;d++){
  ctx.fillText(d,x-4,canvas.height-10);
 }
 </script>
+
 <script>
+// ✅ HELPER: Normalize status strings to match our keys
+function normalizeStatus(status) {
+  if (!status) return "pending";
+  const s = status.toLowerCase().trim();
+  if (s === "in progress") return "in-progress";
+  return s.replace(/\s+/g, '-'); // replace spaces with hyphens
+}
+
 async function loadChartData(){
  if(!window.supabaseClient) return;
 
@@ -193,19 +223,42 @@ async function loadChartData(){
  const start=new Date(year,month,1).toISOString();
  const end=new Date(year,month+1,1).toISOString();
 
- const { data, error } = await window.supabaseClient
+ // 1. Fetch from pps_queue (Requests)
+ const { data: queueData, error: queueError } = await window.supabaseClient
   .from("pps_queue")
   .select("status, created_at")
   .gte("created_at", start)
   .lt("created_at", end);
 
- if(error) return;
+ // 2. Fetch from interactions (Leads)
+ const {  interactionData, error: interactionError } = await window.supabaseClient
+  .from("interactions")
+  .select("status, created_at")
+  .gte("created_at", start)
+  .lt("created_at", end);
 
- data.forEach(r=>{
-  const d=new Date(r.created_at).getDate()-1;
-  const key=r.status || "pending";
-  if(daily[key]) daily[key][d]++;
- });
+ if(queueError) console.error("Queue Error:", queueError);
+ if(interactionError) console.error("Interaction Error:", interactionError);
+
+ // Process Queue Data
+ if(queueData) {
+   queueData.forEach(r=>{
+    const d=new Date(r.created_at).getDate()-1;
+    const key = normalizeStatus(r.status);
+    if(daily[key] && d >= 0 && d < daysInMonth) daily[key][d]++;
+   });
+ }
+
+ // Process Interaction Data
+ if(interactionData) {
+   interactionData.forEach(r=>{
+    const d=new Date(r.created_at).getDate()-1;
+    const key = normalizeStatus(r.status);
+    if(key === 'incomplete' && daily['incomplete'] && d >= 0 && d < daysInMonth) {
+      daily['incomplete'][d]++;
+    }
+   });
+ }
 
  const drawLine=(arr,color)=>{
   ctx.strokeStyle=color;
@@ -227,16 +280,24 @@ async function loadChartData(){
 
 document.addEventListener("DOMContentLoaded", loadChartData);
 </script>
+
 <!-- ✅ OVERVIEW COUNTERS -->
 <script>
 async function loadOverviewCounters(){
  if(!window.supabaseClient) return;
 
- const { data, error } = await window.supabaseClient
+ // 1. Count from pps_queue (Requests)
+ const { data: queueData, error: queueError } = await window.supabaseClient
   .from("pps_queue")
   .select("status");
 
- if(error) return;
+ // 2. Count from interactions (Leads - Incomplete only)
+ const {  interactionData, error: interactionError } = await window.supabaseClient
+  .from("interactions")
+  .select("status");
+
+ if(queueError) console.error("Queue Error:", queueError);
+ if(interactionError) console.error("Interaction Error:", interactionError);
 
  const counts={
   pending:0,
@@ -246,11 +307,25 @@ async function loadOverviewCounters(){
   incomplete:0
  };
 
- data.forEach(row=>{
-  const key=row.status||"pending";
-  if(counts[key]!==undefined) counts[key]++;
- });
+ // Process Queue Counts
+ if(queueData) {
+   queueData.forEach(row=>{
+    const key = normalizeStatus(row.status);
+    if(counts[key] !== undefined) counts[key]++;
+   });
+ }
 
+ // Process Interaction Counts (only Incomplete)
+ if(interactionData) {
+   interactionData.forEach(row => {
+     const key = normalizeStatus(row.status);
+     if(key === 'incomplete') {
+       counts.incomplete++;
+     }
+   });
+ }
+
+ // Update DOM
  document.getElementById("count-pending").textContent=counts.pending;
  document.getElementById("count-inprogress").textContent=counts["in-progress"];
  document.getElementById("count-completed").textContent=counts.completed;
