@@ -35,6 +35,15 @@ input, select { width: 100%; padding: 8px; border: 1px solid rgba(204,204,204,0.
 .history-section-header { background: #e9eaec; border-radius: 10px; padding: 14px 20px; cursor: pointer; }
 .history-section-header h3 { font-size: 14px; font-weight: 600; color: #111827; }
 .history-section-body { background: #f3f4f6; border-radius: 10px; min-height: 120px; margin-top: 6px; padding: 20px; display: none; font-size: 13px; color: #9ca3af; }
+
+/* ✅ HISTORY INDICATOR STYLES */
+.history-item { padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-size: 13px; color: #374151; }
+.history-item:last-child { border-bottom: none; }
+.history-id { font-weight: 700; color: #111827; font-family: monospace; }
+.history-date { color: #6b7280; margin: 0 8px; }
+.history-detail { color: #4b5563; font-weight: 500; }
+.history-note { display: block; color: #d97706; font-style: italic; margin-top: 4px; font-size: 12px; }
+.history-empty { color: #9ca3af; font-style: italic; padding: 10px 0; }
 </style>
 </head>
  
@@ -52,7 +61,7 @@ input, select { width: 100%; padding: 8px; border: 1px solid rgba(204,204,204,0.
   <div id="rightActions" style="display:none; gap:8px;">
     <div id="profileActions" style="display:none; gap:8px;">
       <button onclick="openInvoice()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Invoice</button>
-      <button onclick="enableEditMode()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Edit</button>
+      <button id="editSaveBtn" onclick="handleEditSave()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Edit</button>
       <button id="blockUnblockBtn" onclick="handleBlockUnblock()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Block</button>
       <button onclick="showDeleteModal()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Delete</button>
     </div>
@@ -114,6 +123,7 @@ input, select { width: 100%; padding: 8px; border: 1px solid rgba(204,204,204,0.
 window.currentMode = null;
 window.currentEntrepreneurId = null;
 window.currentAction = null;
+window.isEditMode = false;
 window.supabaseClient = null;
 window.duplicateCheckToken = 0;
 
@@ -163,6 +173,7 @@ window.goBack = function() {
   document.getElementById("entrepreneurView").style.display = "none";
   document.getElementById("mainView").style.display = "flex";
   window.currentEntrepreneurId = null;
+  window.isEditMode = false;
   setFormState('readonly');
   clearSearchTools();
   clearDuplicates();
@@ -208,9 +219,84 @@ window.setFormState = function(state) {
   });
 };
 
-window.enableEditMode = function() { setFormState('edit'); };
+// 🔹 UPDATED: Toggle between Edit and Save modes
+window.handleEditSave = function() {
+  if (window.isEditMode) {
+    // Save the changes
+    saveEntrepreneurChanges();
+  } else {
+    // Enable edit mode
+    enableEditMode();
+  }
+};
 
-// ✅ Opens admininvoice.html in ENTREPRENEUR MODE
+window.enableEditMode = function() {
+  window.isEditMode = true;
+  setFormState('edit');
+  const editBtn = document.getElementById("editSaveBtn");
+  if (editBtn) {
+    editBtn.textContent = "Save";
+    editBtn.style.background = "#111827";
+    editBtn.style.color = "#ffffff";
+  }
+};
+
+// 🔹 UPDATED: Save changes for existing entrepreneur
+window.saveEntrepreneurChanges = async function() {
+  if (!window.currentEntrepreneurId) {
+    alert("No entrepreneur selected to save.");
+    return;
+  }
+  
+  const btn = document.getElementById("editSaveBtn");
+  const originalText = btn.textContent;
+  btn.textContent = "Saving...";
+  btn.disabled = true;
+  
+  const entrepreneurData = {
+    name: document.getElementById("entrepreneurName").value,
+    contact: document.getElementById("entrepreneurContact").value,
+    email: document.getElementById("entrepreneurEmail").value,
+    address: document.getElementById("entrepreneurAddress").value,
+    city: document.getElementById("entrepreneurCity").value,
+    region: document.getElementById("entrepreneurRegion").value
+  };
+  
+  try {
+    if (!window.supabaseClient) throw new Error("Database not connected");
+    
+    const { error } = await window.supabaseClient.from('entrepreneurs')
+      .update(entrepreneurData)
+      .eq('id', window.currentEntrepreneurId);
+    
+    if (error) throw error;
+    
+    alert("Entrepreneur updated successfully!");
+    
+    // Reset to view mode
+    window.isEditMode = false;
+    setFormState('readonly');
+    btn.textContent = "Edit";
+    btn.style.background = "#e5e7eb";
+    btn.style.color = "#111827";
+    
+    // Reload the entrepreneur to refresh history
+    const { data } = await window.supabaseClient.from('entrepreneurs')
+      .select('*')
+      .eq('id', window.currentEntrepreneurId)
+      .single();
+    if (data) {
+      await loadEntrepreneur(data);
+    }
+    
+  } catch (err) {
+    console.error("Save error:", err);
+    alert("Error saving entrepreneur: " + err.message);
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+};
+
 window.openInvoice = function() {
   if (!window.currentEntrepreneurId) return;
   const name = encodeURIComponent(document.getElementById("entrepreneurName").value || "");
@@ -227,11 +313,13 @@ window.openInvoice = function() {
   window.open(url, '_blank');
 };
 
+// 🔹 UPDATED: Load Entrepreneur + Trigger History Load
 window.loadEntrepreneur = async function(entrepreneur) {
   clearDuplicates();
   
   window.currentEntrepreneurId = entrepreneur.id;
   window.currentMode = 'view';
+  window.isEditMode = false;
   
   document.getElementById("entrepreneurName").value = entrepreneur.name || '';
   document.getElementById("entrepreneurContact").value = entrepreneur.contact || '';
@@ -251,6 +339,14 @@ window.loadEntrepreneur = async function(entrepreneur) {
   document.getElementById("entrepreneurModeIndicator").style.display = "none";
   document.getElementById("rightActions").style.display = "flex";
   
+  // Reset Edit/Save button
+  const editBtn = document.getElementById("editSaveBtn");
+  if (editBtn) {
+    editBtn.textContent = "Edit";
+    editBtn.style.background = "#e5e7eb";
+    editBtn.style.color = "#111827";
+  }
+  
   const blockBtn = document.getElementById("blockUnblockBtn");
   if (entrepreneur.blocked) {
     blockBtn.textContent = "Unblock";
@@ -262,10 +358,108 @@ window.loadEntrepreneur = async function(entrepreneur) {
   
   setFormState('readonly');
   
-  document.getElementById("requests").innerHTML = '<p>No requests found</p>';
-  document.getElementById("interactions").innerHTML = '<p>No interactions found</p>';
-  document.getElementById("invoice").innerHTML = '<p>No invoices found</p>';
+  // 🔹 INITIALIZE HISTORY SECTIONS
+  document.getElementById("requests").innerHTML = '<div class="history-empty">Loading history...</div>';
+  document.getElementById("interactions").innerHTML = '<div class="history-empty">Loading history...</div>';
+  document.getElementById("invoice").innerHTML = '<div class="history-empty">Loading history...</div>';
+  
+  // 🔹 LOAD HISTORY DATA
+  await loadHistory(entrepreneur);
 };
+
+// 🔹 History Indicator Logic for Entrepreneur
+async function loadHistory(entrepreneur) {
+  if (!window.supabaseClient) {
+    document.getElementById("requests").innerHTML = '<div class="history-empty">Demo Mode: History unavailable</div>';
+    document.getElementById("interactions").innerHTML = '<div class="history-empty">Demo Mode: History unavailable</div>';
+    document.getElementById("invoice").innerHTML = '<div class="history-empty">Demo Mode: History unavailable</div>';
+    return;
+  }
+
+  const formatDate = (dateString) => {
+    const d = new Date(dateString);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  const buildOrFilter = (colName, val) => val ? `${colName}.ilike.%${val}%` : null;
+  
+  // 1. Requests (pps_queue)
+  let reqFilters = [
+    buildOrFilter('client->>name', entrepreneur.name),
+    buildOrFilter('client->>contact', entrepreneur.contact),
+    buildOrFilter('client->>email', entrepreneur.email)
+  ].filter(Boolean);
+  
+  let reqQuery = window.supabaseClient.from('pps_queue').select('*').order('created_at', { ascending: false });
+  if (reqFilters.length > 0) reqQuery = reqQuery.or(reqFilters.join(','));
+  
+  const { data: reqData, error: reqError } = await reqQuery;
+
+  // 2. Interactions
+  let intFilters = [
+    buildOrFilter('name', entrepreneur.name),
+    buildOrFilter('phone', entrepreneur.contact),
+    buildOrFilter('email', entrepreneur.email)
+  ].filter(Boolean);
+  
+  let intQuery = window.supabaseClient.from('interactions').select('*').order('created_at', { ascending: false });
+  if (intFilters.length > 0) intQuery = intQuery.or(intFilters.join(','));
+  
+  const { data: intData, error: intError } = await intQuery;
+
+  // 3. Invoices
+  let invFilters = [
+    buildOrFilter('client_name', entrepreneur.name),
+    buildOrFilter('client_phone', entrepreneur.contact),
+    buildOrFilter('client_email', entrepreneur.email)
+  ].filter(Boolean);
+  
+  let invQuery = window.supabaseClient.from('invoices').select('*').order('created_at', { ascending: false });
+  if (invFilters.length > 0) invQuery = invQuery.or(invFilters.join(','));
+  
+  const { data: invData, error: invError } = await invQuery;
+
+  // Render Requests
+  const reqContainer = document.getElementById("requests");
+  reqContainer.innerHTML = '';
+  if (reqData && reqData.length > 0) {
+    reqData.forEach(r => {
+      let wsCount = 0;
+      if (r.workspaces) wsCount = Array.isArray(r.workspaces) ? r.workspaces.length : (typeof r.workspaces === 'object' ? Object.keys(r.workspaces).length : 0);
+      const id = r.record_id || r.request_id;
+      reqContainer.innerHTML += `<div class="history-item"><span class="history-id">${id}</span> <span class="history-date">${formatDate(r.created_at)}</span> <span class="history-detail">• Workspace ${wsCount}</span></div>`;
+    });
+  } else {
+    reqContainer.innerHTML = '<div class="history-empty">No requests found</div>';
+  }
+
+  // Render Interactions
+  const intContainer = document.getElementById("interactions");
+  intContainer.innerHTML = '';
+  if (intData && intData.length > 0) {
+    intData.forEach(i => {
+      const wsCount = i.total_pictures || 0;
+      const note = i.note ? `<br><span class="history-note">Note: ${i.note}</span>` : '';
+      const id = i.record_id || i.id;
+      intContainer.innerHTML += `<div class="history-item"><span class="history-id">${id}</span> <span class="history-date">${formatDate(i.created_at)}</span> <span class="history-detail">• Workspace ${wsCount}</span>${note}</div>`;
+    });
+  } else {
+    intContainer.innerHTML = '<div class="history-empty">No interactions found</div>';
+  }
+
+  // Render Invoices
+  const invContainer = document.getElementById("invoice");
+  invContainer.innerHTML = '';
+  if (invData && invData.length > 0) {
+    invData.forEach(inv => {
+      const wsCount = inv.workspaces ? (Array.isArray(inv.workspaces) ? inv.workspaces.length : 0) : 0;
+      const id = inv.ir_code || inv.record_id || inv.id;
+      invContainer.innerHTML += `<div class="history-item"><span class="history-id">${id}</span> <span class="history-date">${formatDate(inv.created_at)}</span> <span class="history-detail">• Workspace ${wsCount}</span></div>`;
+    });
+  } else {
+    invContainer.innerHTML = '<div class="history-empty">No invoices found</div>';
+  }
+}
 
 window.saveEntrepreneur = async function() {
   const btn = document.getElementById("saveBtn");
@@ -285,11 +479,9 @@ window.saveEntrepreneur = async function() {
   try {
     if (!window.supabaseClient) throw new Error("Database not connected");
     if (window.currentEntrepreneurId) {
-      // ✅ UPDATE FROM 'entrepreneurs' TABLE
       const { error } = await window.supabaseClient.from('entrepreneurs').update(entrepreneurData).eq('id', window.currentEntrepreneurId);
       if (error) throw error;
     } else {
-      // ✅ INSERT INTO 'entrepreneurs' TABLE
       const { error } = await window.supabaseClient.from('entrepreneurs').insert([entrepreneurData]);
       if (error) throw error;
     }
@@ -324,7 +516,6 @@ window.checkEntrepreneurDuplicates = async function() {
   try {
     if (!window.supabaseClient) throw new Error("DB not connected");
     
-    // ✅ SEARCH IN 'entrepreneurs' TABLE
     let query = window.supabaseClient.from('entrepreneurs').select('*');
     if (name) query = query.ilike('name', `%${name}%`);
     if (contact) query = query.ilike('contact', `%${contact}%`);
@@ -391,7 +582,6 @@ window.performSearch = async function() {
   try {
     if (!window.supabaseClient) throw new Error("Database not connected");
     
-    // ✅ SEARCH IN 'entrepreneurs' TABLE
     let query = window.supabaseClient.from('entrepreneurs').select('*');
     if (name) query = query.ilike('name', `%${name}%`);
     if (contact) query = query.ilike('contact', `%${contact}%`);
@@ -437,7 +627,6 @@ window.handleUnblock = async function() {
   
   try {
     if (!window.supabaseClient) throw new Error("DB not connected");
-    // ✅ UPDATE BLOCK STATUS IN 'entrepreneurs' TABLE
     const { error } = await window.supabaseClient.from('entrepreneurs')
       .update({ blocked: false, block_note: null })
       .eq('id', window.currentEntrepreneurId);
@@ -486,7 +675,6 @@ window.confirmAction = async function() {
     if (!window.supabaseClient) throw new Error("DB not connected");
     
     if (window.currentAction === 'block') {
-      // ✅ BLOCK IN 'entrepreneurs' TABLE
       const { error } = await window.supabaseClient.from('entrepreneurs')
         .update({ blocked: true, block_note: note })
         .eq('id', window.currentEntrepreneurId);
@@ -495,7 +683,6 @@ window.confirmAction = async function() {
       const { data } = await window.supabaseClient.from('entrepreneurs').select('*').eq('id', window.currentEntrepreneurId).single();
       if (data) window.loadEntrepreneur(data);
     } else if (window.currentAction === 'delete') {
-      // ✅ DELETE FROM 'entrepreneurs' TABLE
       const { error } = await window.supabaseClient.from('entrepreneurs')
         .delete()
         .eq('id', window.currentEntrepreneurId);
