@@ -263,7 +263,8 @@
           return;
         }
 
-        const {    items, error } = await window.supabaseClient
+        // ✅ CORRECT: Supabase returns {  data, error }
+        const {   data, error } = await window.supabaseClient
           .from('pps_queue')
           .select('*')
           .eq('status', 'archived')
@@ -274,8 +275,8 @@
           return;
         }
         
-        console.log("✅ Archived items found:", items);
-        render(items || []);
+        console.log("✅ Archived items found:", data);
+        render(data || []);
       } catch(err) {
         console.error("Error in fetchAndRender:", err);
       }
@@ -299,8 +300,7 @@
         
         const displayId = req.record_id || `#${req.request_id.slice(0,8).toUpperCase()}`;
         
-        // 🔹 FIX: Check multiple possible field names for mode
-        // The database might store it as sourceMode, source_mode, or mode
+        // ✅ Check multiple possible field names for mode
         const mode = (req.sourceMode || req.source_mode || req.mode || 'client').toLowerCase();
         const modeClass = mode === 'entrepreneur' ? 'mode-entrepreneur' : 'mode-client';
         const modeLabel = mode === 'entrepreneur' ? 'Entrepreneur' : 'Client';
