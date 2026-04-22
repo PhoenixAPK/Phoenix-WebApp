@@ -51,7 +51,7 @@
   (function(){
     async function fetchAndRender(){
       try{
-        const { data: items, error } = await window.supabaseClient
+        const {  items, error } = await window.supabaseClient
           .from('pps_queue')
           .select('*')
           .eq('status','in-progress')
@@ -69,8 +69,12 @@
       }
       items.forEach(req=>{
         const tr=document.createElement('tr');
+        
+        // 🔹 FIX: Use record_id if available, else fallback to request_id
+        const displayId = req.record_id || `#PPS-${req.request_id.slice(0,8).toUpperCase()}`;
+        
         tr.innerHTML=`
-          <td class="ref-code">#PPS-${req.request_id.slice(0,8).toUpperCase()}</td>
+          <td class="ref-code">${displayId}</td>
           <td><strong>${req.client?.name||'Unknown'}</strong></td>
           <td>${(req.workspaces||[]).length} Units</td>
           <td>
