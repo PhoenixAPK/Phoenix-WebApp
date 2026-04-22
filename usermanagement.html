@@ -6,38 +6,56 @@
 <title>User Management</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
-body { background: transparent; color: #111827; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
+body { background: #ffffff; padding: 20px 40px; color: #111827; line-height: 1.5; }
 
-/* 🔹 MAIN VIEW - Buttons centered horizontally, moved 20px higher */
-#mainView { 
-  display: flex; 
-  justify-content: center; 
-  gap: 16px; 
-  padding: 20px 0; /* ✅ Fixed: Reduced from 60px to 20px */
+/* 🔹 NAV CONTAINER - Identical to Interactions page */
+.nav-container { 
+    display: flex; 
+    justify-content: center; 
+    gap: 12px; 
+    margin: 20px 0 32px 0;
+    flex-wrap: wrap; 
 }
 .main-btn { 
-  flex: 1; 
-  max-width: 180px; 
-  padding: 16px 20px; 
-  background: #f3f4f6; 
-  border: 1px solid #e5e7eb; 
-  border-radius: 8px; 
-  font-size: 14px; 
-  font-weight: 600; 
-  cursor: pointer; 
-  text-align: center; 
-  transition: all 0.2s; 
-  color: #374151; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  gap: 8px; 
+    flex: 1; 
+    max-width: 180px; 
+    padding: 16px 20px; 
+    background: #f3f4f6; 
+    border: 1px solid #e5e7eb; 
+    border-radius: 8px; 
+    font-size: 14px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    text-align: center; 
+    transition: all 0.2s; 
+    color: #374151; 
 }
 .main-btn:hover { background: #e5e7eb; border-color: #d1d5db; }
 
+/* 🔹 SECTIONS */
+.section { display: none; max-width: 1000px; margin: 0 auto; animation: fadeIn 0.25s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* 🔹 RETURN BUTTON - Top left positioning */
+.back-btn { 
+    width: 90px; 
+    height: 34px; 
+    background: #e5e7eb; 
+    border: none; 
+    border-radius: 6px; 
+    font-size: 13px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 6px;
+    margin-bottom: 20px;
+}
+.back-btn:hover { background: #d1d5db; }
+
 /* 🔹 EMPLOYEE LIST QUEUE */
-#employeeListView { display: none; padding: 24px; }
 .queue-container { margin: 0 auto; width: 90%; max-width: 1100px; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
 .queue-header-box { background: #e5e7eb; color: #000; padding: 0; display: grid; grid-template-columns: 60% 40%; border-bottom: 1px solid #d1d5db; }
 .header-title { padding: 12px 30px; font-family: 'Times New Roman', Times, serif; font-weight: bold; font-size: 1.1rem; letter-spacing: 2px; display: flex; align-items: center; justify-content: center; }
@@ -50,10 +68,7 @@ tr:hover td { background: #f9f9f9; }
 .btn-action { border: none; padding: 8px 16px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; transition: opacity .2s; background: #2e7d32; }
 .btn-action:hover { opacity: 0.8; }
 
-/* 🔹 NEW PROFILE FORM */
-#newProfileView { display: none; padding: 24px; }
-.back-btn { width: 74px; height: 30px; background: #e5e7eb; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
-.back-btn:hover { background: #d1d5db; }
+/* 🔹 FORM STYLES */
 .form-card { background: #ffffff; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
 .input-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
 label { font-size: 13px; font-weight: 500; margin-bottom: 4px; display: block; color: #374151; }
@@ -64,7 +79,6 @@ input:disabled, select:disabled { background: #f3f4f6; cursor: not-allowed; opac
 .save-btn:hover { background: #374151; }
 
 /* 🔹 PROFILE DETAIL VIEW */
-#profileDetailView { display: none; padding: 24px; }
 .profile-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .header-left { display: flex; gap: 10px; }
 .header-right { display: flex; gap: 10px; }
@@ -91,17 +105,15 @@ input:disabled, select:disabled { background: #f3f4f6; cursor: not-allowed; opac
 </head>
 <body>
 
-<!-- 🔹 MAIN VIEW -->
-<div id="mainView">
+<!-- 🔹 MAIN VIEW - Uses nav-container like Interactions -->
+<div id="mainView" class="nav-container">
   <button class="main-btn" onclick="openNewProfile()">✨ New Profile</button>
   <button class="main-btn" onclick="openEmployeeList()">👥 Employee List</button>
 </div>
 
 <!-- 🔹 EMPLOYEE LIST VIEW -->
-<div id="employeeListView">
-  <!-- ✅ Return button at top -->
+<div id="employeeListView" class="section">
   <button class="back-btn" onclick="goToMainView()">← Return</button>
-  
   <div class="queue-container">
     <div class="queue-header-box">
       <div class="header-title">EMPLOYEE LIST</div>
@@ -123,7 +135,7 @@ input:disabled, select:disabled { background: #f3f4f6; cursor: not-allowed; opac
 </div>
 
 <!-- 🔹 NEW PROFILE VIEW -->
-<div id="newProfileView">
+<div id="newProfileView" class="section">
   <button class="back-btn" onclick="goToMainView()">← Return</button>
   <div class="form-card">
     <div class="input-grid">
@@ -199,10 +211,10 @@ input:disabled, select:disabled { background: #f3f4f6; cursor: not-allowed; opac
 </div>
 
 <!-- 🔹 PROFILE DETAIL VIEW -->
-<div id="profileDetailView">
+<div id="profileDetailView" class="section">
   <div class="profile-header">
     <div class="header-left">
-      <button class="back-btn" onclick="goToEmployeeList()">← Return</button>
+      <button class="back-btn" onclick="goToEmployeeList()" style="margin-bottom:0;">← Return</button>
     </div>
     <div class="header-right">
       <button id="editSaveBtn" class="action-btn" onclick="toggleEditMode()">Edit</button>
