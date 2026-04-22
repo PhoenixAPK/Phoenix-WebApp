@@ -61,7 +61,7 @@ input, select { width: 100%; padding: 8px; border: 1px solid rgba(204,204,204,0.
   <div id="rightActions" style="display:none; gap:8px;">
     <div id="profileActions" style="display:none; gap:8px;">
       <button onclick="openInvoice()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Invoice</button>
-      <button onclick="enableEditMode()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Edit</button>
+      <button id="editSaveBtn" onclick="handleEditSave()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Edit</button>
       <button id="blockUnblockBtn" onclick="handleBlockUnblock()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Block</button>
       <button onclick="showDeleteModal()" style="width:74px; height:30px; background:#e5e7eb; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Delete</button>
     </div>
@@ -123,6 +123,7 @@ input, select { width: 100%; padding: 8px; border: 1px solid rgba(204,204,204,0.
 window.currentMode = null;
 window.currentClientId = null;
 window.currentAction = null;
+window.isEditMode = false;
 window.supabaseClient = null;
 window.duplicateCheckToken = 0;
 
@@ -172,6 +173,7 @@ window.goBack = function() {
   document.getElementById("clientView").style.display = "none";
   document.getElementById("mainView").style.display = "flex";
   window.currentClientId = null;
+  window.isEditMode = false;
   setFormState('readonly');
   clearSearchTools();
   clearDuplicates();
@@ -217,7 +219,83 @@ window.setFormState = function(state) {
   });
 };
 
-window.enableEditMode = function() { setFormState('edit'); };
+// 🔹 UPDATED: Toggle between Edit and Save modes
+window.handleEditSave = function() {
+  if (window.isEditMode) {
+    // Save the changes
+    saveClientChanges();
+  } else {
+    // Enable edit mode
+    enableEditMode();
+  }
+};
+
+window.enableEditMode = function() {
+  window.isEditMode = true;
+  setFormState('edit');
+  const editBtn = document.getElementById("editSaveBtn");
+  if (editBtn) {
+    editBtn.textContent = "Save";
+    editBtn.style.background = "#111827";
+    editBtn.style.color = "#ffffff";
+  }
+};
+
+// 🔹 UPDATED: Save changes for existing client
+window.saveClientChanges = async function() {
+  if (!window.currentClientId) {
+    alert("No client selected to save.");
+    return;
+  }
+  
+  const btn = document.getElementById("editSaveBtn");
+  const originalText = btn.textContent;
+  btn.textContent = "Saving...";
+  btn.disabled = true;
+  
+  const clientData = {
+    name: document.getElementById("clientName").value,
+    contact: document.getElementById("clientContact").value,
+    email: document.getElementById("clientEmail").value,
+    address: document.getElementById("clientAddress").value,
+    city: document.getElementById("clientCity").value,
+    region: document.getElementById("clientRegion").value
+  };
+  
+  try {
+    if (!window.supabaseClient) throw new Error("Database not connected");
+    
+    const { error } = await window.supabaseClient.from('clients')
+      .update(clientData)
+      .eq('id', window.currentClientId);
+    
+    if (error) throw error;
+    
+    alert("Client updated successfully!");
+    
+    // Reset to view mode
+    window.isEditMode = false;
+    setFormState('readonly');
+    btn.textContent = "Edit";
+    btn.style.background = "#e5e7eb";
+    btn.style.color = "#111827";
+    
+    // Reload the client to refresh history
+    const { data } = await window.supabaseClient.from('clients')
+      .select('*')
+      .eq('id', window.currentClientId)
+      .single();
+    if (data) {
+      await loadClient(data);
+    }
+    
+  } catch (err) {
+    console.error("Save error:", err);
+    alert("Error saving client: " + err.message);
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+};
 
 window.openInvoice = function() {
   if (!window.currentClientId) return;
@@ -241,6 +319,7 @@ window.loadClient = async function(client) {
   
   window.currentClientId = client.id;
   window.currentMode = 'view';
+  window.isEditMode = false;
   
   document.getElementById("clientName").value = client.name || '';
   document.getElementById("clientContact").value = client.contact || '';
@@ -260,6 +339,14 @@ window.loadClient = async function(client) {
   document.getElementById("clientModeIndicator").style.display = "none";
   document.getElementById("rightActions").style.display = "flex";
   
+  // Reset Edit/Save button
+  const editBtn = document.getElementById("editSaveBtn");
+  if (editBtn) {
+    editBtn.textContent = "Edit";
+    editBtn.style.background = "#e5e7eb";
+    editBtn.style.color = "#111827";
+  }
+  
   const blockBtn = document.getElementById("blockUnblockBtn");
   if (client.blocked) {
     blockBtn.textContent = "Unblock";
@@ -277,10 +364,10 @@ window.loadClient = async function(client) {
   document.getElementById("invoice").innerHTML = '<div class="history-empty">Loading history...</div>';
   
   // 🔹 LOAD HISTORY DATA
-  loadHistory(client);
+  await loadHistory(client);
 };
 
-// 🔹 NEW: History Indicator Logic
+// 🔹 History Indicator Logic
 async function loadHistory(client) {
   if (!window.supabaseClient) {
     document.getElementById("requests").innerHTML = '<div class="history-empty">Demo Mode: History unavailable</div>';
