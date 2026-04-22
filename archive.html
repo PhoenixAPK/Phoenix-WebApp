@@ -21,14 +21,60 @@
     .nav-btn{text-decoration:none;color:#000;font-family:'Syncopate',sans-serif;font-size:.7rem;font-weight:700;padding:10px 18px;border-radius:5px;transition:.3s;border:1px solid transparent}
     .nav-btn:hover{color:var(--electric-lime);border-color:var(--electric-lime);background:rgba(0,255,135,0.1)}
     .main-content{width:100%;display:flex;justify-content:center}
-    .queue-container{margin:80px auto 0;width:90%;max-width:1200px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 4px 20px rgba(0,0,0,0.08);color:#000}
-    .queue-header-box{background:#e5e7eb;color:#000;padding:25px 30px;display:flex;justify-content:space-between;align-items:center;font-family:'Syncopate';letter-spacing:3px}
-    .queue-header-box h1{margin:0;font-size:0.9rem}
-    .stats{font-size:0.75rem;background:rgba(255,255,255,0.2);padding:5px 15px;border-radius:20px;font-family:'Roboto'}
+    
+    /* 🔹 Queue positioned higher (reduced margin to 40px) */
+    .queue-container{margin:40px auto 0;width:90%;max-width:1200px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 4px 20px rgba(0,0,0,0.08);color:#000}
+    
+    /* 🔹 Unified Header Layout */
+    .queue-header-box{
+      background:#e5e7eb; /* Base background color */
+      color:#000;
+      padding:0;
+      display:grid;
+      grid-template-columns: 60% 40%;
+      border-bottom:1px solid #d1d5db;
+    }
+    .header-title{
+      padding:12px 30px;
+      font-family:'Times New Roman', Times, serif;
+      font-weight:bold;
+      font-size:1.1rem;
+      letter-spacing:2px;
+      display:flex;
+      align-items:center;
+    }
+    .header-stats{
+      padding:12px 30px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      border-left:1px solid #d1d5db;
+      /* 🔹 Removed background override so it inherits #e5e7eb */
+      font-family:'Times New Roman', Times, serif;
+    }
+    .stats-count{
+      font-size:1.1rem;
+      font-weight:bold;
+      color:#000; /* Unified black color */
+    }
+    
     table{width:100%;border-collapse:collapse;text-align:left}
-    thead{background:#fafafa;font-family:'Syncopate';font-size:0.65rem;letter-spacing:2px;color:#000}
-    th{padding:20px 30px;font-weight:700;border-bottom:1px solid #e0e0e0}
-    td{padding:18px 30px;border-bottom:1px solid #eee;font-size:0.85rem;color:#000}
+    thead{background:#fafafa}
+    th{
+      padding:15px 30px;
+      font-family:'Times New Roman', Times, serif;
+      font-weight:bold;
+      font-size:0.85rem;
+      border-bottom:1px solid #e0e0e0;
+      color:#000;
+    }
+    td{
+      padding:18px 30px;
+      border-bottom:1px solid #eee;
+      font-size:0.85rem;
+      color:#000;
+    }
     tr:hover td{background:#f9f9f9}
     .ref-code{font-family:monospace;font-weight:bold;color:#000}
     .action-cell{display:flex;gap:10px;align-items:center}
@@ -40,23 +86,17 @@
     .footer-logo{height:30px;margin-right:15px}
     footer p{font-family:'Syncopate';font-size:0.62rem;letter-spacing:3px;opacity:0.7;color:#000;margin:0}
 
-    /* 🔹 UPDATED: Smaller, Regular Times New Roman Fonts */
-    .queue-title {
-      font-family: 'Times New Roman', Times, serif;
-      font-weight: bold;
-      font-size: 0.85rem;
-      letter-spacing: 1px;
-    }
+    /* 🔹 Times New Roman Fonts for Table Data */
     .queue-info {
       font-family: 'Times New Roman', Times, serif;
       font-weight: normal;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
     }
     .mode-badge {
       display: inline-block;
-      padding: 3px 10px;
+      padding: 4px 12px;
       border-radius: 4px;
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       font-weight: bold;
       text-transform: uppercase;
       border: 1px solid;
@@ -101,18 +141,22 @@
   <div class="main-content">
     <div class="queue-container">
       <div class="queue-header-box">
-        <h1 class="queue-title">ARCHIVE HISTORY</h1>
-        <div class="stats" id="archiveCount">0 Items</div>
+        <!-- 60% Title -->
+        <div class="header-title">ARCHIVE HISTORY</div>
+        <!-- 40% Count -->
+        <div class="header-stats">
+          <div class="stats-count" id="archiveCount">0 Items</div>
+        </div>
       </div>
       <table>
         <thead>
           <tr>
-            <th class="queue-title">REF CODE</th>
-            <th class="queue-title">Name</th>
-            <th class="queue-title">City</th>
-            <th class="queue-title">Workspace</th>
-            <th class="queue-title">Mode</th>
-            <th class="queue-title">Action</th>
+            <th>REF CODE</th>
+            <th>Name</th>
+            <th>City</th>
+            <th>Workspace</th>
+            <th>Mode</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody id="archiveBody"></tbody>
@@ -199,7 +243,7 @@
 
     window.finishItem = async function(id) {
       try {
-        const {  data: req, error } = await window.supabaseClient.from("pps_queue").select("*").eq("request_id", id).single();
+        const {   req, error } = await window.supabaseClient.from("pps_queue").select("*").eq("request_id", id).single();
         if (error) throw error;
         const pdfBlob = await generateVisualInvoicePDF(req);
         await uploadPdfToSupabase(req, pdfBlob);
@@ -219,12 +263,24 @@
     }
 
     async function fetchAndRender(){
-      const {   items, error } = await window.supabaseClient.from('pps_queue').select('*').eq('status','archived').order('created_at',{ascending:false});
-      if(error) {
-        console.error("Archive fetch error:", error);
-        return;
+      try {
+        // ✅ Fetch archived items
+        const {   items, error } = await window.supabaseClient
+          .from('pps_queue')
+          .select('*')
+          .eq('status', 'archived')
+          .order('created_at', { ascending: false });
+        
+        if(error) {
+          console.error("Archive fetch error:", error);
+          return;
+        }
+        
+        console.log("✅ Archived items found:", items);
+        render(items || []);
+      } catch(err) {
+        console.error("Error in fetchAndRender:", err);
       }
-      render(items||[]);
     }
 
     function render(data){
@@ -232,10 +288,20 @@
       var countLabel=document.getElementById('archiveCount');
       if(!tbody) return;
       tbody.innerHTML='';
-      countLabel.innerText = data.length + ' Items';
+      
+      // 🔹 Update count to show exactly "X Items"
+      countLabel.innerText = `${data.length} Items`;
+      
+      if(data.length === 0){
+        tbody.innerHTML='<tr><td colspan="6" style="text-align:center; padding:50px; opacity:0.5; font-family: Times New Roman;">No archived requests found.</td></tr>';
+        return;
+      }
+      
       data.forEach(function(req){
         var tr=document.createElement('tr');
         
+        // 🔹 FIX: Prioritize record_id (e.g. PR 000010). 
+        // If record_id is missing (old data), it falls back to request_id.
         const displayId = req.record_id || `#${req.request_id.slice(0,8).toUpperCase()}`;
         const mode = req.source_mode || 'client';
         const modeClass = mode === 'entrepreneur' ? 'mode-entrepreneur' : 'mode-client';
