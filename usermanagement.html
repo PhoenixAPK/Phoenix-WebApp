@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Management</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+body { background: transparent; color: #111827; }
+
+/* 🔹 MAIN VIEW */
+#mainView { display: flex; justify-content: center; gap: 16px; padding: 60px 0; }
+.main-btn { flex: 1; max-width: 160px; padding: 14px 24px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.2s; color: #374151; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.main-btn:hover { background: #e5e7eb; border-color: #d1d5db; }
+
+/* 🔹 EMPLOYEE LIST QUEUE */
+#employeeListView { display: none; padding: 24px; }
+.queue-container { margin: 0 auto; width: 90%; max-width: 1100px; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.queue-header-box { background: #e5e7eb; color: #000; padding: 0; display: grid; grid-template-columns: 60% 40%; border-bottom: 1px solid #d1d5db; }
+.header-title { padding: 12px 30px; font-family: 'Times New Roman', Times, serif; font-weight: bold; font-size: 1.1rem; letter-spacing: 2px; display: flex; align-items: center; justify-content: center; }
+.header-stats { padding: 12px 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-left: 1px solid #d1d5db; font-family: 'Times New Roman', Times, serif; font-size: 1.1rem; font-weight: bold; color: #000; }
+table { width: 100%; border-collapse: collapse; text-align: left; }
+thead { background: #fafafa; }
+th { padding: 15px 30px; font-family: 'Times New Roman', Times, serif; font-weight: bold; font-size: 0.85rem; border-bottom: 1px solid #e0e0e0; color: #000; }
+td { padding: 18px 30px; border-bottom: 1px solid #eee; font-size: 0.85rem; color: #000; }
+tr:hover td { background: #f9f9f9; }
+.btn-action { border: none; padding: 8px 16px; border-radius: 6px; font-size: 10px; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; transition: opacity .2s; background: #2e7d32; }
+.btn-action:hover { opacity: 0.8; }
+
+/* 🔹 NEW PROFILE FORM */
+#newProfileView { display: none; padding: 24px; }
+.back-btn { width: 74px; height: 30px; background: #e5e7eb; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+.back-btn:hover { background: #d1d5db; }
+.form-card { background: #ffffff; border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+.input-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+label { font-size: 13px; font-weight: 500; margin-bottom: 4px; display: block; color: #374151; }
+input, select { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; }
+input:disabled, select:disabled { background: #f3f4f6; cursor: not-allowed; opacity: 0.6; }
+.save-wrapper { width: 100%; display: flex; justify-content: flex-end; margin-top: 24px; }
+.save-btn { width: 120px; height: 36px; background: #111827; color: #ffffff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.save-btn:hover { background: #374151; }
+
+/* 🔹 PROFILE DETAIL VIEW */
+#profileDetailView { display: none; padding: 24px; }
+.profile-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.header-left { display: flex; gap: 10px; }
+.header-right { display: flex; gap: 10px; }
+.action-btn { width: 74px; height: 30px; background: #e5e7eb; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.action-btn:hover { background: #d1d5db; }
+.action-btn.primary { background: #111827; color: #fff; }
+.action-btn.danger { background: #dc2626; color: #fff; }
+.field-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 16px; }
+.field-item { display: flex; flex-direction: column; }
+.field-label { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+.field-value { font-size: 14px; font-weight: 500; color: #111827; }
+
+/* 🔹 MODAL */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+.modal-box { background: #fff; padding: 24px; border-radius: 10px; width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+.modal-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+.modal-input { width: 100%; height: 80px; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; resize: none; margin-bottom: 16px; font-size: 14px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.modal-btn { padding: 8px 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.modal-btn.cancel { background: #e5e7eb; color: #374151; }
+.modal-btn.confirm { background: #111827; color: #fff; }
+.modal-btn.danger { background: #dc2626; color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- 🔹 MAIN VIEW -->
+<div id="mainView">
+  <button class="main-btn" onclick="openNewProfile()">✨ New Profile</button>
+  <button class="main-btn" onclick="openEmployeeList()">👥 Employee List</button>
+</div>
+
+<!-- 🔹 EMPLOYEE LIST VIEW -->
+<div id="employeeListView">
+  <!-- ✅ FIX: Return button moved to top -->
+  <button class="back-btn" onclick="goToMainView()">← Return</button>
+  
+  <div class="queue-container">
+    <div class="queue-header-box">
+      <div class="header-title">EMPLOYEE LIST</div>
+      <div class="header-stats" id="employeeCount">0 Employees</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Full Name</th>
+          <th>Phone</th>
+          <th>Email</th>
+          <th>Position</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="employeeTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 🔹 NEW PROFILE VIEW -->
+<div id="newProfileView">
+  <button class="back-btn" onclick="goToMainView()">← Return</button>
+  <div class="form-card">
+    <div class="input-grid">
+      <div>
+        <label>Full Name *</label>
+        <input type="text" id="empFullName" required>
+      </div>
+      <div>
+        <label>Email *</label>
+        <input type="email" id="empEmail" required>
+      </div>
+      <div>
+        <label>Phone *</label>
+        <input type="text" id="empPhone" required>
+      </div>
+      <div>
+        <label>Address *</label>
+        <input type="text" id="empAddress" required>
+      </div>
+      <div>
+        <label>City *</label>
+        <input type="text" id="empCity" required>
+      </div>
+      <div>
+        <label>CIN *</label>
+        <input type="text" id="empCIN" required>
+      </div>
+      <div>
+        <label>Employee ID</label>
+        <input type="text" id="empID" readonly style="background: #f3f4f6; cursor: not-allowed;">
+      </div>
+      <div>
+        <label>Start Date *</label>
+        <input type="date" id="empStartDate" required>
+      </div>
+      <div>
+        <label>End Date (Optional)</label>
+        <input type="date" id="empEndDate">
+      </div>
+      <div>
+        <label>Marital Status *</label>
+        <select id="empMarital" required>
+          <option value="">Select Status</option>
+          <option value="Single">Single</option>
+          <option value="Married">Married</option>
+          <option value="Divorced">Divorced</option>
+        </select>
+      </div>
+      <div>
+        <label>Role *</label>
+        <select id="empRole" required>
+          <option value="">Select Role</option>
+          <option value="Admin">Admin</option>
+          <option value="Technician">Technician</option>
+          <option value="Secretary">Secretary</option>
+          <option value="Assistant">Assistant</option>
+          <option value="Assistante">Assistante</option>
+        </select>
+      </div>
+      <div>
+        <label>Access Control *</label>
+        <select id="empAccess" required>
+          <option value="">Select Access</option>
+          <option value="Full Control">Full Control</option>
+          <option value="Limited">Limited</option>
+        </select>
+      </div>
+    </div>
+    <div class="save-wrapper">
+      <button class="save-btn" onclick="saveNewEmployee()">Save Profile</button>
+    </div>
+  </div>
+</div>
+
+<!-- 🔹 PROFILE DETAIL VIEW -->
+<div id="profileDetailView">
+  <div class="profile-header">
+    <div class="header-left">
+      <button class="back-btn" onclick="goToEmployeeList()">← Return</button>
+    </div>
+    <div class="header-right">
+      <button id="editSaveBtn" class="action-btn" onclick="toggleEditMode()">Edit</button>
+      <button id="blockUnblockBtn" class="action-btn" onclick="handleBlockUnblock()">Block</button>
+      <button class="action-btn danger" onclick="showDeleteModal()">Delete</button>
+    </div>
+  </div>
+  <div class="form-card">
+    <div class="field-row">
+      <div class="field-item">
+        <span class="field-label">Full Name</span>
+        <span class="field-value" id="viewFullName">-</span>
+        <input type="text" id="editFullName" style="display:none; margin-top:4px;">
+      </div>
+      <div class="field-item">
+        <span class="field-label">Email</span>
+        <span class="field-value" id="viewEmail">-</span>
+        <input type="email" id="editEmail" style="display:none; margin-top:4px;">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-item">
+        <span class="field-label">Phone</span>
+        <span class="field-value" id="viewPhone">-</span>
+        <input type="text" id="editPhone" style="display:none; margin-top:4px;">
+      </div>
+      <div class="field-item">
+        <span class="field-label">Address</span>
+        <span class="field-value" id="viewAddress">-</span>
+        <input type="text" id="editAddress" style="display:none; margin-top:4px;">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-item">
+        <span class="field-label">City</span>
+        <span class="field-value" id="viewCity">-</span>
+        <input type="text" id="editCity" style="display:none; margin-top:4px;">
+      </div>
+      <div class="field-item">
+        <span class="field-label">CIN</span>
+        <span class="field-value" id="viewCIN">-</span>
+        <input type="text" id="editCIN" style="display:none; margin-top:4px;">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-item">
+        <span class="field-label">Employee ID</span>
+        <span class="field-value" id="viewEmpID">-</span>
+      </div>
+      <div class="field-item">
+        <span class="field-label">Start Date</span>
+        <span class="field-value" id="viewStartDate">-</span>
+        <input type="date" id="editStartDate" style="display:none; margin-top:4px;">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-item">
+        <span class="field-label">End Date</span>
+        <span class="field-value" id="viewEndDate">-</span>
+        <input type="date" id="editEndDate" style="display:none; margin-top:4px;">
+      </div>
+      <div class="field-item">
+        <span class="field-label">Marital Status</span>
+        <span class="field-value" id="viewMarital">-</span>
+        <select id="editMarital" style="display:none; margin-top:4px;">
+          <option value="Single">Single</option>
+          <option value="Married">Married</option>
+          <option value="Divorced">Divorced</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-item">
+        <span class="field-label">Role</span>
+        <span class="field-value" id="viewRole">-</span>
+        <select id="editRole" style="display:none; margin-top:4px;">
+          <option value="Admin">Admin</option>
+          <option value="Technician">Technician</option>
+          <option value="Secretary">Secretary</option>
+          <option value="Assistant">Assistant</option>
+          <option value="Assistante">Assistante</option>
+        </select>
+      </div>
+      <div class="field-item">
+        <span class="field-label">Access Control</span>
+        <span class="field-value" id="viewAccess">-</span>
+        <select id="editAccess" style="display:none; margin-top:4px;">
+          <option value="Full Control">Full Control</option>
+          <option value="Limited">Limited</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🔹 MODAL -->
+<div id="noteModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle">Mandatory Note</div>
+    <textarea id="modalNote" class="modal-input" placeholder="Enter reason..."></textarea>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-btn danger" id="modalConfirmBtn" onclick="confirmModalAction()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentEmployeeId = null;
+let isEditMode = false;
+let pendingAction = null;
+let supabaseClient = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (window.supabase) {
+    supabaseClient = window.supabase.createClient(
+      'https://puymabrkwtpvhropcvqk.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk'
+    );
+  }
+});
+
+function goToMainView() {
+  document.getElementById('mainView').style.display = 'flex';
+  document.getElementById('employeeListView').style.display = 'none';
+  document.getElementById('newProfileView').style.display = 'none';
+  document.getElementById('profileDetailView').style.display = 'none';
+  resetForm();
+}
+
+function goToEmployeeList() {
+  document.getElementById('mainView').style.display = 'none';
+  document.getElementById('employeeListView').style.display = 'block';
+  document.getElementById('newProfileView').style.display = 'none';
+  document.getElementById('profileDetailView').style.display = 'none';
+  loadEmployeeList();
+}
+
+function openNewProfile() {
+  document.getElementById('mainView').style.display = 'none';
+  document.getElementById('employeeListView').style.display = 'none';
+  document.getElementById('newProfileView').style.display = 'block';
+  document.getElementById('profileDetailView').style.display = 'none';
+  resetForm();
+  generateEmployeeID();
+}
+
+function openEmployeeList() {
+  goToEmployeeList();
+}
+
+function openProfileDetail(emp) {
+  currentEmployeeId = emp.id;
+  isEditMode = false;
+  
+  document.getElementById('mainView').style.display = 'none';
+  document.getElementById('employeeListView').style.display = 'none';
+  document.getElementById('newProfileView').style.display = 'none';
+  document.getElementById('profileDetailView').style.display = 'block';
+  
+  renderProfileView(emp);
+  updateBlockButton(emp.is_blocked);
+}
+
+function resetForm() {
+  ['empFullName', 'empEmail', 'empPhone', 'empAddress', 'empCity', 'empCIN', 'empStartDate', 'empEndDate', 'empMarital', 'empRole', 'empAccess'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  document.getElementById('empID').value = '';
+  currentEmployeeId = null;
+}
+
+async function generateEmployeeID() {
+  if (!supabaseClient) return;
+  try {
+    const { data } = await supabaseClient.from('employees').select('employee_id').order('employee_id', { ascending: false }).limit(1);
+    let nextNum = 1;
+    if (data && data.length > 0 && data[0].employee_id) {
+      const lastNum = parseInt(data[0].employee_id);
+      if (lastNum < 100) nextNum = lastNum + 1;
+    }
+    document.getElementById('empID').value = String(nextNum).padStart(3, '0');
+  } catch (err) {
+    console.error('ID generation error:', err);
+    document.getElementById('empID').value = '001';
+  }
+}
+
+async function saveNewEmployee() {
+  const fields = {
+    fullName: document.getElementById('empFullName').value.trim(),
+    email: document.getElementById('empEmail').value.trim(),
+    phone: document.getElementById('empPhone').value.trim(),
+    address: document.getElementById('empAddress').value.trim(),
+    city: document.getElementById('empCity').value.trim(),
+    cin: document.getElementById('empCIN').value.trim(),
+    startDate: document.getElementById('empStartDate').value,
+    marital: document.getElementById('empMarital').value,
+    role: document.getElementById('empRole').value,
+    access: document.getElementById('empAccess').value
+  };
+  
+  for (const [key, value] of Object.entries(fields)) {
+    if (!value) {
+      alert(`Error: ${key.replace(/([A-Z])/g, ' $1').trim()} is required.`);
+      return;
+    }
+  }
+  
+  const employeeData = {
+    full_name: fields.fullName,
+    email: fields.email,
+    phone: fields.phone,
+    address: fields.address,
+    city: fields.city,
+    cin: fields.cin,
+    employee_id: document.getElementById('empID').value,
+    start_date: fields.startDate,
+    end_date: document.getElementById('empEndDate').value || null,
+    marital_status: fields.marital,
+    role: fields.role,
+    access_control: fields.access,
+    is_blocked: false,
+    block_note: null
+  };
+  
+  try {
+    const btn = document.querySelector('.save-btn');
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+    
+    const { error } = await supabaseClient.from('employees').insert([employeeData]);
+    if (error) throw error;
+    
+    alert('Employee profile saved successfully!');
+    goToEmployeeList();
+  } catch (err) {
+    console.error('Save error:', err);
+    alert('Error saving profile: ' + err.message);
+  } finally {
+    const btn = document.querySelector('.save-btn');
+    btn.textContent = 'Save Profile';
+    btn.disabled = false;
+  }
+}
+
+async function loadEmployeeList() {
+  if (!supabaseClient) return;
+  const tbody = document.getElementById('employeeTableBody');
+  const countEl = document.getElementById('employeeCount');
+  tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;">Loading...</td></tr>';
+  
+  try {
+    const { data, error } = await supabaseClient.from('employees').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    
+    countEl.textContent = `${data ? data.length : 0} Employees`;
+    
+    if (!data || data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#9ca3af;">No employees found</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = '';
+    data.forEach(emp => {
+      const tr = document.createElement('tr');
+      // Use JSON stringify carefully to avoid breaking quotes
+      const empStr = JSON.stringify(emp).replace(/'/g, "&#39;");
+      tr.innerHTML = `
+        <td><strong>${emp.full_name}</strong></td>
+        <td>${emp.phone}</td>
+        <td>${emp.email}</td>
+        <td>${emp.role}</td>
+        <td><button class="btn-action" onclick='openProfileDetail(${empStr})'>Open</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    console.error('Load error:', err);
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#ef4444;">Error loading data</td></tr>';
+  }
+}
+
+function renderProfileView(emp) {
+  document.getElementById('viewFullName').textContent = emp.full_name;
+  document.getElementById('viewEmail').textContent = emp.email;
+  document.getElementById('viewPhone').textContent = emp.phone;
+  document.getElementById('viewAddress').textContent = emp.address;
+  document.getElementById('viewCity').textContent = emp.city;
+  document.getElementById('viewCIN').textContent = emp.cin;
+  document.getElementById('viewEmpID').textContent = emp.employee_id;
+  document.getElementById('viewStartDate').textContent = emp.start_date;
+  document.getElementById('viewEndDate').textContent = emp.end_date || 'Active';
+  document.getElementById('viewMarital').textContent = emp.marital_status;
+  document.getElementById('viewRole').textContent = emp.role;
+  document.getElementById('viewAccess').textContent = emp.access_control;
+  
+  document.getElementById('editFullName').value = emp.full_name;
+  document.getElementById('editEmail').value = emp.email;
+  document.getElementById('editPhone').value = emp.phone;
+  document.getElementById('editAddress').value = emp.address;
+  document.getElementById('editCity').value = emp.city;
+  document.getElementById('editCIN').value = emp.cin;
+  document.getElementById('editStartDate').value = emp.start_date;
+  document.getElementById('editEndDate').value = emp.end_date || '';
+  document.getElementById('editMarital').value = emp.marital_status;
+  document.getElementById('editRole').value = emp.role;
+  document.getElementById('editAccess').value = emp.access_control;
+  
+  isEditMode = false;
+  document.getElementById('editSaveBtn').textContent = 'Edit';
+  document.getElementById('editSaveBtn').classList.remove('primary');
+  toggleFieldVisibility(false);
+}
+
+function toggleFieldVisibility(show) {
+  const fields = ['editFullName', 'editEmail', 'editPhone', 'editAddress', 'editCity', 'editCIN', 'editStartDate', 'editEndDate', 'editMarital', 'editRole', 'editAccess'];
+  const views = ['viewFullName', 'viewEmail', 'viewPhone', 'viewAddress', 'viewCity', 'viewCIN', 'viewStartDate', 'viewEndDate', 'viewMarital', 'viewRole', 'viewAccess'];
+  
+  fields.forEach(id => document.getElementById(id).style.display = show ? 'block' : 'none');
+  views.forEach(id => document.getElementById(id).style.display = show ? 'none' : 'block');
+}
+
+function toggleEditMode() {
+  const btn = document.getElementById('editSaveBtn');
+  if (!isEditMode) {
+    isEditMode = true;
+    btn.textContent = 'Save';
+    btn.classList.add('primary');
+    toggleFieldVisibility(true);
+  } else {
+    saveProfileChanges();
+  }
+}
+
+async function saveProfileChanges() {
+  if (!currentEmployeeId || !supabaseClient) return;
+  
+  const btn = document.getElementById('editSaveBtn');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+  
+  const updates = {
+    full_name: document.getElementById('editFullName').value,
+    email: document.getElementById('editEmail').value,
+    phone: document.getElementById('editPhone').value,
+    address: document.getElementById('editAddress').value,
+    city: document.getElementById('editCity').value,
+    cin: document.getElementById('editCIN').value,
+    start_date: document.getElementById('editStartDate').value,
+    end_date: document.getElementById('editEndDate').value || null,
+    marital_status: document.getElementById('editMarital').value,
+    role: document.getElementById('editRole').value,
+    access_control: document.getElementById('editAccess').value
+  };
+  
+  try {
+    const { error } = await supabaseClient.from('employees').update(updates).eq('id', currentEmployeeId);
+    if (error) throw error;
+    
+    const { data } = await supabaseClient.from('employees').select('*').eq('id', currentEmployeeId).single();
+    renderProfileView(data);
+    isEditMode = false;
+    btn.textContent = 'Edit';
+    btn.classList.remove('primary');
+    alert('Profile updated successfully!');
+  } catch (err) {
+    console.error('Update error:', err);
+    alert('Error saving changes: ' + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function handleBlockUnblock() {
+  if (!currentEmployeeId) return;
+  supabaseClient.from('employees').select('is_blocked').eq('id', currentEmployeeId).single().then(({ data }) => {
+    if (data && data.is_blocked) {
+      supabaseClient.from('employees').update({ is_blocked: false, block_note: null }).eq('id', currentEmployeeId).then(() => {
+        alert('Employee unblocked successfully!');
+        loadEmployeeList();
+      });
+    } else {
+      pendingAction = 'block';
+      document.getElementById('modalTitle').textContent = 'Block Employee - Mandatory Note';
+      document.getElementById('modalNote').value = '';
+      document.getElementById('noteModal').style.display = 'flex';
+    }
+  });
+}
+
+function updateBlockButton(isBlocked) {
+  const btn = document.getElementById('blockUnblockBtn');
+  if (isBlocked) {
+    btn.textContent = 'Unblock';
+    btn.style.background = '#16a34a';
+    btn.style.color = '#fff';
+  } else {
+    btn.textContent = 'Block';
+    btn.style.background = '#e5e7eb';
+    btn.style.color = '#111827';
+  }
+}
+
+function showDeleteModal() {
+  if (!currentEmployeeId) return;
+  pendingAction = 'delete';
+  document.getElementById('modalTitle').textContent = 'Delete Employee - Mandatory Note';
+  document.getElementById('modalNote').value = '';
+  document.getElementById('noteModal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('noteModal').style.display = 'none';
+  pendingAction = null;
+}
+
+async function confirmModalAction() {
+  const note = document.getElementById('modalNote').value.trim();
+  if (!note) {
+    alert('Note is mandatory.');
+    return;
+  }
+  
+  if (!currentEmployeeId || !supabaseClient) return;
+  
+  const btn = document.getElementById('modalConfirmBtn');
+  btn.textContent = 'Processing...';
+  btn.disabled = true;
+  
+  try {
+    if (pendingAction === 'block') {
+      const { error } = await supabaseClient.from('employees').update({ is_blocked: true, block_note: note }).eq('id', currentEmployeeId);
+      if (error) throw error;
+      alert('Employee blocked successfully.');
+    } else if (pendingAction === 'delete') {
+      const { error } = await supabaseClient.from('employees').delete().eq('id', currentEmployeeId);
+      if (error) throw error;
+      alert('Employee deleted permanently.');
+    }
+    closeModal();
+    goToEmployeeList();
+  } catch (err) {
+    console.error('Action error:', err);
+    alert('Error: ' + err.message);
+  } finally {
+    btn.textContent = 'Confirm';
+    btn.disabled = false;
+  }
+}
+
+window.addEventListener('beforeunload', function() {
+  goToMainView();
+});
+</script>
+</body>
+</html>
