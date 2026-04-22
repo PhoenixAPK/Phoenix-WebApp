@@ -22,10 +22,8 @@
     .nav-btn:hover{color:var(--electric-lime);border-color:var(--electric-lime);background:rgba(0,255,135,0.1)}
     .main-content{width:100%;display:flex;justify-content:center}
     
-    /* 🔹 Queue positioned higher */
     .queue-container{margin:40px auto 0;width:90%;max-width:1200px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 4px 20px rgba(0,0,0,0.08);color:#000}
     
-    /* 🔹 Unified Header Layout */
     .queue-header-box{
       background:#e5e7eb;
       color:#000;
@@ -42,7 +40,7 @@
       letter-spacing:2px;
       display:flex;
       align-items:center;
-      justify-content: center; /* 🔹 FIX: Center the title text */
+      justify-content: center;
     }
     .header-stats{
       padding:12px 30px;
@@ -111,7 +109,6 @@
       border-color: #ffcc00;
     }
 
-    /* HIDDEN RENDER AREA FOR PDF GENERATION */
     #hiddenInvoiceWrap { position: absolute; left: -9999px; top: 0; width: 800px; color: #333; }
     .invoice-container { padding: 30px; background: #ffffff; border-radius: 12px; }
     .invoice-header { text-align: center; margin-bottom: 8px; display: flex; flex-direction: column; align-items: center; }
@@ -261,16 +258,12 @@
 
     async function fetchAndRender(){
       try {
-        // 🔹 SAFETY CHECK: Ensure Supabase client is ready
         if (!window.supabaseClient) {
           console.error("Supabase client not initialized");
           return;
         }
 
-        // 🔹 FIX: Corrected destructuring. 
-        // Supabase returns {  data, error }.
-        // Previously it was looking for 'items' which didn't exist, causing the list to be empty.
-        const {   data: items, error } = await window.supabaseClient
+        const {    items, error } = await window.supabaseClient
           .from('pps_queue')
           .select('*')
           .eq('status', 'archived')
@@ -304,13 +297,15 @@
       data.forEach(function(req){
         var tr=document.createElement('tr');
         
-        // 🔹 FIX: Use record_id if available (e.g. PR 000010)
         const displayId = req.record_id || `#${req.request_id.slice(0,8).toUpperCase()}`;
         
-        // 🔹 FIX: Changed from req.source_mode to req.sourceMode (camelCase)
-        const mode = req.sourceMode || 'client';
+        // 🔹 FIX: Check multiple possible field names for mode
+        // The database might store it as sourceMode, source_mode, or mode
+        const mode = (req.sourceMode || req.source_mode || req.mode || 'client').toLowerCase();
         const modeClass = mode === 'entrepreneur' ? 'mode-entrepreneur' : 'mode-client';
         const modeLabel = mode === 'entrepreneur' ? 'Entrepreneur' : 'Client';
+        
+        console.log("Request mode:", mode, "Full req object:", req);
         
         tr.innerHTML=`
           <td class="ref-code queue-info">${displayId}</td>
