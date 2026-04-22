@@ -35,6 +35,15 @@ input, select { width: 100%; padding: 8px; border: 1px solid rgba(204,204,204,0.
 .history-section-header { background: #e9eaec; border-radius: 10px; padding: 14px 20px; cursor: pointer; }
 .history-section-header h3 { font-size: 14px; font-weight: 600; color: #111827; }
 .history-section-body { background: #f3f4f6; border-radius: 10px; min-height: 120px; margin-top: 6px; padding: 20px; display: none; font-size: 13px; color: #9ca3af; }
+
+/* ✅ HISTORY INDICATOR STYLES */
+.history-item { padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-size: 13px; color: #374151; }
+.history-item:last-child { border-bottom: none; }
+.history-id { font-weight: 700; color: #111827; font-family: monospace; }
+.history-date { color: #6b7280; margin: 0 8px; }
+.history-detail { color: #4b5563; font-weight: 500; }
+.history-note { display: block; color: #d97706; font-style: italic; margin-top: 4px; font-size: 12px; }
+.history-empty { color: #9ca3af; font-style: italic; padding: 10px 0; }
 </style>
 </head>
  
@@ -210,7 +219,6 @@ window.setFormState = function(state) {
 
 window.enableEditMode = function() { setFormState('edit'); };
 
-// ✅ FIXED: Open invoice inside iframe shell (same as interactions.html)
 window.openInvoice = function() {
   if (!window.currentClientId) return;
   const name = encodeURIComponent(document.getElementById("clientName").value || "");
@@ -220,15 +228,14 @@ window.openInvoice = function() {
   const city = encodeURIComponent(document.getElementById("clientCity").value || "");
   const url = `admininvoice.html?mode=client&name=${name}&phone=${phone}&email=${email}&address=${address}&city=${city}`;
   
-  // ✅ Open inside iframe shell if available
   if (window.parent && window.parent !== window) {
     const frame = window.parent.document.getElementById('content-frame');
     if (frame) { frame.src = url; return; }
   }
-  // Fallback: open in new tab only if iframe not available
   window.open(url, '_blank');
 };
 
+// 🔹 UPDATED: Load Client + Trigger History Load
 window.loadClient = async function(client) {
   clearDuplicates();
   
@@ -264,10 +271,108 @@ window.loadClient = async function(client) {
   
   setFormState('readonly');
   
-  document.getElementById("requests").innerHTML = '<p>No requests found</p>';
-  document.getElementById("interactions").innerHTML = '<p>No interactions found</p>';
-  document.getElementById("invoice").innerHTML = '<p>No invoices found</p>';
+  // 🔹 INITIALIZE HISTORY SECTIONS
+  document.getElementById("requests").innerHTML = '<div class="history-empty">Loading history...</div>';
+  document.getElementById("interactions").innerHTML = '<div class="history-empty">Loading history...</div>';
+  document.getElementById("invoice").innerHTML = '<div class="history-empty">Loading history...</div>';
+  
+  // 🔹 LOAD HISTORY DATA
+  loadHistory(client);
 };
+
+// 🔹 NEW: History Indicator Logic
+async function loadHistory(client) {
+  if (!window.supabaseClient) {
+    document.getElementById("requests").innerHTML = '<div class="history-empty">Demo Mode: History unavailable</div>';
+    document.getElementById("interactions").innerHTML = '<div class="history-empty">Demo Mode: History unavailable</div>';
+    document.getElementById("invoice").innerHTML = '<div class="history-empty">Demo Mode: History unavailable</div>';
+    return;
+  }
+
+  const formatDate = (dateString) => {
+    const d = new Date(dateString);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  const buildOrFilter = (colName, val) => val ? `${colName}.ilike.%${val}%` : null;
+  
+  // 1. Requests (pps_queue)
+  let reqFilters = [
+    buildOrFilter('client->>name', client.name),
+    buildOrFilter('client->>contact', client.contact),
+    buildOrFilter('client->>email', client.email)
+  ].filter(Boolean);
+  
+  let reqQuery = window.supabaseClient.from('pps_queue').select('*').order('created_at', { ascending: false });
+  if (reqFilters.length > 0) reqQuery = reqQuery.or(reqFilters.join(','));
+  
+  const { data: reqData, error: reqError } = await reqQuery;
+
+  // 2. Interactions
+  let intFilters = [
+    buildOrFilter('name', client.name),
+    buildOrFilter('phone', client.contact),
+    buildOrFilter('email', client.email)
+  ].filter(Boolean);
+  
+  let intQuery = window.supabaseClient.from('interactions').select('*').order('created_at', { ascending: false });
+  if (intFilters.length > 0) intQuery = intQuery.or(intFilters.join(','));
+  
+  const { data: intData, error: intError } = await intQuery;
+
+  // 3. Invoices
+  let invFilters = [
+    buildOrFilter('client_name', client.name),
+    buildOrFilter('client_phone', client.contact),
+    buildOrFilter('client_email', client.email)
+  ].filter(Boolean);
+  
+  let invQuery = window.supabaseClient.from('invoices').select('*').order('created_at', { ascending: false });
+  if (invFilters.length > 0) invQuery = invQuery.or(invFilters.join(','));
+  
+  const { data: invData, error: invError } = await invQuery;
+
+  // Render Requests
+  const reqContainer = document.getElementById("requests");
+  reqContainer.innerHTML = '';
+  if (reqData && reqData.length > 0) {
+    reqData.forEach(r => {
+      let wsCount = 0;
+      if (r.workspaces) wsCount = Array.isArray(r.workspaces) ? r.workspaces.length : (typeof r.workspaces === 'object' ? Object.keys(r.workspaces).length : 0);
+      const id = r.record_id || r.request_id;
+      reqContainer.innerHTML += `<div class="history-item"><span class="history-id">${id}</span> <span class="history-date">${formatDate(r.created_at)}</span> <span class="history-detail">• Workspace ${wsCount}</span></div>`;
+    });
+  } else {
+    reqContainer.innerHTML = '<div class="history-empty">No requests found</div>';
+  }
+
+  // Render Interactions
+  const intContainer = document.getElementById("interactions");
+  intContainer.innerHTML = '';
+  if (intData && intData.length > 0) {
+    intData.forEach(i => {
+      const wsCount = i.total_pictures || 0;
+      const note = i.note ? `<br><span class="history-note">Note: ${i.note}</span>` : '';
+      const id = i.record_id || i.id;
+      intContainer.innerHTML += `<div class="history-item"><span class="history-id">${id}</span> <span class="history-date">${formatDate(i.created_at)}</span> <span class="history-detail">• Workspace ${wsCount}</span>${note}</div>`;
+    });
+  } else {
+    intContainer.innerHTML = '<div class="history-empty">No interactions found</div>';
+  }
+
+  // Render Invoices
+  const invContainer = document.getElementById("invoice");
+  invContainer.innerHTML = '';
+  if (invData && invData.length > 0) {
+    invData.forEach(inv => {
+      const wsCount = inv.workspaces ? (Array.isArray(inv.workspaces) ? inv.workspaces.length : 0) : 0;
+      const id = inv.ir_code || inv.record_id || inv.id;
+      invContainer.innerHTML += `<div class="history-item"><span class="history-id">${id}</span> <span class="history-date">${formatDate(inv.created_at)}</span> <span class="history-detail">• Workspace ${wsCount}</span></div>`;
+    });
+  } else {
+    invContainer.innerHTML = '<div class="history-empty">No invoices found</div>';
+  }
+}
 
 window.saveClient = async function() {
   const btn = document.getElementById("saveBtn");
