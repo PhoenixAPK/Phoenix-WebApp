@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phoenix Printing Solutions | Redefine Your Space</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400:700&family=Plus+Jakarta+Sans:wght@300:500:800&family=Roboto:wght@400:500:700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="assets/js/auth.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/supabase.js"></script>
@@ -40,6 +40,38 @@
     .footer-logo{height:30px;margin-right:15px}
     footer p{font-family:'Syncopate';font-size:0.62rem;letter-spacing:3px;opacity:0.7;color:#000;margin:0}
 
+    /* 🔹 UPDATED: Smaller, Regular Times New Roman Fonts */
+    .queue-title {
+      font-family: 'Times New Roman', Times, serif;
+      font-weight: bold;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+    }
+    .queue-info {
+      font-family: 'Times New Roman', Times, serif;
+      font-weight: normal;
+      font-size: 0.85rem;
+    }
+    .mode-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      border: 1px solid;
+    }
+    .mode-client {
+      background: rgba(0, 212, 255, 0.1);
+      color: #00d4ff;
+      border-color: #00d4ff;
+    }
+    .mode-entrepreneur {
+      background: rgba(255, 204, 0, 0.1);
+      color: #ffcc00;
+      border-color: #ffcc00;
+    }
+
     /* HIDDEN RENDER AREA FOR PDF GENERATION */
     #hiddenInvoiceWrap { position: absolute; left: -9999px; top: 0; width: 800px; color: #333; }
     .invoice-container { padding: 30px; background: #ffffff; border-radius: 12px; }
@@ -69,17 +101,18 @@
   <div class="main-content">
     <div class="queue-container">
       <div class="queue-header-box">
-        <h1>ARCHIVE HISTORY</h1>
+        <h1 class="queue-title">ARCHIVE HISTORY</h1>
         <div class="stats" id="archiveCount">0 Items</div>
       </div>
       <table>
         <thead>
           <tr>
-            <th>Reference</th>
-            <th>Client / Business Name</th>
-            <th>City</th>
-            <th>Units</th>
-            <th>Action</th>
+            <th class="queue-title">REF CODE</th>
+            <th class="queue-title">Name</th>
+            <th class="queue-title">City</th>
+            <th class="queue-title">Workspace</th>
+            <th class="queue-title">Mode</th>
+            <th class="queue-title">Action</th>
           </tr>
         </thead>
         <tbody id="archiveBody"></tbody>
@@ -154,7 +187,6 @@
     async function uploadPdfToSupabase(req, pdfBlob) {
       const cleanName = (req.client?.name || "Customer").replace(/[^a-z0-9]/gi, '_');
       const cleanCity = (req.location?.city || "City").replace(/[^a-z0-9]/gi, '_');
-      // 🔹 FIX: Use record_id for filename if available
       const refId = req.record_id || req.request_id.slice(0, 8).toUpperCase();
       const fileName = `PPS-${cleanName}-${cleanCity}-${refId}.pdf`;
 
@@ -187,8 +219,7 @@
     }
 
     async function fetchAndRender(){
-      // ✅ CORRECT DESTRUCTURING SYNTAX
-      const {  data: items, error } = await window.supabaseClient.from('pps_queue').select('*').eq('status','archived').order('created_at',{ascending:false});
+      const {   items, error } = await window.supabaseClient.from('pps_queue').select('*').eq('status','archived').order('created_at',{ascending:false});
       if(error) {
         console.error("Archive fetch error:", error);
         return;
@@ -205,14 +236,17 @@
       data.forEach(function(req){
         var tr=document.createElement('tr');
         
-        // 🔹 FIX: Use record_id if available, else fallback to request_id
         const displayId = req.record_id || `#${req.request_id.slice(0,8).toUpperCase()}`;
+        const mode = req.source_mode || 'client';
+        const modeClass = mode === 'entrepreneur' ? 'mode-entrepreneur' : 'mode-client';
+        const modeLabel = mode === 'entrepreneur' ? 'Entrepreneur' : 'Client';
         
         tr.innerHTML=`
-          <td class="ref-code">${displayId}</td>
-          <td><strong>${req.client?.name || 'N/A'}</strong></td>
-          <td>${req.location?.city || 'N/A'}</td>
-          <td>${req.workspaces?.length || 0} Units</td>
+          <td class="ref-code queue-info">${displayId}</td>
+          <td class="queue-info">${req.client?.name || 'N/A'}</td>
+          <td class="queue-info">${req.location?.city || 'N/A'}</td>
+          <td class="queue-info">${req.workspaces?.length || 0} Units</td>
+          <td class="queue-info"><span class="mode-badge ${modeClass}">${modeLabel}</span></td>
           <td>
             <div class="action-cell">
               <button class="btn-action activate-btn" onclick="activateItem('${req.request_id}')">Activate</button>
