@@ -215,7 +215,7 @@
           <div class="invoice-footer"><div>Phoenix Printing Solutions</div><div>0667336303</div></div>
         </div>`;
 
-      const canvas = await html2canvas(wrap, { scale: 2 });
+      const canvas = await html2canvas(wrap, { scale: 2, useCORS: true });
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
@@ -228,29 +228,110 @@
       const refId = req.record_id || req.request_id.slice(0, 8).toUpperCase();
       const fileName = `PPS-${cleanName}-${cleanCity}-${refId}.pdf`;
 
-      const {  data, error } = await window.supabaseClient.storage
-        .from("Archive-invoice")
-        .upload(`archive/${fileName}`, pdfBlob, { contentType: "application/pdf", upsert: true });
-      if (error) throw error;
-      return data;
+      console.log("📤 Uploading to Supabase Storage:", fileName);
+      
+      // 🔹 Try both possible bucket names (case-sensitive)
+      const bucketNames = ["Archive-invoice", "archive-invoice", "archive_invoice"];
+      let uploadResult = null;
+      
+      for (const bucketName of bucketNames) {
+        try {
+          console.log(`🔍 Trying bucket: ${bucketName}`);
+          const { data, error } = await window.supabaseClient.storage
+            .from(bucketName)
+            .upload(`archive/${fileName}`, pdfBlob, { 
+              contentType: "application/pdf", 
+              upsert: true,
+              cacheControl: '3600'
+            });
+          
+          if (error) {
+            console.warn(`❌ Bucket ${bucketName} failed:`, error);
+            continue;
+          }
+          
+          console.log(`✅ Successfully uploaded to bucket: ${bucketName}`, data);
+          uploadResult = data;
+          break;
+        } catch (bucketErr) {
+          console.warn(`❌ Bucket ${bucketName} error:`, bucketErr);
+          continue;
+        }
+      }
+      
+      if (!uploadResult) {
+        throw new Error("Failed to upload to any storage bucket. Check bucket name and RLS policies.");
+      }
+      
+      return uploadResult;
     }
 
     window.finishItem = async function(id) {
+      console.log("🔄 Starting archive process for ID:", id);
+      
       try {
-        const {   req, error } = await window.supabaseClient.from("pps_queue").select("*").eq("request_id", id).single();
-        if (error) throw error;
+        // Step 1: Fetch the request data
+        console.log("1️⃣ Fetching request data...");
+        const { data: req, error: fetchError } = await window.supabaseClient
+          .from("pps_queue")
+          .select("*")
+          .eq("request_id", id)
+          .single();
+        
+        if (fetchError) {
+          console.error("❌ Failed to fetch request:", fetchError);
+          alert("Error: Could not fetch request data.");
+          return;
+        }
+        
+        if (!req) {
+          console.error("❌ Request not found");
+          alert("Error: Request not found.");
+          return;
+        }
+        
+        console.log("✅ Request data fetched:", req);
+        
+        // Step 2: Generate PDF
+        console.log("2️⃣ Generating PDF...");
         const pdfBlob = await generateVisualInvoicePDF(req);
+        console.log("✅ PDF generated, size:", pdfBlob.size, "bytes");
+        
+        // Step 3: Upload to Supabase Storage
+        console.log("3️⃣ Uploading PDF to storage...");
         await uploadPdfToSupabase(req, pdfBlob);
-        const { error: delErr } = await window.supabaseClient.from("pps_queue").delete().eq("request_id", id);
-        if (delErr) throw delErr;
+        console.log("✅ PDF uploaded successfully");
+        
+        // Step 4: Delete from pps_queue
+        console.log("4️⃣ Deleting from pps_queue...");
+        const { error: delErr } = await window.supabaseClient
+          .from("pps_queue")
+          .delete()
+          .eq("request_id", id);
+        
+        if (delErr) {
+          console.error("❌ Failed to delete from queue:", delErr);
+          alert("PDF saved, but failed to remove from queue. Please try again.");
+          return;
+        }
+        
+        console.log("✅ Request deleted from queue");
+        
+        // Step 5: Refresh the list
         fetchAndRender();
-        alert("Archived and PDF saved successfully.");
-      } catch (err) { alert("Error finishing item."); }
+        alert("✅ Archived and PDF saved successfully!");
+        
+      } catch (err) {
+        console.error("❌ Critical error in finishItem:", err);
+        alert("Error finishing item: " + err.message + "\n\nCheck console for details.");
+      }
     };
 
     window.activateItem = async function(id){
       try{
-        const { error } = await window.supabaseClient.from('pps_queue').update({ status:'pending', created_at: new Date().toISOString() }).eq('request_id', id);
+        const { error } = await window.supabaseClient.from('pps_queue')
+          .update({ status:'pending', created_at: new Date().toISOString() })
+          .eq('request_id', id);
         if(error) throw error;
         fetchAndRender();
       } catch(err){ alert("Error activating item."); }
@@ -267,8 +348,7 @@
 
         console.log("📡 Querying database for archived items...");
         
-        // ✅ Query the database
-        const {   data, error } = await window.supabaseClient
+        const { data, error } = await window.supabaseClient
           .from('pps_queue')
           .select('*')
           .eq('status', 'archived')
@@ -325,7 +405,6 @@
         
         const displayId = req.record_id || `#${req.request_id.slice(0,8).toUpperCase()}`;
         
-        // ✅ Check multiple possible field names for mode
         const mode = (req.sourceMode || req.source_mode || req.mode || 'client').toLowerCase();
         const modeClass = mode === 'entrepreneur' ? 'mode-entrepreneur' : 'mode-client';
         const modeLabel = mode === 'entrepreneur' ? 'Entrepreneur' : 'Client';
