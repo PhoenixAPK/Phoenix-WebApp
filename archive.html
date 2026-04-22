@@ -13,7 +13,8 @@
   <style>
     :root { --glass: rgba(0,0,0,0.6); --glass-border: rgba(255,255,255,0.2); --electric-lime:#00FF87; --fire-orange:#ff4d00; --fire-yellow:#ffcc00; --pps-green:#066d44; --pps-admin-green:#046C4E; }
     *{margin:0;padding:0;box-sizing:border-box}
-    body { background:#f2f3f5; }
+    /* 🔹 FIXED: Background is now White to match the shell */
+    body { background:#ffffff; }
     body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:none;z-index:-1}
     nav{padding:20px 5%;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(20px);position:fixed;width:100%;top:0;z-index:1000;border-bottom:1px solid var(--glass-border)}
     .brand-name{font-family:'Syncopate',sans-serif;font-weight:700;font-size:1.4rem;letter-spacing:2px;text-transform:uppercase;color:#000;text-shadow:0 0 5px #fff,0 0 10px #ffcc00,0 0 20px #ff4d00}
@@ -22,12 +23,12 @@
     .nav-btn:hover{color:var(--electric-lime);border-color:var(--electric-lime);background:rgba(0,255,135,0.1)}
     .main-content{width:100%;display:flex;justify-content:center}
     
-    /* 🔹 Queue positioned higher (reduced margin to 40px) */
+    /* 🔹 Queue positioned higher */
     .queue-container{margin:40px auto 0;width:90%;max-width:1200px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 4px 20px rgba(0,0,0,0.08);color:#000}
     
     /* 🔹 Unified Header Layout */
     .queue-header-box{
-      background:#e5e7eb; /* Base background color */
+      background:#e5e7eb;
       color:#000;
       padding:0;
       display:grid;
@@ -50,13 +51,12 @@
       justify-content:center;
       align-items:center;
       border-left:1px solid #d1d5db;
-      /* 🔹 Removed background override so it inherits #e5e7eb */
       font-family:'Times New Roman', Times, serif;
     }
     .stats-count{
       font-size:1.1rem;
       font-weight:bold;
-      color:#000; /* Unified black color */
+      color:#000;
     }
     
     table{width:100%;border-collapse:collapse;text-align:left}
@@ -86,7 +86,6 @@
     .footer-logo{height:30px;margin-right:15px}
     footer p{font-family:'Syncopate';font-size:0.62rem;letter-spacing:3px;opacity:0.7;color:#000;margin:0}
 
-    /* 🔹 Times New Roman Fonts for Table Data */
     .queue-info {
       font-family: 'Times New Roman', Times, serif;
       font-weight: normal;
@@ -141,9 +140,7 @@
   <div class="main-content">
     <div class="queue-container">
       <div class="queue-header-box">
-        <!-- 60% Title -->
         <div class="header-title">ARCHIVE HISTORY</div>
-        <!-- 40% Count -->
         <div class="header-stats">
           <div class="stats-count" id="archiveCount">0 Items</div>
         </div>
@@ -243,7 +240,7 @@
 
     window.finishItem = async function(id) {
       try {
-        const {   req, error } = await window.supabaseClient.from("pps_queue").select("*").eq("request_id", id).single();
+        const {  data: req, error } = await window.supabaseClient.from("pps_queue").select("*").eq("request_id", id).single();
         if (error) throw error;
         const pdfBlob = await generateVisualInvoicePDF(req);
         await uploadPdfToSupabase(req, pdfBlob);
@@ -264,8 +261,16 @@
 
     async function fetchAndRender(){
       try {
-        // ✅ Fetch archived items
-        const {   items, error } = await window.supabaseClient
+        // 🔹 SAFETY CHECK: Ensure Supabase client is ready
+        if (!window.supabaseClient) {
+          console.error("Supabase client not initialized");
+          return;
+        }
+
+        // 🔹 FIX: Corrected destructuring. 
+        // Supabase returns {  items, error }.
+        // Previously it was looking for 'items' which didn't exist, returning undefined.
+        const {  items, error } = await window.supabaseClient
           .from('pps_queue')
           .select('*')
           .eq('status', 'archived')
@@ -289,7 +294,6 @@
       if(!tbody) return;
       tbody.innerHTML='';
       
-      // 🔹 Update count to show exactly "X Items"
       countLabel.innerText = `${data.length} Items`;
       
       if(data.length === 0){
@@ -300,8 +304,7 @@
       data.forEach(function(req){
         var tr=document.createElement('tr');
         
-        // 🔹 FIX: Prioritize record_id (e.g. PR 000010). 
-        // If record_id is missing (old data), it falls back to request_id.
+        // 🔹 FIX: Use record_id if available
         const displayId = req.record_id || `#${req.request_id.slice(0,8).toUpperCase()}`;
         const mode = req.source_mode || 'client';
         const modeClass = mode === 'entrepreneur' ? 'mode-entrepreneur' : 'mode-client';
