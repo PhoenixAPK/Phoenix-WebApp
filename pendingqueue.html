@@ -20,8 +20,10 @@
     .nav-btn:hover{color:var(--electric-lime);border-color:var(--electric-lime);background:rgba(0,255,135,0.1)}
     .main-content{width:100%;display:flex;justify-content:center}
     
+    /* 🔹 IDENTICAL to Archive and In Progress */
     .queue-container{margin:40px auto 0;width:90%;max-width:1200px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 4px 20px rgba(0,0,0,0.08);color:#000}
     
+    /* 🔹 60/40 Split Header */
     .queue-header-box{
       background:#e5e7eb;
       color:#000;
@@ -244,7 +246,6 @@
         const modeClass = mode === 'entrepreneur' ? 'mode-entrepreneur' : 'mode-client';
         const modeLabel = mode === 'entrepreneur' ? 'Entrepreneur' : 'Client';
         
-        // Use record_id if available, else fallback to request_id
         const displayId = req.record_id || `#${req.request_id.slice(0,8).toUpperCase()}`;
         
         tr.innerHTML = `
