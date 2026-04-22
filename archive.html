@@ -167,7 +167,7 @@
 
     window.finishItem = async function(id) {
       try {
-        const {  req, error } = await window.supabaseClient.from("pps_queue").select("*").eq("request_id", id).single();
+        const {  data: req, error } = await window.supabaseClient.from("pps_queue").select("*").eq("request_id", id).single();
         if (error) throw error;
         const pdfBlob = await generateVisualInvoicePDF(req);
         await uploadPdfToSupabase(req, pdfBlob);
@@ -187,8 +187,12 @@
     }
 
     async function fetchAndRender(){
-      const {  items, error } = await window.supabaseClient.from('pps_queue').select('*').eq('status','archived').order('created_at',{ascending:false});
-      if(error) console.error("Archive fetch error:", error);
+      // ✅ CORRECT DESTRUCTURING SYNTAX
+      const {  data: items, error } = await window.supabaseClient.from('pps_queue').select('*').eq('status','archived').order('created_at',{ascending:false});
+      if(error) {
+        console.error("Archive fetch error:", error);
+        return;
+      }
       render(items||[]);
     }
 
