@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Phoenix Printing Solutions | Redefine Your Space</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;500;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400:700&family=Plus+Jakarta+Sans:wght@300:500:800&family=Roboto:wght@400:500:700&display=swap" rel="stylesheet">
   <script src="assets/js/auth.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/supabase.js"></script>
@@ -117,7 +117,7 @@
         return `<tr><td>Workspace ${i+1}</td><td>${h.toFixed(2)}x${w.toFixed(2)}</td><td>${actual.toFixed(2)}</td><td>${charge.toFixed(2)}</td><td>${basePrice.toFixed(2)}</td><td>${(charge*basePrice).toFixed(2)}</td></tr>`;
       }).join('');
 
-      const baseCost = totalArea = totalChargeArea * basePrice;
+      const baseCost = totalChargeArea * basePrice;
       const travel = (parseFloat(req.costs?.fuelPrice) || 0) + (parseFloat(req.costs?.tollPrice) || 0) + (parseFloat(req.costs?.accommodationPrice) || 0);
       const grand = baseCost + travel;
 
@@ -154,7 +154,9 @@
     async function uploadPdfToSupabase(req, pdfBlob) {
       const cleanName = (req.client?.name || "Customer").replace(/[^a-z0-9]/gi, '_');
       const cleanCity = (req.location?.city || "City").replace(/[^a-z0-9]/gi, '_');
-      const fileName = `PPS-${cleanName}-${cleanCity}-${req.request_id.slice(0, 5).toUpperCase()}.pdf`;
+      // 🔹 FIX: Use record_id for filename if available
+      const refId = req.record_id || req.request_id.slice(0, 8).toUpperCase();
+      const fileName = `PPS-${cleanName}-${cleanCity}-${refId}.pdf`;
 
       const { data, error } = await window.supabaseClient.storage
         .from("Archive-invoice")
@@ -185,7 +187,8 @@
     }
 
     async function fetchAndRender(){
-      const { data: items } = await window.supabaseClient.from('pps_queue').select('*').eq('status','archived').order('created_at',{ascending:false});
+      const {  items, error } = await window.supabaseClient.from('pps_queue').select('*').eq('status','archived').order('created_at',{ascending:false});
+      if(error) console.error("Archive fetch error:", error);
       render(items||[]);
     }
 
@@ -197,8 +200,12 @@
       countLabel.innerText = data.length + ' Items';
       data.forEach(function(req){
         var tr=document.createElement('tr');
+        
+        // 🔹 FIX: Use record_id if available, else fallback to request_id
+        const displayId = req.record_id || `#${req.request_id.slice(0,8).toUpperCase()}`;
+        
         tr.innerHTML=`
-          <td class="ref-code">#${req.request_id.slice(0,8).toUpperCase()}</td>
+          <td class="ref-code">${displayId}</td>
           <td><strong>${req.client?.name || 'N/A'}</strong></td>
           <td>${req.location?.city || 'N/A'}</td>
           <td>${req.workspaces?.length || 0} Units</td>
