@@ -258,44 +258,69 @@
 
     async function fetchAndRender(){
       try {
+        console.log("🔍 Starting fetchAndRender...");
+        
         if (!window.supabaseClient) {
-          console.error("Supabase client not initialized");
+          console.error("❌ Supabase client not initialized");
           return;
         }
 
-        // ✅ CORRECT: Supabase returns {  data, error }
+        console.log("📡 Querying database for archived items...");
+        
+        // ✅ Query the database
         const {   data, error } = await window.supabaseClient
           .from('pps_queue')
           .select('*')
           .eq('status', 'archived')
           .order('created_at', { ascending: false });
         
+        console.log("📥 Database response:", { data, error });
+        
         if(error) {
-          console.error("Archive fetch error:", error);
+          console.error("❌ Archive fetch error:", error);
+          document.getElementById('archiveBody').innerHTML = 
+            `<tr><td colspan="6" style="text-align:center; padding:50px; color:red;">Error loading data: ${error.message}</td></tr>`;
           return;
         }
         
-        console.log("✅ Archived items found:", data);
-        render(data || []);
+        if (!data) {
+          console.warn("⚠️ No data returned from database");
+          document.getElementById('archiveBody').innerHTML = 
+            '<tr><td colspan="6" style="text-align:center; padding:50px; opacity:0.5;">No data returned</td></tr>';
+          return;
+        }
+        
+        console.log(`✅ Found ${data.length} archived items`);
+        render(data);
       } catch(err) {
-        console.error("Error in fetchAndRender:", err);
+        console.error("❌ Error in fetchAndRender:", err);
+        document.getElementById('archiveBody').innerHTML = 
+          `<tr><td colspan="6" style="text-align:center; padding:50px; color:red;">Error: ${err.message}</td></tr>`;
       }
     }
 
     function render(data){
+      console.log("🎨 Rendering data:", data);
+      
       var tbody=document.getElementById('archiveBody');
       var countLabel=document.getElementById('archiveCount');
-      if(!tbody) return;
-      tbody.innerHTML='';
+      if(!tbody) {
+        console.error("❌ tbody element not found");
+        return;
+      }
       
+      tbody.innerHTML='';
       countLabel.innerText = `${data.length} Items`;
       
       if(data.length === 0){
+        console.log("ℹ️ No archived items to display");
         tbody.innerHTML='<tr><td colspan="6" style="text-align:center; padding:50px; opacity:0.5; font-family: Times New Roman;">No archived requests found.</td></tr>';
         return;
       }
       
-      data.forEach(function(req){
+      data.forEach(function(req, index){
+        console.log(`Processing item ${index + 1}:`, req);
+        
         var tr=document.createElement('tr');
         
         const displayId = req.record_id || `#${req.request_id.slice(0,8).toUpperCase()}`;
@@ -305,7 +330,7 @@
         const modeClass = mode === 'entrepreneur' ? 'mode-entrepreneur' : 'mode-client';
         const modeLabel = mode === 'entrepreneur' ? 'Entrepreneur' : 'Client';
         
-        console.log("Request mode:", mode, "Full req object:", req);
+        console.log(`  - Mode detected: ${mode}, Class: ${modeClass}, Label: ${modeLabel}`);
         
         tr.innerHTML=`
           <td class="ref-code queue-info">${displayId}</td>
@@ -321,6 +346,8 @@
           </td>`;
         tbody.appendChild(tr);
       });
+      
+      console.log("✅ Rendering complete");
     }
 
     document.addEventListener('DOMContentLoaded', fetchAndRender);
