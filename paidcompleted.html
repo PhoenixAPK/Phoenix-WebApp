@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paid - Completed</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* 🔹 GLOBAL RESET & FONTS */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
+body { background: #ffffff; padding: 20px 40px; color: #111827; }
+
+/* 🔹 MAIN MENU (START SCREEN) - EXACT MATCH */
+.main-menu { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
+.menu-btn { padding: 16px 40px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; color: #374151; }
+.menu-btn:hover { background: #e5e7eb; }
+
+/* 🔹 SECTIONS */
+.section-view { display: none; }
+.section-view.active { display: block; }
+
+/* 🔹 RETURN BUTTON & HEADER */
+.section-header { display: flex; align-items: center; margin-bottom: 20px; }
+.back-btn { width: 90px; height: 34px; background: #e5e7eb; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.back-btn:hover { background: #d1d5db; }
+
+.queue-container { margin: 0 auto; width: 95%; max-width: 1200px; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.queue-header-box { background: #e5e7eb; display: grid; grid-template-columns: 60% 40%; border-bottom: 1px solid #d1d5db; align-items: center; }
+.header-title { padding: 14px 30px; font-family: 'Times New Roman', serif; font-weight: bold; font-size: 1.2rem; letter-spacing: 2px; display: flex; align-items: center; justify-content: center; color: #000; }
+.header-stats { padding: 12px 30px; font-family: 'Times New Roman', serif; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; border-left: 1px solid #d1d5db; color: #000; }
+
+/* 🔹 FORM STYLES */
+.payment-form { padding: 24px; }
+.form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+
+/* ✅ BLACK TIMES NEW ROMAN TITLES */
+.form-group label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #000;
+    font-family: 'Times New Roman', serif;
+}
+
+.form-group input, .form-group select {
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 13px;
+    width: 100%;
+    background: #fff;
+}
+.form-group input:disabled, .form-group select:disabled {
+    background: #f3f4f6;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+/* 🔹 ACTION BUTTONS */
+.form-actions { display: flex; justify-content: center; gap: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
+.action-btn { padding: 10px 30px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; text-transform: uppercase; }
+.save-btn { background: #2e7d32; color: white; }
+.save-btn:hover { background: #1b5e20; }
+.complete-btn { background: #9ca3af; color: white; cursor: not-allowed; }
+.complete-btn.enabled { background: #dc2626; cursor: pointer; }
+.complete-btn.enabled:hover { background: #b91c1c; }
+
+/* 🔹 COMPLETED LIST */
+.completed-list { padding: 20px; }
+.completed-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+.completed-table th { background: #f8f9fa; padding: 12px; text-align: left; font-weight: 600; border-bottom: 2px solid #e5e7eb; font-family: 'Times New Roman', serif; color: #000; }
+.completed-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+.completed-table tr:hover { background: #f9f9f9; }
+.open-btn { background: #2563eb; color: white; padding: 6px 12px; font-size: 11px; border: none; border-radius: 4px; cursor: pointer; }
+.open-btn:hover { background: #1d4ed8; }
+
+@media (max-width: 768px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .form-actions { flex-direction: column; }
+    .action-btn { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- 🔹 MAIN MENU (START SCREEN) -->
+<div id="mainMenu" class="main-menu">
+    <button class="menu-btn" onclick="showPayment()">Payment</button>
+    <button class="menu-btn" onclick="showCompleted()">Completed</button>
+</div>
+
+<!-- 🔹 PAYMENT SECTION -->
+<div id="paymentSection" class="section-view">
+    <div class="section-header">
+        <button class="back-btn" onclick="goToMainMenu()">← Return</button>
+    </div>
+    
+    <div class="queue-container">
+        <div class="queue-header-box">
+            <div class="header-title">PAYMENT INFORMATION</div>
+            <div class="header-stats">
+                <div>Total / <span id="totalDisplay">0.000</span> Dh</div>
+            </div>
+        </div>
+        
+        <form id="paymentForm" class="payment-form">
+            <!-- Row 1 -->
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Mode</label>
+                    <select id="mode"><option value="">Select Mode...</option><option value="Client">Client</option><option value="Entrepreneur">Entrepreneur</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="name" placeholder="Enter name">
+                </div>
+                <div class="form-group">
+                    <label>Contact</label>
+                    <input type="text" id="contact" placeholder="Enter contact">
+                </div>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="Enter email">
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" id="address" placeholder="Enter address">
+                </div>
+                <div class="form-group">
+                    <label>City</label>
+                    <select id="city" onchange="autoFillRegion()"><option value="">Select City...</option>
+                        <option value="Agadir">Agadir</option>
+                        <option value="Aït Melloul">Aït Melloul</option>
+                        <option value="Aïn Harrouda">Aïn Harrouda</option>
+                        <option value="Aïn Leuh">Aïn Leuh</option>
+                        <option value="Aïn Taoujdat">Aïn Taoujdat</option>
+                        <option value="Aïn El Aouda">Aïn El Aouda</option>
+                        <option value="Akka">Akka</option>
+                        <option value="Assa">Assa</option>
+                        <option value="Ait Ourir">Ait Ourir</option>
+                        <option value="Ait Iaaza">Ait Iaaza</option>
+                        <option value="Aousserd">Aousserd</option>
+                        <option value="Azemmour">Azemmour</option>
+                        <option value="Azrou">Azrou</option>
+                        <option value="Beni Ayat">Beni Ayat</option>
+                        <option value="Ben Guerir">Ben Guerir</option>
+                        <option value="Berrechid">Berrechid</option>
+                        <option value="Berkane">Berkane</option>
+                        <option value="Béni Mellal">Béni Mellal</option>
+                        <option value="Bir Anzarane">Bir Anzarane</option>
+                        <option value="Bir Jdid">Bir Jdid</option>
+                        <option value="Bouarfa">Bouarfa</option>
+                        <option value="Boufakrane">Boufakrane</option>
+                        <option value="Bouizakarne">Bouizakarne</option>
+                        <option value="Boujad">Boujad</option>
+                        <option value="Boulanouare">Boulanouare</option>
+                        <option value="Bouskoura">Bouskoura</option>
+                        <option value="Bouznika">Bouznika</option>
+                        <option value="Casablanca">Casablanca</option>
+                        <option value="Chefchaouen">Chefchaouen</option>
+                        <option value="Dar Bouazza">Dar Bouazza</option>
+                        <option value="Dcheira El Jihadia">Dcheira El Jihadia</option>
+                        <option value="Drargua">Drargua</option>
+                        <option value="El Hajeb">El Hajeb</option>
+                        <option value="El Jadida">El Jadida</option>
+                        <option value="El Kelâa des Sraghna">El Kelâa des Sraghna</option>
+                        <option value="Errachidia">Errachidia</option>
+                        <option value="Es-Semara">Es-Semara</option>
+                        <option value="Fès">Fès</option>
+                        <option value="Fnideq">Fnideq</option>
+                        <option value="Ghafsai">Ghafsai</option>
+                        <option value="Guelmim">Guelmim</option>
+                        <option value="Inezgane">Inezgane</option>
+                        <option value="Kalaat Mgouna">Kalaat Mgouna</option>
+                        <option value="Karia">Karia</option>
+                        <option value="Kénitra">Kénitra</option>
+                        <option value="Khemisset">Khemisset</option>
+                        <option value="Khouribga">Khouribga</option>
+                        <option value="Ksar El Kébir">Ksar El Kébir</option>
+                        <option value="Laâyoune">Laâyoune</option>
+                        <option value="Larache">Larache</option>
+                        <option value="Loulad">Loulad</option>
+                        <option value="Marrakech">Marrakech</option>
+                        <option value="Martil">Martil</option>
+                        <option value="M'diq">M'diq</option>
+                        <option value="Meknès">Meknès</option>
+                        <option value="Midelt">Midelt</option>
+                        <option value="Mohammedia">Mohammedia</option>
+                        <option value="Moulay Bousselham">Moulay Bousselham</option>
+                        <option value="Nador">Nador</option>
+                        <option value="Ouarzazate">Ouarzazate</option>
+                        <option value="Oujda">Oujda</option>
+                        <option value="Oulad Ayyad">Oulad Ayyad</option>
+                        <option value="Oulad Frej">Oulad Frej</option>
+                        <option value="Oulad Ghanem">Oulad Ghanem</option>
+                        <option value="Oulad H'Riz Sahel">Oulad H'Riz Sahel</option>
+                        <option value="Oulad M'Rabet">Oulad M'Rabet</option>
+                        <option value="Oulad Teima">Oulad Teima</option>
+                        <option value="Oulad Yaich">Oulad Yaich</option>
+                        <option value="Rabat">Rabat</option>
+                        <option value="Salé">Salé</option>
+                        <option value="Safi">Safi</option>
+                        <option value="Settat">Settat</option>
+                        <option value="Sefrou">Sefrou</option>
+                        <option value="Sidi Ali Ban Hamdouche">Sidi Ali Ban Hamdouche</option>
+                        <option value="Sidi Allal El Bahraoui">Sidi Allal El Bahraoui</option>
+                        <option value="Sidi Bennour">Sidi Bennour</option>
+                        <option value="Sidi Bou Othmane">Sidi Bou Othmane</option>
+                        <option value="Sidi Kacem">Sidi Kacem</option>
+                        <option value="Sidi Moussa">Sidi Moussa</option>
+                        <option value="Sidi Rahhal Chataï">Sidi Rahhal Chataï</option>
+                        <option value="Sidi Smaïl">Sidi Smaïl</option>
+                        <option value="Sidi Slimane">Sidi Slimane</option>
+                        <option value="Sidi Yahya">Sidi Yahya</option>
+                        <option value="Sidi Yahya El Gharb">Sidi Yahya El Gharb</option>
+                        <option value="Skhirate">Skhirate</option>
+                        <option value="Smara">Smara</option>
+                        <option value="Tahla">Tahla</option>
+                        <option value="Tan-Tan">Tan-Tan</option>
+                        <option value="Tanger">Tanger</option>
+                        <option value="Taza">Taza</option>
+                        <option value="Taourirt">Taourirt</option>
+                        <option value="Témara">Témara</option>
+                        <option value="Tétouan">Tétouan</option>
+                        <option value="Tiflet">Tiflet</option>
+                        <option value="Tinghir">Tinghir</option>
+                        <option value="Tiznit">Tiznit</option>
+                        <option value="Tameslouht">Tameslouht</option>
+                        <option value="Taroudant">Taroudant</option>
+                        <option value="Youssoufia">Youssoufia</option>
+                        <option value="Zaio">Zaio</option>
+                        <option value="Zeghanghane">Zeghanghane</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Region</label>
+                    <input type="text" id="region" placeholder="Auto-filled from city">
+                </div>
+                <div class="form-group">
+                    <label>Total Pictures</label>
+                    <input type="number" id="totalPictures" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>Total M²</label>
+                    <input type="number" id="totalM2" placeholder="Number in M²" step="0.01">
+                </div>
+            </div>
+
+            <!-- Row 4 -->
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Invoice ID</label>
+                    <input type="text" id="invoiceId" placeholder="Text & number">
+                </div>
+                <div class="form-group">
+                    <label>Request ID</label>
+                    <input type="text" id="requestId" placeholder="Text & Number">
+                </div>
+                <div class="form-group">
+                    <label>Interaction ID</label>
+                    <input type="text" id="interactionId" placeholder="Text & Number">
+                </div>
+            </div>
+
+            <!-- Row 5: ✅ CONFIRMATION - START - END -->
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Confirmation Date</label>
+                    <input type="date" id="confirmationDate">
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="date" id="endDate">
+                </div>
+            </div>
+
+            <!-- Row 6: Payments -->
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>1st Payment</label>
+                    <input type="number" id="payment1" placeholder="Amount in Dh" onchange="calculateTotal()">
+                </div>
+                <div class="form-group">
+                    <label>2nd Payment</label>
+                    <input type="number" id="payment2" placeholder="Amount in Dh" onchange="calculateTotal()">
+                </div>
+                <div class="form-group">
+                    <label>Final Payment</label>
+                    <input type="number" id="payment3" placeholder="Amount in Dh" onchange="calculateTotal()">
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+                <button type="button" class="action-btn save-btn" onclick="savePayment()">Save</button>
+                <button type="button" class="action-btn complete-btn" id="completeBtn" onclick="completePayment()" disabled>Completed</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 🔹 COMPLETED SECTION -->
+<div id="completedSection" class="section-view">
+    <div class="section-header">
+        <button class="back-btn" onclick="goToMainMenu()">← Return</button>
+    </div>
+    <div class="queue-container">
+        <div class="queue-header-box">
+            <div class="header-title">COMPLETED PAYMENTS</div>
+            <div class="header-stats"><div>Total Records: <span id="completedCount">0</span></div></div>
+        </div>
+        <div class="completed-list">
+            <table class="completed-table">
+                <thead>
+                    <tr><th>Mode</th><th>Name</th><th>Contact</th><th>Invoice ID</th><th>Total M²</th><th>Price (Total Paid)</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody id="completedTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://puymabrkwtpvhropcvqk.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk";
+const DB = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentRecordId = null;
+
+// Navigation
+function showPayment() {
+    document.getElementById('mainMenu').style.display = 'none';
+    document.getElementById('paymentSection').classList.add('active');
+    document.getElementById('completedSection').classList.remove('active');
+    resetForm();
+}
+
+function showCompleted() {
+    document.getElementById('mainMenu').style.display = 'none';
+    document.getElementById('paymentSection').classList.remove('active');
+    document.getElementById('completedSection').classList.add('active');
+    loadCompletedRecords();
+}
+
+function goToMainMenu() {
+    document.getElementById('mainMenu').style.display = 'flex';
+    document.getElementById('paymentSection').classList.remove('active');
+    document.getElementById('completedSection').classList.remove('active');
+}
+
+// Region Map
+const cityRegionMap = {
+    'Agadir': 'Souss-Massa', 'Aït Melloul': 'Souss-Massa', 'Aïn Harrouda': 'Casablanca-Settat',
+    'Aïn Leuh': 'Fès-Meknès', 'Aïn Taoujdat': 'Fès-Meknès', 'Aïn El Aouda': 'Rabat-Salé-Kénitra',
+    'Akka': 'Guelmim-Oued Noun', 'Assa': 'Guelmim-Oued Noun', 'Ait Ourir': 'Marrakech-Safi',
+    'Ait Iaaza': 'Souss-Massa', 'Aousserd': 'Dakhla-Oued Ed-Dahab', 'Azemmour': 'Casablanca-Settat',
+    'Azrou': 'Fès-Meknès', 'Beni Ayat': 'Béni Mellal-Khénifra', 'Ben Guerir': 'Marrakech-Safi',
+    'Berrechid': 'Casablanca-Settat', 'Berkane': 'Oriental', 'Béni Mellal': 'Béni Mellal-Khénifra',
+    'Bir Anzarane': 'Laâyoune-Sakia El Hamra', 'Bir Jdid': 'Casablanca-Settat', 'Bouarfa': 'Oriental',
+    'Boufakrane': 'Fès-Meknès', 'Bouizakarne': 'Guelmim-Oued Noun', 'Boujad': 'Béni Mellal-Khénifra',
+    'Boulanouare': 'Rabat-Salé-Kénitra', 'Bouskoura': 'Casablanca-Settat', 'Bouznika': 'Casablanca-Settat',
+    'Casablanca': 'Casablanca-Settat', 'Chefchaouen': 'Tanger-Tétouan-Al Hoceïma', 'Dar Bouazza': 'Casablanca-Settat',
+    'Dcheira El Jihadia': 'Souss-Massa', 'Drargua': 'Souss-Massa', 'El Hajeb': 'Fès-Meknès',
+    'El Jadida': 'Casablanca-Settat', 'El Kelâa des Sraghna': 'Marrakech-Safi', 'Errachidia': 'Drâa-Tafilalet',
+    'Es-Semara': 'Laâyoune-Sakia El Hamra', 'Fès': 'Fès-Meknès', 'Fnideq': 'Tanger-Tétouan-Al Hoceïma',
+    'Ghafsai': 'Fès-Meknès', 'Guelmim': 'Guelmim-Oued Noun', 'Inezgane': 'Souss-Massa',
+    'Kalaat Mgouna': 'Drâa-Tafilalet', 'Karia': 'Rabat-Salé-Kénitra', 'Kénitra': 'Rabat-Salé-Kénitra',
+    'Khemisset': 'Rabat-Salé-Kénitra', 'Khouribga': 'Béni Mellal-Khénifra', 'Ksar El Kébir': 'Tanger-Tétouan-Al Hoceïma',
+    'Laâyoune': 'Laâyoune-Sakia El Hamra', 'Larache': 'Tanger-Tétouan-Al Hoceïma', 'Loulad': 'Casablanca-Settat',
+    'Marrakech': 'Marrakech-Safi', 'Martil': 'Tanger-Tétouan-Al Hoceïma', 'M\'diq': 'Tanger-Tétouan-Al Hoceïma',
+    'Meknès': 'Fès-Meknès', 'Midelt': 'Drâa-Tafilalet', 'Mohammedia': 'Casablanca-Settat',
+    'Moulay Bousselham': 'Rabat-Salé-Kénitra', 'Nador': 'Oriental', 'Ouarzazate': 'Drâa-Tafilalet',
+    'Oujda': 'Oriental', 'Oulad Ayyad': 'Marrakech-Safi', 'Oulad Frej': 'Casablanca-Settat',
+    'Oulad Ghanem': 'Casablanca-Settat', 'Oulad H\'Riz Sahel': 'Rabat-Salé-Kénitra', 'Oulad M\'Rabet': 'Casablanca-Settat',
+    'Oulad Teima': 'Souss-Massa', 'Oulad Yaich': 'Béni Mellal-Khénifra', 'Rabat': 'Rabat-Salé-Kénitra',
+    'Salé': 'Rabat-Salé-Kénitra', 'Safi': 'Marrakech-Safi', 'Settat': 'Casablanca-Settat',
+    'Sefrou': 'Fès-Meknès', 'Sidi Ali Ban Hamdouche': 'Casablanca-Settat', 'Sidi Allal El Bahraoui': 'Rabat-Salé-Kénitra',
+    'Sidi Bennour': 'Casablanca-Settat', 'Sidi Bou Othmane': 'Marrakech-Safi', 'Sidi Kacem': 'Rabat-Salé-Kénitra',
+    'Sidi Moussa': 'Casablanca-Settat', 'Sidi Rahhal Chataï': 'Casablanca-Settat', 'Sidi Smaïl': 'Casablanca-Settat',
+    'Sidi Slimane': 'Rabat-Salé-Kénitra', 'Sidi Yahya': 'Casablanca-Settat', 'Sidi Yahya El Gharb': 'Rabat-Salé-Kénitra',
+    'Skhirate': 'Rabat-Salé-Kénitra', 'Smara': 'Laâyoune-Sakia El Hamra', 'Tahla': 'Fès-Meknès',
+    'Tan-Tan': 'Guelmim-Oued Noun', 'Tanger': 'Tanger-Tétouan-Al Hoceïma', 'Taza': 'Fès-Meknès',
+    'Taourirt': 'Oriental', 'Témara': 'Rabat-Salé-Kénitra', 'Tétouan': 'Tanger-Tétouan-Al Hoceïma',
+    'Tiflet': 'Rabat-Salé-Kénitra', 'Tinghir': 'Drâa-Tafilalet', 'Tiznit': 'Souss-Massa',
+    'Tameslouht': 'Marrakech-Safi', 'Taroudant': 'Souss-Massa', 'Youssoufia': 'Marrakech-Safi',
+    'Zaio': 'Oriental', 'Zeghanghane': 'Oriental'
+};
+
+function autoFillRegion() {
+    const city = document.getElementById('city').value;
+    document.getElementById('region').value = cityRegionMap[city] || '';
+}
+
+function calculateTotal() {
+    const p1 = parseFloat(document.getElementById('payment1').value) || 0;
+    const p2 = parseFloat(document.getElementById('payment2').value) || 0;
+    const p3 = parseFloat(document.getElementById('payment3').value) || 0;
+    document.getElementById('totalDisplay').textContent = (p1 + p2 + p3).toFixed(3);
+}
+
+async function savePayment() {
+    const formData = {
+        mode: document.getElementById('mode').value,
+        name: document.getElementById('name').value,
+        contact: document.getElementById('contact').value,
+        email: document.getElementById('email').value,
+        address: document.getElementById('address').value,
+        city: document.getElementById('city').value,
+        region: document.getElementById('region').value,
+        total_pictures: document.getElementById('totalPictures').value,
+        total_m2: document.getElementById('totalM2').value,
+        invoice_id: document.getElementById('invoiceId').value,
+        request_id: document.getElementById('requestId').value,
+        interaction_id: document.getElementById('interactionId').value,
+        start_date: document.getElementById('startDate').value,
+        end_date: document.getElementById('endDate').value,
+        confirmation_date: document.getElementById('confirmationDate').value,
+        payment_1: document.getElementById('payment1').value,
+        payment_2: document.getElementById('payment2').value,
+        payment_3: document.getElementById('payment3').value,
+        total: (parseFloat(document.getElementById('payment1').value) || 0) + 
+               (parseFloat(document.getElementById('payment2').value) || 0) + 
+               (parseFloat(document.getElementById('payment3').value) || 0),
+        status: 'saved'
+    };
+
+    if (!formData.mode || !formData.name || !formData.contact) {
+        alert("Please fill Mode, Name, and Contact.");
+        return;
+    }
+
+    try {
+        let result;
+        if (currentRecordId) {
+            result = await DB.from('payments').update(formData).eq('id', currentRecordId);
+        } else {
+            result = await DB.from('payments').insert([formData]).select();
+        }
+        if (result.error) throw result.error;
+        
+        currentRecordId = result.data ? result.data[0].id : currentRecordId;
+        
+        // Disable inputs (Read Mode)
+        document.querySelectorAll('#paymentForm input, #paymentForm select').forEach(el => el.disabled = true);
+        document.getElementById('completeBtn').disabled = false;
+        document.getElementById('completeBtn').classList.add('enabled');
+        alert("Saved successfully!");
+    } catch (err) {
+        alert("Error: " + err.message);
+    }
+}
+
+async function completePayment() {
+    if (!currentRecordId) return;
+    if (!confirm("Mark as completed?")) return;
+    try {
+        await DB.from('payments').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', currentRecordId);
+        alert("Marked as completed!");
+        goToMainMenu();
+    } catch (err) {
+        alert("Error: " + err.message);
+    }
+}
+
+async function loadCompletedRecords() {
+    const { data, error } = await DB.from('payments').select('*').eq('status', 'completed').order('created_at', { ascending: false });
+    if (error) return;
+    
+    const tbody = document.getElementById('completedTableBody');
+    tbody.innerHTML = '';
+    document.getElementById('completedCount').textContent = data.length;
+    
+    if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:40px;">No records</td></tr>';
+        return;
+    }
+    
+    data.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${r.mode}</td>
+            <td>${r.name}</td>
+            <td>${r.contact}</td>
+            <td>${r.invoice_id || '-'}</td>
+            <td>${r.total_m2 || '-'}</td>
+            <td style="font-weight:bold; color:#16a34a;">${r.total.toFixed(3)} Dh</td>
+            <td style="color:#16a34a;">Completed</td>
+            <td><button class="open-btn" onclick="openPayment('${r.id}')">Open</button></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+async function openPayment(id) {
+    const { data } = await DB.from('payments').select('*').eq('id', id).single();
+    if (!data) return;
+    
+    showPayment();
+    currentRecordId = id;
+    document.getElementById('mode').value = data.mode;
+    document.getElementById('name').value = data.name;
+    document.getElementById('contact').value = data.contact;
+    document.getElementById('email').value = data.email;
+    document.getElementById('address').value = data.address;
+    document.getElementById('city').value = data.city;
+    document.getElementById('region').value = data.region;
+    document.getElementById('totalPictures').value = data.total_pictures;
+    document.getElementById('totalM2').value = data.total_m2;
+    document.getElementById('invoiceId').value = data.invoice_id;
+    document.getElementById('requestId').value = data.request_id;
+    document.getElementById('interactionId').value = data.interaction_id;
+    document.getElementById('startDate').value = data.start_date;
+    document.getElementById('endDate').value = data.end_date;
+    document.getElementById('confirmationDate').value = data.confirmation_date;
+    document.getElementById('payment1').value = data.payment_1;
+    document.getElementById('payment2').value = data.payment_2;
+    document.getElementById('payment3').value = data.payment_3;
+    calculateTotal();
+    
+    document.querySelectorAll('#paymentForm input, #paymentForm select').forEach(el => el.disabled = true);
+    document.getElementById('completeBtn').disabled = false;
+    document.getElementById('completeBtn').classList.add('enabled');
+}
+
+function resetForm() {
+    document.getElementById('paymentForm').reset();
+    currentRecordId = null;
+    document.querySelectorAll('#paymentForm input, #paymentForm select').forEach(el => el.disabled = false);
+    document.getElementById('completeBtn').disabled = true;
+    document.getElementById('completeBtn').classList.remove('enabled');
+    document.getElementById('totalDisplay').textContent = '0.000';
+}
+</script>
+</body>
+</html>
