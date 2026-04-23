@@ -59,37 +59,13 @@ tr:hover td { background: #f9f9f9; }
 .add-charge-btn:hover { border-color: #9ca3af; background: #f9fafb; }
 
 /* Modal Styles */
-.modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-}
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
 .modal-overlay.active { display: flex; }
-.modal-box {
-    background: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    width: 400px;
-    max-width: 90%;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-}
+.modal-box { background: #fff; padding: 30px; border-radius: 12px; width: 400px; max-width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
 .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #111827; }
 .form-group { margin-bottom: 16px; }
 .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #374151; }
-.form-group input, .form-group select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-}
+.form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; }
 .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
 .modal-btn { padding: 10px 20px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .modal-btn.cancel { background: #e5e7eb; color: #374151; }
@@ -100,23 +76,18 @@ tr:hover td { background: #f9f9f9; }
 .search-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
 .search-tab { padding: 10px 24px; border: 1px solid #d1d5db; border-radius: 20px; background: #fff; cursor: pointer; font-size: 13px; font-weight: 600; }
 .search-tab.active { background: #111827; color: #fff; border-color: #111827; }
-
 .search-panel { display: none; justify-content: center; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
 .search-panel.active { display: flex; }
-
 .search-label { font-weight: 600; color: #374151; }
 .search-input { padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; }
 .search-submit { padding: 10px 24px; background: #111827; color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
 .search-submit:hover { background: #374151; }
-
 .months-horizontal { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
 .month-chip { padding: 10px 16px; border: 1px solid #d1d5db; border-radius: 6px; text-align: center; cursor: pointer; font-size: 13px; background: #fff; min-width: 70px; }
 .month-chip:hover { background: #f3f4f6; }
-
 .years-horizontal { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
 .year-chip { padding: 10px 20px; border: 1px solid #d1d5db; border-radius: 6px; text-align: center; cursor: pointer; font-size: 14px; background: #fff; }
 .year-chip:hover, .year-chip.active { background: #111827; color: #fff; border-color: #111827; }
-
 .result-label { text-align: center; margin-bottom: 20px; font-weight: 600; color: #059669; font-size: 15px; }
 .hidden { display: none !important; }
 </style>
@@ -144,112 +115,44 @@ tr:hover td { background: #f9f9f9; }
             </div>
         </div>
 
-        <!-- FRAME 1: PRINTER CONSUMABLES -->
         <div class="category-divider">
             <div class="category-title">PRINTER CONSUMABLES</div>
             <table>
-                <thead>
-                    <tr>
-                        <th style="width: 30%;">ITEM</th>
-                        <th style="width: 14%;">QUANTITY</th>
-                        <th style="width: 14%;">UNIT</th>
-                        <th style="width: 14%;">PRICE (DH)</th>
-                        <th style="width: 14%;">DATE</th>
-                        <th style="width: 14%;">ACTION</th>
-                    </tr>
-                </thead>
+                <thead><tr><th style="width:30%">ITEM</th><th style="width:14%">QUANTITY</th><th style="width:14%">UNIT</th><th style="width:14%">PRICE (DH)</th><th style="width:14%">DATE</th><th style="width:14%">ACTION</th></tr></thead>
                 <tbody id="consumablesBody"></tbody>
             </table>
         </div>
 
-        <!-- FRAME 2: MECHANICAL PARTS -->
         <div class="category-divider">
             <div class="category-title">MECHANICAL PARTS</div>
             <table>
-                <thead>
-                    <tr>
-                        <th style="width: 30%;">ITEM</th>
-                        <th style="width: 14%;">QUANTITY</th>
-                        <th style="width: 14%;">UNIT</th>
-                        <th style="width: 14%;">PRICE (DH)</th>
-                        <th style="width: 14%;">DATE</th>
-                        <th style="width: 14%;">ACTION</th>
-                    </tr>
-                </thead>
+                <thead><tr><th style="width:30%">ITEM</th><th style="width:14%">QUANTITY</th><th style="width:14%">UNIT</th><th style="width:14%">PRICE (DH)</th><th style="width:14%">DATE</th><th style="width:14%">ACTION</th></tr></thead>
                 <tbody id="mechanicalBody"></tbody>
             </table>
         </div>
 
-        <!-- FRAME 3: PRINTER ELECTRONICS -->
         <div class="category-divider">
             <div class="category-title">PRINTER ELECTRONICS</div>
             <table>
-                <thead>
-                    <tr>
-                        <th style="width: 30%;">ITEM</th>
-                        <th style="width: 14%;">QUANTITY</th>
-                        <th style="width: 14%;">UNIT</th>
-                        <th style="width: 14%;">PRICE (DH)</th>
-                        <th style="width: 14%;">DATE</th>
-                        <th style="width: 14%;">ACTION</th>
-                    </tr>
-                </thead>
+                <thead><tr><th style="width:30%">ITEM</th><th style="width:14%">QUANTITY</th><th style="width:14%">UNIT</th><th style="width:14%">PRICE (DH)</th><th style="width:14%">DATE</th><th style="width:14%">ACTION</th></tr></thead>
                 <tbody id="electronicsBody"></tbody>
             </table>
         </div>
     </div>
-    
-    <!-- ADDITIONAL CHARGE BUTTON -->
     <div class="add-charge-wrapper">
         <button class="add-charge-btn" onclick="openAddChargeModal()">+ Add Additional Charge</button>
     </div>
 </div>
 
-<!-- ADDITIONAL CHARGE MODAL -->
 <div id="addChargeModal" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-title">Add Additional Charge</div>
-        
-        <div class="form-group">
-            <label>Select Category *</label>
-            <select id="chargeCategory">
-                <option value="">Choose category...</option>
-                <option value="consumablesBody">PRINTER CONSUMABLES</option>
-                <option value="mechanicalBody">MECHANICAL PARTS</option>
-                <option value="electronicsBody">PRINTER ELECTRONICS</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label>Item Name *</label>
-            <input type="text" id="chargeItemName" placeholder="Enter item name">
-        </div>
-        
-        <div class="form-group">
-            <label>Quantity</label>
-            <input type="number" id="chargeQuantity" placeholder="0" min="0" step="0.1">
-        </div>
-        
-        <div class="form-group">
-            <label>Unit</label>
-            <select id="chargeUnit">
-                <option value="Piece">Piece</option>
-                <option value="Set">Set</option>
-                <option value="Roll">Roll</option>
-                <option value="Liters">Liters</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label>Price (DH) *</label>
-            <input type="number" id="chargePrice" placeholder="0.00" min="0" step="0.01">
-        </div>
-        
-        <div class="form-group">
-            <label>Date *</label>
-            <input type="date" id="chargeDate" value="">
-        </div>
-        
+        <div class="form-group"><label>Select Category *</label><select id="chargeCategory"><option value="">Choose category...</option><option value="consumablesBody">PRINTER CONSUMABLES</option><option value="mechanicalBody">MECHANICAL PARTS</option><option value="electronicsBody">PRINTER ELECTRONICS</option></select></div>
+        <div class="form-group"><label>Item Name *</label><input type="text" id="chargeItemName" placeholder="Enter item name"></div>
+        <div class="form-group"><label>Quantity (Reminder)</label><input type="number" id="chargeQuantity" placeholder="0" min="0" step="0.1"></div>
+        <div class="form-group"><label>Unit</label><select id="chargeUnit"><option value="Piece">Piece</option><option value="Set">Set</option><option value="Roll">Roll</option><option value="Liters">Liters</option></select></div>
+        <div class="form-group"><label>Price (DH) *</label><input type="number" id="chargePrice" placeholder="0.00" min="0" step="0.01"></div>
+        <div class="form-group"><label>Date *</label><input type="date" id="chargeDate"></div>
         <div class="modal-actions">
             <button class="modal-btn cancel" onclick="closeAddChargeModal()">Cancel</button>
             <button class="modal-btn confirm" onclick="saveAdditionalCharge()">Add Item</button>
@@ -258,37 +161,25 @@ tr:hover td { background: #f9f9f9; }
 </div>
 
 <div id="searchSection" class="section-view">
-    <div class="section-header">
-        <button class="back-btn" onclick="handleSearchReturn()">← Return</button>
-    </div>
-
+    <div class="section-header"><button class="back-btn" onclick="handleSearchReturn()">← Return</button></div>
     <div id="searchTools">
         <div class="search-nav">
             <button class="search-tab active" onclick="switchSearchMode('range')">📅 Dates (From/To)</button>
             <button class="search-tab" onclick="switchSearchMode('monthly')">📆 Monthly</button>
             <button class="search-tab" onclick="switchSearchMode('yearly')">🗓️ Yearly</button>
         </div>
-
         <div id="panel-range" class="search-panel active">
-            <span class="search-label">From:</span>
-            <input type="date" id="searchFrom" class="search-input">
-            <span class="search-label">To:</span>
-            <input type="date" id="searchTo" class="search-input">
+            <span class="search-label">From:</span><input type="date" id="searchFrom" class="search-input">
+            <span class="search-label">To:</span><input type="date" id="searchTo" class="search-input">
             <button class="search-submit" onclick="searchByRange()">Search</button>
         </div>
-
-        <div id="panel-monthly" class="search-panel">
-            <div class="months-horizontal" id="monthlyGrid"></div>
-        </div>
-
+        <div id="panel-monthly" class="search-panel"><div class="months-horizontal" id="monthlyGrid"></div></div>
         <div id="panel-yearly" class="search-panel">
             <div class="years-horizontal" id="yearlyGrid"></div>
             <div class="months-horizontal" id="yearlyMonthGrid" style="display:none; margin-top:10px;"></div>
         </div>
     </div>
-
     <div id="resultLabel" class="result-label hidden"></div>
-
     <div id="searchResultsContainer" class="hidden">
         <div class="queue-container">
             <div class="queue-header-box">
@@ -302,16 +193,7 @@ tr:hover td { background: #f9f9f9; }
                 </div>
             </div>
             <table>
-                <thead>
-                    <tr>
-                        <th>ITEM</th>
-                        <th>QUANTITY</th>
-                        <th>UNIT</th>
-                        <th>PRICE (DH)</th>
-                        <th>DATE</th>
-                        <th>AMOUNT</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>ITEM</th><th>QUANTITY</th><th>UNIT</th><th>PRICE (DH)</th><th>DATE</th><th>AMOUNT</th></tr></thead>
                 <tbody id="searchMaintenanceBody"></tbody>
             </table>
         </div>
@@ -319,26 +201,23 @@ tr:hover td { background: #f9f9f9; }
 </div>
 
 <script>
-const DB = window.supabase.createClient(
-    "https://puymabrkwtpvhropcvqk.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk"
-);
+// ✅ BULLETPROOF SUPABASE INITIALIZATION
+const SUPABASE_URL = "https://puymabrkwtpvhropcvqk.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk";
 
-const CONSUMABLES = [
-    "UV Ink (CMYK+W)", "Cleaning Solution", "Lint-free Wipes", 
-    "Ink Filters", "Waste Ink Bottle", "Spare Printhead"
-];
+let DB;
+try {
+    if (typeof supabase === 'undefined') throw new Error("Supabase CDN not loaded");
+    DB = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log("✅ Supabase client initialized successfully");
+} catch (err) {
+    console.error("❌ Supabase init failed:", err);
+    alert("Database connection failed. Check console.");
+}
 
-const MECHANICAL_PARTS = [
-    "8-Channel Ink Dampers", "Ink Pump & Tubes", "Y-axis & X-axis Belts", 
-    "Linear Guide Sliders", "UV Lamp Unit"
-];
-
-const PRINTER_ELECTRONICS = [
-    "Printhead Drive Board", "PCB Motherboard", "Printhead Data Cables", 
-    "Magnetic Limit Sensors", "Stepper Motor Drivers"
-];
-
+const CONSUMABLES = ["UV Ink (CMYK+W)", "Cleaning Solution", "Lint-free Wipes", "Ink Filters", "Waste Ink Bottle", "Spare Printhead"];
+const MECHANICAL_PARTS = ["8-Channel Ink Dampers", "Ink Pump & Tubes", "Y-axis & X-axis Belts", "Linear Guide Sliders", "UV Lamp Unit"];
+const PRINTER_ELECTRONICS = ["Printhead Drive Board", "PCB Motherboard", "Printhead Data Cables", "Magnetic Limit Sensors", "Stepper Motor Drivers"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 let currentMonth = new Date().toISOString().slice(0, 7);
 let currentSearchData = [];
@@ -352,22 +231,17 @@ document.addEventListener('DOMContentLoaded', () => {
     loadMonthData(currentMonth);
 });
 
-// Modal Functions
-window.openAddChargeModal = function() {
-    document.getElementById('addChargeModal').classList.add('active');
-};
-
-window.closeAddChargeModal = function() {
+window.openAddChargeModal = () => document.getElementById('addChargeModal').classList.add('active');
+window.closeAddChargeModal = () => {
     document.getElementById('addChargeModal').classList.remove('active');
-    // Clear form
     document.getElementById('chargeCategory').value = '';
     document.getElementById('chargeItemName').value = '';
     document.getElementById('chargeQuantity').value = '';
-    document.getElementById('chargeUnit').value = 'Piece';
     document.getElementById('chargePrice').value = '';
     document.getElementById('chargeDate').value = new Date().toISOString().slice(0,10);
 };
 
+// ✅ SAVE ADDITIONAL CHARGE (Amount = Price only)
 window.saveAdditionalCharge = async function() {
     const category = document.getElementById('chargeCategory').value;
     const itemName = document.getElementById('chargeItemName').value.trim();
@@ -376,52 +250,29 @@ window.saveAdditionalCharge = async function() {
     const price = parseFloat(document.getElementById('chargePrice').value) || 0;
     const date = document.getElementById('chargeDate').value;
 
-    if (!category) { alert("Please select a category."); return; }
-    if (!itemName) { alert("Please enter item name."); return; }
-    if (!price) { alert("Please enter price."); return; }
-
-    const amount = price;
-    const monthValue = `${date.slice(0,7)}-01`;
-    const categoryLabel = category.replace('Body','').toUpperCase();
+    if (!category || !itemName || !price) { alert("Please fill all required fields."); return; }
+    if (!DB) { alert("Database not connected."); return; }
 
     try {
+        // ✅ Amount is strictly PRICE (Quantity is ignored for math)
         const { error } = await DB.from('printer_maintenance').insert([{
-            month: monthValue,
-            category: categoryLabel,
-            item_name: itemName,
-            quantity: qty,
-            unit: unit,
-            price: price,
-            amount: amount,
-            entry_date: date
+            month: `${date.slice(0,7)}-01`, category: category.replace('Body','').toUpperCase(),
+            item_name: itemName, quantity: qty, unit, price, amount: price, entry_date: date
         }]);
-
         if (error) throw error;
-
-        // Add row to the correct table
+        
         const tbody = document.getElementById(category);
         const rowId = `row-${itemName.replace(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}`;
         const tr = document.createElement('tr');
         tr.id = rowId;
-        tr.innerHTML = `
-            <td style="font-weight:bold; font-family:'Times New Roman', serif;">${itemName}</td>
+        tr.innerHTML = `<td style="font-weight:bold; font-family:'Times New Roman', serif;">${itemName}</td>
             <td><div class="input-cell"><input type="number" class="qty-input" value="${qty}" min="0"></div><div class="saved-list" id="list-${rowId}"></div></td>
-            <td><div class="input-cell"><select class="unit-select"><option value="Piece" ${unit==='Piece'?'selected':''}>Piece</option><option value="Set" ${unit==='Set'?'selected':''}>Set</option><option value="Roll" ${unit==='Roll'?'selected':''}>Roll</option><option value="Liters" ${unit==='Liters'?'selected':''}>Liters</option></select></div></td>
+            <td><div class="input-cell"><select class="unit-select"><option value="Piece"${unit==='Piece'?' selected':''}>Piece</option><option value="Set"${unit==='Set'?' selected':''}>Set</option><option value="Roll"${unit==='Roll'?' selected':''}>Roll</option><option value="Liters"${unit==='Liters'?' selected':''}>Liters</option></select></div></td>
             <td><div class="input-cell"><input type="number" class="price-input" value="${price}" min="0" step="0.01"></div></td>
             <td><div class="input-cell"><input type="date" class="date-input" value="${date}"></div></td>
-            <td style="text-align:center;">
-                <div class="action-btns">
-                    <button class="action-btn save-btn" onclick="saveEntry('${rowId}', '${category}')" style="display:none;">SAVE</button>
-                    <button class="action-btn add-new-btn" onclick="resetRow('${rowId}')" style="display:inline-block;">ADD NEW</button>
-                </div>
-            </td>
-        `;
+            <td style="text-align:center;"><div class="action-btns"><button class="action-btn save-btn" style="display:none;">SAVE</button><button class="action-btn add-new-btn" style="display:inline-block;" onclick="resetRow('${rowId}')">ADD NEW</button></div></td>`;
         tbody.appendChild(tr);
-        
-        // Add to saved list
-        const list = document.getElementById(`list-${rowId}`);
-        list.innerHTML = `<div class="saved-row"><span>${date} (${qty} ${unit})</span> <span>${amount.toFixed(2)} Dh</span></div>`;
-        
+        document.getElementById(`list-${rowId}`).innerHTML = `<div class="saved-row"><span>${date} (${qty} ${unit})</span> <span>${price.toFixed(2)} Dh</span></div>`;
         closeAddChargeModal();
         updateTotal();
         alert('Item added successfully!');
@@ -438,12 +289,8 @@ window.goToMainMenu = function() {
 };
 
 window.handleSearchReturn = function() {
-    const resultsVisible = !document.getElementById('searchResultsContainer').classList.contains('hidden');
-    if (resultsVisible) {
+    if (!document.getElementById('searchResultsContainer').classList.contains('hidden')) {
         resetSearchState();
-        document.getElementById('searchTools').style.display = 'block';
-        document.getElementById('searchResultsContainer').classList.add('hidden');
-        document.getElementById('resultLabel').classList.add('hidden');
     } else {
         goToMainMenu();
     }
@@ -452,10 +299,7 @@ window.handleSearchReturn = function() {
 function resetSearchState() {
     document.getElementById('searchTools').style.display = 'block';
     document.querySelector('.search-nav').classList.remove('hidden');
-    document.querySelectorAll('.search-panel').forEach(p => {
-        p.classList.remove('hidden');
-        p.style.display = ''; 
-    });
+    document.querySelectorAll('.search-panel').forEach(p => { p.classList.remove('hidden'); p.style.display = ''; });
     document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
     document.querySelector('.search-tab').classList.add('active');
     document.getElementById('panel-range').classList.add('active');
@@ -488,27 +332,21 @@ function renderCategoryRows(tbodyId, itemList) {
         const rowId = `row-${item.replace(/[^a-zA-Z0-9]/g, '-')}`;
         const tr = document.createElement('tr');
         tr.id = rowId;
-        tr.innerHTML = `
-            <td style="font-weight:bold; font-family:'Times New Roman', serif;">${item}</td>
+        tr.innerHTML = `<td style="font-weight:bold; font-family:'Times New Roman', serif;">${item}</td>
             <td><div class="input-cell"><input type="number" class="qty-input" placeholder="0" min="0"></div><div class="saved-list" id="list-${rowId}"></div></td>
             <td><div class="input-cell"><select class="unit-select"><option value="Piece">Piece</option><option value="Set">Set</option><option value="Roll">Roll</option><option value="Liters">Liters</option></select></div></td>
             <td><div class="input-cell"><input type="number" class="price-input" placeholder="0.00" min="0" step="0.01"></div></td>
             <td><div class="input-cell"><input type="date" class="date-input" value="${new Date().toISOString().slice(0,10)}"></div></td>
-            <td style="text-align:center;">
-                <div class="action-btns">
-                    <button class="action-btn save-btn" onclick="saveEntry('${rowId}', '${tbodyId}')">SAVE</button>
-                    <button class="action-btn add-new-btn" onclick="resetRow('${rowId}')">ADD NEW</button>
-                </div>
-            </td>
-        `;
+            <td style="text-align:center;"><div class="action-btns"><button class="action-btn save-btn" onclick="saveEntry('${rowId}', '${tbodyId}')">SAVE</button><button class="action-btn add-new-btn" onclick="resetRow('${rowId}')">ADD NEW</button></div></td>`;
         tbody.appendChild(tr);
     });
 }
 
-// ✅ FIXED SAVE ENTRY FUNCTION
+// ✅ FIXED SAVE FUNCTION (Amount = Price only)
 window.saveEntry = async function(rowId, tableId) {
+    if (!DB) { alert("Database not connected."); return; }
     const row = document.getElementById(rowId);
-    // ✅ FIX: Get item name directly from first cell, not from span
+    // ✅ Get text directly from cell
     const itemName = row.cells[0].innerText.trim();
     const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
     const unit = row.querySelector('.unit-select').value;
@@ -517,27 +355,17 @@ window.saveEntry = async function(rowId, tableId) {
 
     if (!price) { alert("Please enter Price."); return; }
 
-    const amount = price;
-    const monthValue = `${date.slice(0,7)}-01`;
-    const category = tableId.replace('Body','').toUpperCase();
-
     try {
+        // ✅ Amount is strictly PRICE (Quantity is ignored for math)
         const { error } = await DB.from('printer_maintenance').insert([{
-            month: monthValue,
-            category: category,
-            item_name: itemName,
-            quantity: qty,
-            unit: unit,
-            price: price,
-            amount: amount,
-            entry_date: date
+            month: `${date.slice(0,7)}-01`, category: tableId.replace('Body','').toUpperCase(),
+            item_name: itemName, quantity: qty, unit, price, amount: price, entry_date: date
         }]);
-
         if (error) throw error;
-
         row.querySelector('.save-btn').style.display = 'inline-block';
         row.querySelector('.add-new-btn').style.display = 'inline-block';
-        addSavedEntryToList(rowId, date, qty, unit, price, amount);
+        const list = document.getElementById(`list-${rowId}`);
+        list.innerHTML = `<div class="saved-row"><span>${date} (${qty} ${unit})</span> <span>${price.toFixed(2)} Dh</span></div>`;
         updateTotal();
     } catch (err) {
         console.error(err);
@@ -562,20 +390,17 @@ window.resetRow = function(rowId) {
 };
 
 async function loadMonthData(month) {
-    if(!month) return;
+    if(!month || !DB) return;
     currentMonth = month;
-    const monthValue = `${month}-01`;
     document.querySelectorAll('.saved-list').forEach(el => el.innerHTML = '');
     document.querySelectorAll('.save-btn').forEach(btn => btn.style.display = 'inline-block');
     document.querySelectorAll('.add-new-btn').forEach(btn => btn.style.display = 'none');
 
     try {
-        const { data, error } = await DB.from('printer_maintenance').select('*').eq('month', monthValue);
+        const { data, error } = await DB.from('printer_maintenance').select('*').eq('month', `${month}-01`);
         if (error || !data) { updateTotal(); return; }
-
         const items = {};
         data.forEach(d => { if (!items[d.item_name]) items[d.item_name] = []; items[d.item_name].push(d); });
-
         for (const [itemName, entries] of Object.entries(items)) {
             let rowId = `row-${itemName.replace(/[^a-zA-Z0-9]/g, '-')}`;
             let row = document.getElementById(rowId);
@@ -592,10 +417,10 @@ async function loadMonthData(month) {
 }
 
 async function updateTotal() {
-    const monthValue = `${currentMonth}-01`;
-    const { data, error } = await DB.from('printer_maintenance').select('amount').eq('month', monthValue);
-    if (error || !data) return;
-    const total = data.reduce((sum, row) => sum + row.amount, 0);
+    if(!DB) return;
+    // ✅ Total sums 'amount' which is now equal to 'price'
+    const { data } = await DB.from('printer_maintenance').select('amount').eq('month', `${currentMonth}-01`);
+    const total = data ? data.reduce((s, r) => s + r.amount, 0) : 0;
     document.getElementById('headerTotal').textContent = total.toFixed(2);
 }
 
@@ -603,7 +428,6 @@ function initSearchTools() {
     renderMonthlyGrid();
     renderYearlyGrid();
 }
-
 window.switchSearchMode = function(mode) {
     document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.search-panel').forEach(p => p.classList.remove('active'));
@@ -611,184 +435,116 @@ window.switchSearchMode = function(mode) {
     event.target.classList.add('active');
     hideSearchResults();
 };
-
 function hideSearchResults() {
     document.getElementById('searchResultsContainer').classList.add('hidden');
     document.getElementById('resultLabel').classList.add('hidden');
 }
-
 function renderMonthlyGrid() {
-    const grid = document.getElementById('monthlyGrid');
-    grid.innerHTML = '';
-    const currentYear = new Date().getFullYear();
+    const grid = document.getElementById('monthlyGrid'); grid.innerHTML = '';
+    const cy = new Date().getFullYear();
     MONTHS.forEach((m, i) => {
-        const val = `${currentYear}-${String(i+1).padStart(2,'0')}`;
-        const chip = document.createElement('div');
-        chip.className = 'month-chip';
-        chip.textContent = m;
-        chip.onclick = () => executeSearch(val, `Monthly: ${m} ${currentYear}`);
-        grid.appendChild(chip);
+        const val = `${cy}-${String(i+1).padStart(2,'0')}`;
+        const chip = document.createElement('div'); chip.className = 'month-chip'; chip.textContent = m;
+        chip.onclick = () => executeSearch(val, `Monthly: ${m} ${cy}`); grid.appendChild(chip);
     });
 }
-
 function renderYearlyGrid() {
-    const grid = document.getElementById('yearlyGrid');
-    grid.innerHTML = '';
+    const grid = document.getElementById('yearlyGrid'); grid.innerHTML = '';
     for(let y = 2026; y <= 2036; y++) {
-        const chip = document.createElement('div');
-        chip.className = 'year-chip';
-        chip.textContent = y;
-        chip.onclick = () => selectYear(y);
-        grid.appendChild(chip);
+        const chip = document.createElement('div'); chip.className = 'year-chip'; chip.textContent = y;
+        chip.onclick = () => selectYear(y); grid.appendChild(chip);
     }
 }
-
 window.selectYear = function(year) {
     document.querySelectorAll('.year-chip').forEach(c => c.classList.remove('active'));
     event.target.classList.add('active');
-    
-    const monthGrid = document.getElementById('yearlyMonthGrid');
-    monthGrid.style.display = 'flex';
-    monthGrid.innerHTML = '';
-    
+    const mg = document.getElementById('yearlyMonthGrid'); mg.style.display = 'flex'; mg.innerHTML = '';
     MONTHS.forEach((m, i) => {
         const val = `${year}-${String(i+1).padStart(2,'0')}`;
-        const chip = document.createElement('div');
-        chip.className = 'month-chip';
-        chip.textContent = m;
-        chip.onclick = () => executeSearch(val, `Monthly: ${m} ${year}`);
-        monthGrid.appendChild(chip);
+        const chip = document.createElement('div'); chip.className = 'month-chip'; chip.textContent = m;
+        chip.onclick = () => executeSearch(val, `Monthly: ${m} ${year}`); mg.appendChild(chip);
     });
 };
-
 window.searchByRange = function() {
     const from = document.getElementById('searchFrom').value;
     const to = document.getElementById('searchTo').value;
-    if(!from || !to) { alert("Please select both From and To dates."); return; }
-    
+    if(!from || !to) { alert("Select dates."); return; }
     DB.from('printer_maintenance').select('*').gte('entry_date', from).lte('entry_date', to).order('entry_date', {ascending: false}).then(({ data, error }) => {
         if(error) { alert("Error: " + error.message); return; }
         renderSearchResults(data, `Range: ${from} to ${to}`);
     });
 };
-
 function executeSearch(monthVal, label) {
-    const monthDate = `${monthVal}-01`;
-    DB.from('printer_maintenance').select('*').eq('month', monthDate).order('entry_date', {ascending: false}).then(({ data, error }) => {
+    DB.from('printer_maintenance').select('*').eq('month', `${monthVal}-01`).order('entry_date', {ascending: false}).then(({ data, error }) => {
         if(error) { alert("Error: " + error.message); return; }
         renderSearchResults(data, label);
     });
 }
-
 function renderSearchResults(data, label) {
     currentSearchData = data || [];
-    const container = document.getElementById('searchResultsContainer');
-    const tbody = document.getElementById('searchMaintenanceBody');
-    const labelDiv = document.getElementById('resultLabel');
-    const totalSpan = document.getElementById('searchTotal');
-
     document.getElementById('searchTools').style.display = 'none';
-    labelDiv.textContent = `Showing results for: ${label}`;
-    labelDiv.classList.remove('hidden');
-    
-    tbody.innerHTML = '';
-    
+    document.getElementById('resultLabel').textContent = `Showing results for: ${label}`;
+    document.getElementById('resultLabel').classList.remove('hidden');
+    const tbody = document.getElementById('searchMaintenanceBody'); tbody.innerHTML = '';
     if(!data || data.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No results found</td></tr>';
-        totalSpan.textContent = '0.00';
-        container.classList.remove('hidden');
-        return;
+        document.getElementById('searchTotal').textContent = '0.00';
+        document.getElementById('searchResultsContainer').classList.remove('hidden'); return;
     }
-
     let total = 0;
     data.forEach(row => {
         total += row.amount;
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><strong>${row.item_name}</strong></td>
-            <td>${row.quantity}</td>
-            <td>${row.unit}</td>
-            <td>${row.price}</td>
-            <td>${row.entry_date || row.created_at.split('T')[0]}</td>
-            <td style="font-weight:bold; color:#059669;">${row.amount.toFixed(2)} Dh</td>
-        `;
+        tr.innerHTML = `<td><strong>${row.item_name}</strong></td><td>${row.quantity}</td><td>${row.unit}</td><td>${row.price}</td><td>${row.entry_date || row.created_at.split('T')[0]}</td><td style="font-weight:bold; color:#059669;">${row.amount.toFixed(2)} Dh</td>`;
         tbody.appendChild(tr);
     });
-
-    totalSpan.textContent = total.toFixed(2);
-    container.classList.remove('hidden');
+    document.getElementById('searchTotal').textContent = total.toFixed(2);
+    document.getElementById('searchResultsContainer').classList.remove('hidden');
 }
 
 window.exportCSV = function(source) {
     let data = [];
     if(source === 'current') {
-        const monthValue = `${currentMonth}-01`;
-        DB.from('printer_maintenance').select('*').eq('month', monthValue).then(({ data: result, error }) => {
-            if(error || !result) { alert("No data to export."); return; }
-            downloadCSV(result, `PrinterMaintenance_${currentMonth}`);
+        DB.from('printer_maintenance').select('*').eq('month', `${currentMonth}-01`).then(({  r, error }) => {
+            if(error || !r) return alert("No data.");
+            downloadCSV(r, `PrinterMaintenance_${currentMonth}`);
         });
     } else {
-        if(currentSearchData.length === 0) { alert("No data to export."); return; }
+        if(!currentSearchData.length) return alert("No data.");
         downloadCSV(currentSearchData, `PrinterMaintenance_Search`);
     }
 };
-
 function downloadCSV(data, filename) {
     let csv = 'Category,Item,Quantity,Unit,Price (DH),Date,Amount (DH)\n';
-    data.forEach(row => {
-        csv += `"${row.category}","${row.item_name}","${row.quantity}","${row.unit}","${row.price}","${row.entry_date || ''}","${row.amount}"\n`;
-    });
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
+    data.forEach(row => { csv += `"${row.category}","${row.item_name}","${row.quantity}","${row.unit}","${row.price}","${row.entry_date || ''}","${row.amount}"\n`; });
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `${filename}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = `${filename}.csv`; a.click();
 }
-
 window.exportPDF = function(source) {
     let data = [];
     if(source === 'current') {
-        const monthValue = `${currentMonth}-01`;
-        DB.from('printer_maintenance').select('*').eq('month', monthValue).then(({ data: result, error }) => {
-            if(error || !result) { alert("No data to export."); return; }
-            generatePDF(result, `Printer Maintenance - ${currentMonth}`);
+        DB.from('printer_maintenance').select('*').eq('month', `${currentMonth}-01`).then(({ data: r, error }) => {
+            if(error || !r) return alert("No data.");
+            generatePDF(r, `Printer Maintenance - ${currentMonth}`);
         });
     } else {
-        if(currentSearchData.length === 0) { alert("No data to export."); return; }
+        if(!currentSearchData.length) return alert("No data.");
         generatePDF(currentSearchData, `Printer Maintenance - Search Results`);
     }
 };
-
 function generatePDF(data, title) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text(title, 14, 20);
-    doc.setFontSize(10);
-    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 28);
-    
-    const tableData = data.map(r => [
-        r.category,
-        r.item_name, 
-        r.quantity, 
-        r.unit, 
-        `${r.price} DH`, 
-        r.entry_date || '', 
-        `${r.amount.toFixed(2)} DH`
-    ]);
-    
+    doc.setFontSize(18); doc.text(title, 14, 20);
+    doc.setFontSize(10); doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 28);
     doc.autoTable({
-        startY: 35,
-        head: [['Category', 'Item', 'Qty', 'Unit', 'Price', 'Date', 'Amount']],
-        body: tableData,
-        theme: 'grid',
-        headStyles: { fillColor: [17, 24, 39] },
+        startY: 35, head: [['Category', 'Item', 'Qty', 'Unit', 'Price', 'Date', 'Amount']],
+        body: data.map(r => [r.category, r.item_name, r.quantity, r.unit, `${r.price} DH`, r.entry_date || '', `${r.amount.toFixed(2)} DH`]),
+        theme: 'grid', headStyles: { fillColor: [17, 24, 39] },
         foot: [['', '', '', '', '', 'Total:', `${data.reduce((s,r) => s+r.amount, 0).toFixed(2)} DH`]],
         footStyles: { fillColor: [243, 244, 246], textColor: [0,0,0], fontStyle: 'bold' }
     });
-    
     doc.save(`${title.replace(/\s+/g, '_')}.pdf`);
 }
 </script>
