@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monthly Expenses</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
+body { background: #ffffff; padding: 20px 40px; color: #111827; }
+
+.main-menu { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
+.menu-btn { padding: 16px 40px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; color: #374151; }
+.menu-btn:hover { background: #e5e7eb; }
+
+.section-view { display: none; }
+.section-view.active { display: block; }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.back-btn { width: 90px; height: 34px; background: #e5e7eb; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.back-btn:hover { background: #d1d5db; }
+
+.queue-container { margin: 0 auto; width: 95%; max-width: 1300px; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #e0e0e0; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.queue-header-box { background: #e5e7eb; display: grid; grid-template-columns: 50% 50%; border-bottom: 1px solid #d1d5db; align-items: center; }
+.header-title { padding: 12px 30px; font-family: 'Times New Roman', serif; font-weight: bold; font-size: 1.1rem; letter-spacing: 2px; display: flex; align-items: center; justify-content: center; }
+.header-stats { padding: 12px 30px; font-family: 'Times New Roman', serif; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; border-left: 1px solid #d1d5db; flex-direction: column; gap: 8px; }
+
+.export-buttons { display: flex; gap: 8px; }
+.export-btn { padding: 6px 12px; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer; color: #374151; }
+.export-btn:hover { background: #111827; color: #fff; border-color: #111827; }
+
+table { width: 100%; border-collapse: collapse; }
+thead { background: #fafafa; }
+th { padding: 15px 10px; font-family: 'Times New Roman', serif; font-weight: bold; font-size: 0.85rem; border-bottom: 1px solid #e0e0e0; text-align: center; }
+td { padding: 8px; border-bottom: 1px solid #eee; font-size: 0.85rem; vertical-align: middle; }
+tr:hover td { background: #f9f9f9; }
+
+/* 🔹 COMPACT INPUTS - NO GAPS */
+.input-cell { display: flex; gap: 0; justify-content: center; align-items: center; }
+.input-cell input, .input-cell select { padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; width: 100%; margin: 0; }
+.price-input { max-width: 70px; }
+.date-input { max-width: 110px; }
+.note-input { max-width: 220px; }
+.name-input { max-width: 140px; font-weight: 600; }
+
+/* 🔹 ENABLED INPUTS - WHITE BACKGROUND */
+input:not(:disabled) { background: #ffffff; }
+input:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
+
+/* 🔹 ACTION BUTTONS */
+.action-btns { display: flex; gap: 4px; justify-content: center; align-items: center; flex-wrap: wrap; }
+.action-btn { border: none; padding: 6px 9px; border-radius: 4px; font-size: 9px; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; white-space: nowrap; }
+.save-btn { background: #2e7d32; }
+.edit-btn { background: #2563eb; display: none; }
+.delete-btn { background: #dc2626; display: none; }
+.add-new-btn { background: #16a34a; display: none; }
+.saved-list { margin-top: 4px; font-size: 11px; color: #4b5563; background: #f3f4f6; border-radius: 4px; padding: 4px; border: 1px solid #e5e7eb; max-height: 80px; overflow-y: auto; }
+.saved-row { display: flex; justify-content: space-between; border-bottom: 1px solid #e5e7eb; padding: 3px 0; cursor: pointer; transition: all 0.2s; }
+.saved-row:last-child { border-bottom: none; }
+.saved-row:hover { background: #e5e7eb; }
+.saved-row.selected { background: #dbeafe; border-left: 3px solid #2563eb; font-weight: 600; color: #1e40af; padding-left: 2px; }
+
+/* 🔹 BOTTOM CONTROLS */
+.bottom-controls { margin-top: 20px; display: flex; justify-content: center; gap: 16px; align-items: center; }
+.add-charge-btn, .reset-btn { padding: 10px 20px; background: #fff; border: 2px dashed #d1d5db; border-radius: 8px; color: #6b7280; font-weight: 600; cursor: pointer; font-size: 14px; }
+.add-charge-btn:hover, .reset-btn:hover { border-color: #9ca3af; background: #f9fafb; }
+.reset-btn { border-style: solid; border-color: #dc2626; color: #dc2626; }
+.reset-btn:hover { background: #fef2f2; }
+
+/* Search Styles */
+.search-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+.search-tab { padding: 10px 24px; border: 1px solid #d1d5db; border-radius: 20px; background: #fff; cursor: pointer; font-size: 13px; font-weight: 600; }
+.search-tab.active { background: #111827; color: #fff; border-color: #111827; }
+.search-panel { display: none; justify-content: center; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.search-panel.active { display: flex; }
+.search-label { font-weight: 600; color: #374151; }
+.search-input { padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 6px; font-size:14px; }
+.search-submit { padding: 10px 24px; background: #111827; color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+.search-submit:hover { background: #374151; }
+.months-horizontal { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.month-chip { padding: 10px 16px; border: 1px solid #d1d5db; border-radius: 6px; text-align: center; cursor: pointer; font-size: 13px; background: #fff; min-width: 70px; }
+.month-chip:hover { background: #f3f4f6; }
+.years-horizontal { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
+.year-chip { padding: 10px 20px; border: 1px solid #d1d5db; border-radius: 6px; text-align: center; cursor: pointer; font-size: 14px; background: #fff; }
+.year-chip:hover, .year-chip.active { background: #111827; color: #fff; border-color: #111827; }
+.result-label { text-align: center; margin-bottom: 20px; font-weight: 600; color: #059669; font-size: 15px; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div id="mainMenu" class="main-menu">
+    <button class="menu-btn" onclick="showCurrentMonth()">Current Month</button>
+    <button class="menu-btn" onclick="showSearch()">Monthly Search</button>
+</div>
+
+<div id="currentMonthSection" class="section-view">
+    <div class="section-header">
+        <button class="back-btn" onclick="goToMainMenu()">← Return</button>
+    </div>
+    <div class="queue-container">
+        <div class="queue-header-box">
+            <div class="header-title">MONTHLY EXPENSES</div>
+            <div class="header-stats">
+                <div>Total | <span id="headerTotal">0.00</span> Dh</div>
+                <div class="export-buttons">
+                    <button class="export-btn" onclick="exportPDF('current')">📄 PDF</button>
+                    <button class="export-btn" onclick="exportCSV('current')">📊 CSV</button>
+                </div>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 20%;">ITEMS</th>
+                    <th style="width: 30%;">MANDATORY NOTE</th>
+                    <th style="width: 12%;">PRICE (DH)</th>
+                    <th style="width: 15%;">DATE</th>
+                    <th style="width: 23%;">ACTION</th>
+                </tr>
+            </thead>
+            <tbody id="expensesBody"></tbody>
+        </table>
+    </div>
+    <div class="bottom-controls">
+        <button class="reset-btn" onclick="resetPage()">🔄 Reset Page</button>
+        <button class="add-charge-btn" onclick="addAdditionalCharge()">+ Add Additional Charge</button>
+    </div>
+</div>
+
+<div id="searchSection" class="section-view">
+    <div class="section-header">
+        <button class="back-btn" onclick="handleSearchReturn()">← Return</button>
+    </div>
+
+    <div id="searchTools">
+        <div class="search-nav">
+            <button class="search-tab active" onclick="switchSearchMode('range')">📅 Dates (From/To)</button>
+            <button class="search-tab" onclick="switchSearchMode('monthly')">📆 Monthly</button>
+            <button class="search-tab" onclick="switchSearchMode('yearly')">🗓️ Yearly</button>
+        </div>
+
+        <div id="panel-range" class="search-panel active">
+            <span class="search-label">From:</span>
+            <input type="date" id="searchFrom" class="search-input">
+            <span class="search-label">To:</span>
+            <input type="date" id="searchTo" class="search-input">
+            <button class="search-submit" onclick="searchByRange()">Search</button>
+        </div>
+
+        <div id="panel-monthly" class="search-panel">
+            <div class="months-horizontal" id="monthlyGrid"></div>
+        </div>
+
+        <div id="panel-yearly" class="search-panel">
+            <div class="years-horizontal" id="yearlyGrid"></div>
+            <div class="months-horizontal" id="yearlyMonthGrid" style="display:none; margin-top:10px;"></div>
+        </div>
+    </div>
+
+    <div id="resultLabel" class="result-label hidden"></div>
+
+    <div id="searchResultsContainer" class="hidden">
+        <div class="queue-container">
+            <div class="queue-header-box">
+                <div class="header-title">SEARCH RESULTS</div>
+                <div class="header-stats">
+                    <div>Total | <span id="searchTotal">0.00</span> Dh</div>
+                    <div class="export-buttons">
+                        <button class="export-btn" onclick="exportPDF('search')">📄 PDF</button>
+                        <button class="export-btn" onclick="exportCSV('search')">📊 CSV</button>
+                    </div>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ITEM</th>
+                        <th>NOTE</th>
+                        <th>PRICE (DH)</th>
+                        <th>DATE</th>
+                        <th>AMOUNT</th>
+                    </tr>
+                </thead>
+                <tbody id="searchExpensesBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+// ✅ SUPABASE INITIALIZATION
+const SUPABASE_URL = "https://puymabrkwtpvhropcvqk.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk";
+
+let DB;
+try {
+    if (typeof supabase === 'undefined') throw new Error("Supabase CDN not loaded");
+    DB = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log("✅ Supabase client initialized successfully");
+} catch (err) {
+    console.error("❌ Supabase init failed:", err);
+}
+
+const FIXED_ITEMS = [
+    "Monthly rent", "Office Internet", "Mobile subscription", "Ai Tools", "Paid Ads",
+    "Electricity & water", "Cleaning Materials", "Office Supplies", "Office groceries",
+    "building fees", "Maintenance / repairs"
+];
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+let currentMonth = new Date().toISOString().slice(0, 7);
+let currentSearchData = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderFixedRows('expensesBody');
+    initSearchTools();
+    loadMonthData(currentMonth);
+});
+
+// Navigation
+window.goToMainMenu = function() {
+    resetSearchState();
+    document.getElementById('mainMenu').style.display = 'flex';
+    document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
+};
+
+window.handleSearchReturn = function() {
+    if (!document.getElementById('searchResultsContainer').classList.contains('hidden')) {
+        resetSearchState();
+    } else {
+        goToMainMenu();
+    }
+};
+
+function resetSearchState() {
+    document.getElementById('searchTools').style.display = 'block';
+    document.querySelector('.search-nav').classList.remove('hidden');
+    document.querySelectorAll('.search-panel').forEach(p => { p.classList.remove('hidden'); p.style.display = ''; });
+    document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('.search-tab').classList.add('active');
+    document.getElementById('panel-range').classList.add('active');
+    document.getElementById('panel-monthly').classList.remove('active');
+    document.getElementById('panel-yearly').classList.remove('active');
+    document.getElementById('searchResultsContainer').classList.add('hidden');
+    document.getElementById('resultLabel').classList.add('hidden');
+    document.getElementById('yearlyMonthGrid').style.display = 'none';
+    document.querySelectorAll('.year-chip').forEach(c => c.classList.remove('active'));
+}
+
+window.showCurrentMonth = function() {
+    document.getElementById('mainMenu').style.display = 'none';
+    document.getElementById('currentMonthSection').classList.add('active');
+    document.getElementById('searchSection').classList.remove('active');
+    loadMonthData(currentMonth);
+};
+
+window.showSearch = function() {
+    document.getElementById('mainMenu').style.display = 'none';
+    document.getElementById('searchSection').classList.add('active');
+    document.getElementById('currentMonthSection').classList.remove('active');
+    resetSearchState();
+};
+
+// Render Fixed Rows - Inputs START ENABLED
+function renderFixedRows(tbodyId) {
+    const tbody = document.getElementById(tbodyId);
+    tbody.innerHTML = '';
+    FIXED_ITEMS.forEach(item => {
+        const rowId = `row-${item.replace(/[^a-zA-Z0-9]/g, '-')}`;
+        const tr = document.createElement('tr');
+        tr.id = rowId;
+        tr.dataset.isFixed = 'true';
+        tr.innerHTML = `
+            <td style="font-weight:bold; font-family:'Times New Roman', serif;">${item}</td>
+            <td><div class="input-cell"><input type="text" class="note-input" placeholder="Enter note..."></div><div class="saved-list" id="list-${rowId}"></div></td>
+            <td><div class="input-cell"><input type="number" class="price-input" placeholder="0.00" min="0" step="0.01"></div></td>
+            <td><div class="input-cell"><input type="date" class="date-input" value="${new Date().toISOString().slice(0,10)}"></div></td>
+            <td style="text-align:center;">
+                <div class="action-btns">
+                    <button class="action-btn save-btn" onclick="saveEntry('${rowId}')">SAVE</button>
+                    <button class="action-btn edit-btn" onclick="enableEditMode('${rowId}')">EDIT</button>
+                    <button class="action-btn add-new-btn" onclick="resetRow('${rowId}')">ADD NEW</button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Add Additional Charge - Inputs START ENABLED
+window.addAdditionalCharge = function() {
+    const tbody = document.getElementById('expensesBody');
+    const rowId = `row-additional-${Date.now()}`;
+    const tr = document.createElement('tr');
+    tr.id = rowId;
+    tr.dataset.isAdditional = 'true';
+    tr.innerHTML = `
+        <td><div class="input-cell"><input type="text" class="name-input" placeholder="Item name"></div></td>
+        <td><div class="input-cell"><input type="text" class="note-input" placeholder="Enter note..."></div><div class="saved-list" id="list-${rowId}"></div></td>
+        <td><div class="input-cell"><input type="number" class="price-input" placeholder="0.00" min="0" step="0.01"></div></td>
+        <td><div class="input-cell"><input type="date" class="date-input" value="${new Date().toISOString().slice(0,10)}"></div></td>
+        <td style="text-align:center;">
+            <div class="action-btns">
+                <button class="action-btn save-btn" onclick="saveEntry('${rowId}')">SAVE</button>
+                <button class="action-btn edit-btn" onclick="enableEditMode('${rowId}')">EDIT</button>
+                <button class="action-btn delete-btn" onclick="deleteEntry('${rowId}')">DELETE</button>
+            </div>
+        </td>
+    `;
+    tbody.appendChild(tr);
+};
+
+// Enable Edit Mode - Makes inputs editable and saved entries clickable
+window.enableEditMode = function(rowId) {
+    const row = document.getElementById(rowId);
+    
+    // ENABLE all inputs
+    row.querySelector('.note-input').disabled = false;
+    row.querySelector('.price-input').disabled = false;
+    row.querySelector('.date-input').disabled = false;
+    if (row.querySelector('.name-input')) {
+        row.querySelector('.name-input').disabled = false;
+    }
+    
+    // Show Save button, hide Edit
+    row.querySelector('.save-btn').style.display = 'inline-block';
+    row.querySelector('.edit-btn').style.display = 'none';
+    if (row.querySelector('.delete-btn')) row.querySelector('.delete-btn').style.display = 'none';
+    if (row.querySelector('.add-new-btn')) row.querySelector('.add-new-btn').style.display = 'none';
+    
+    // Add click listeners to saved rows to make them selectable
+    row.querySelectorAll('.saved-row').forEach(el => {
+        el.onclick = function() { selectSavedEntry(rowId, this); };
+    });
+};
+
+// Select Saved Entry for Editing
+window.selectSavedEntry = function(rowId, element) {
+    const row = document.getElementById(rowId);
+    
+    // Remove selection from others
+    row.querySelectorAll('.saved-row').forEach(el => el.classList.remove('selected'));
+    // Highlight clicked
+    element.classList.add('selected');
+    
+    // Get data from selected entry
+    const dbId = element.dataset.dbId;
+    const note = element.dataset.note || '';
+    const price = element.dataset.price || '0';
+    const date = element.dataset.date || new Date().toISOString().slice(0,10);
+    
+    // Populate inputs with selected data
+    row.querySelector('.note-input').value = note;
+    row.querySelector('.price-input').value = price;
+    row.querySelector('.date-input').value = date;
+    
+    // Store the ID we're editing
+    row.dataset.editingId = dbId;
+    
+    // Focus on note field
+    row.querySelector('.note-input').focus();
+};
+
+// Save Entry (Handles both INSERT and UPDATE)
+window.saveEntry = async function(rowId) {
+    if (!DB) { alert("Database not connected. Please test on your local server or hosted domain, not w3schools."); return; }
+    
+    const row = document.getElementById(rowId);
+    const editingId = row.dataset.editingId;
+    
+    const nameInput = row.querySelector('.name-input');
+    const itemName = nameInput ? nameInput.value.trim() : row.cells[0].innerText.trim();
+    const note = row.querySelector('.note-input').value.trim();
+    const price = parseFloat(row.querySelector('.price-input').value) || 0;
+    const date = row.querySelector('.date-input').value;
+
+    if (!itemName || !price) { alert("Please enter Item Name and Price."); return; }
+
+    try {
+        if (editingId) {
+            // UPDATE existing record
+            const { error } = await DB.from('monthly_expenses').update({
+                item_name: itemName,
+                note: note,
+                price: price,
+                amount: price,
+                entry_date: date,
+                updated_at: new Date().toISOString()
+            }).eq('id', editingId);
+            
+            if (error) throw error;
+            delete row.dataset.editingId;
+        } else {
+            // INSERT new record
+            const { error, data } = await DB.from('monthly_expenses').insert([{
+                month: `${date.slice(0,7)}-01`,
+                item_name: itemName,
+                note: note,
+                price: price,
+                amount: price,
+                entry_date: date
+            }]).select();
+            
+            if (error) throw error;
+            if (data && data[0]) {
+                row.dataset.dbId = data[0].id;
+            }
+        }
+
+        // Disable inputs after save
+        disableRowInputs(rowId);
+        
+        // Show appropriate buttons
+        row.querySelector('.save-btn').style.display = 'inline-block';
+        row.querySelector('.edit-btn').style.display = 'inline-block';
+        if (row.dataset.isAdditional === 'true') {
+            row.querySelector('.delete-btn').style.display = 'inline-block';
+        } else {
+            row.querySelector('.add-new-btn').style.display = 'inline-block';
+        }
+
+        // Clear selection
+        row.querySelectorAll('.saved-row').forEach(el => el.classList.remove('selected'));
+        delete row.dataset.editingId;
+
+        // Refresh history list
+        await loadRowHistory(rowId, itemName);
+        updateTotal();
+        
+    } catch (err) {
+        console.error(err);
+        alert("Error saving: " + err.message + "\n\nNote: If testing on w3schools, CORS will block requests. Please test on localhost or your domain.");
+    }
+};
+
+// Delete Entry
+window.deleteEntry = async function(rowId) {
+    if (!DB) { alert("Database not connected."); return; }
+    const row = document.getElementById(rowId);
+    const dbId = row.dataset.dbId;
+
+    if (!dbId) {
+        row.remove();
+        return;
+    }
+
+    if (!confirm("Are you sure you want to delete this item?")) return;
+
+    try {
+        const { error } = await DB.from('monthly_expenses').delete().eq('id', dbId);
+        if (error) throw error;
+        row.remove();
+        updateTotal();
+    } catch (err) {
+        console.error(err);
+        alert("Error deleting: " + err.message);
+    }
+};
+
+// Disable row inputs
+function disableRowInputs(rowId) {
+    const row = document.getElementById(rowId);
+    row.querySelector('.note-input').disabled = true;
+    row.querySelector('.price-input').disabled = true;
+    row.querySelector('.date-input').disabled = true;
+    if (row.querySelector('.name-input')) {
+        row.querySelector('.name-input').disabled = true;
+    }
+    // Remove click handlers
+    row.querySelectorAll('.saved-row').forEach(el => el.onclick = null);
+}
+
+// Reset Row (Add New)
+function resetRow(rowId) {
+    const row = document.getElementById(rowId);
+    const nameInput = row.querySelector('.name-input');
+    if(nameInput) nameInput.value = '';
+    row.querySelector('.note-input').value = '';
+    row.querySelector('.price-input').value = '';
+    row.querySelector('.add-new-btn').style.display = 'none';
+    row.querySelectorAll('.saved-row').forEach(el => el.classList.remove('selected'));
+}
+
+// Load History for a Specific Row
+async function loadRowHistory(rowId, itemName) {
+    if(!DB) return;
+    const listDiv = document.getElementById(`list-${rowId}`);
+    if(!listDiv) return;
+    
+    try {
+        const { data, error } = await DB.from('monthly_expenses')
+            .select('*')
+            .eq('month', `${currentMonth}-01`)
+            .eq('item_name', itemName)
+            .order('entry_date', { ascending: false });
+            
+        if (error || !data) { listDiv.innerHTML = ''; return; }
+        
+        listDiv.innerHTML = '';
+        data.forEach(e => {
+            const div = document.createElement('div');
+            div.className = 'saved-row';
+            div.dataset.dbId = e.id;
+            div.dataset.note = e.note || '';
+            div.dataset.price = e.price;
+            div.dataset.date = e.entry_date || e.created_at.split('T')[0];
+            div.innerHTML = `<span>${e.entry_date || e.created_at.split('T')[0]} | ${e.note || 'No note'}</span> <span>${e.amount.toFixed(2)} Dh</span>`;
+            listDiv.appendChild(div);
+        });
+    } catch (err) { console.error(err); }
+}
+
+// Reset Page - Clear everything but keep inputs ENABLED
+window.resetPage = function() {
+    if (!confirm("Are you sure you want to reset the page? All unsaved data will be lost.")) return;
+    
+    // Clear and ENABLE all inputs
+    document.querySelectorAll('.note-input, .price-input, .date-input, .name-input').forEach(input => {
+        input.disabled = false; // ENABLE inputs
+        if(input.type === 'date') {
+            input.value = new Date().toISOString().slice(0,10);
+        } else {
+            input.value = '';
+        }
+    });
+
+    // Clear saved lists
+    document.querySelectorAll('.saved-list').forEach(list => list.innerHTML = '');
+    document.querySelectorAll('.saved-row').forEach(el => { 
+        el.classList.remove('selected'); 
+        el.onclick = null; 
+    });
+    
+    // Reset buttons for fixed items
+    document.querySelectorAll('tr[data-is-fixed="true"] .save-btn').forEach(btn => btn.style.display = 'inline-block');
+    document.querySelectorAll('tr[data-is-fixed="true"] .edit-btn').forEach(btn => btn.style.display = 'none');
+    document.querySelectorAll('tr[data-is-fixed="true"] .add-new-btn').forEach(btn => btn.style.display = 'none');
+
+    // Reset buttons for additional items
+    document.querySelectorAll('tr[data-is-additional="true"] .save-btn').forEach(btn => btn.style.display = 'inline-block');
+    document.querySelectorAll('tr[data-is-additional="true"] .edit-btn').forEach(btn => btn.style.display = 'none');
+    document.querySelectorAll('tr[data-is-additional="true"] .delete-btn').forEach(btn => btn.style.display = 'inline-block');
+
+    // Reset total
+    document.getElementById('headerTotal').textContent = '0.00';
+};
+
+// Load Month Data
+async function loadMonthData(month) {
+    if(!month || !DB) return;
+    currentMonth = month;
+    document.querySelectorAll('.saved-list').forEach(el => el.innerHTML = '');
+    document.querySelectorAll('.save-btn').forEach(btn => btn.style.display = 'inline-block');
+    document.querySelectorAll('.edit-btn, .delete-btn, .add-new-btn').forEach(btn => btn.style.display = 'none');
+
+    try {
+        const { data, error } = await DB.from('monthly_expenses').select('*').eq('month', `${month}-01`);
+        if (error || !data) { updateTotal(); return; }
+
+        const items = {};
+        data.forEach(d => { if (!items[d.item_name]) items[d.item_name] = []; items[d.item_name].push(d); });
+
+        for (const [itemName, entries] of Object.entries(items)) {
+            let rowId = `row-${itemName.replace(/[^a-zA-Z0-9]/g, '-')}`;
+            let row = document.getElementById(rowId);
+            
+            if (!row && entries.length > 0) {
+                addAdditionalCharge();
+                const rows = document.querySelectorAll('#expensesBody tr');
+                row = rows[rows.length - 1];
+                rowId = row.id;
+            }
+            
+            if (row) {
+                if (entries[0].id) row.dataset.dbId = entries[0].id;
+                await loadRowHistory(rowId, itemName);
+                
+                if (entries.length > 0) {
+                    disableRowInputs(rowId);
+                    row.querySelector('.save-btn').style.display = 'inline-block';
+                    row.querySelector('.edit-btn').style.display = 'inline-block';
+                    if (row.dataset.isAdditional === 'true') {
+                        row.querySelector('.delete-btn').style.display = 'inline-block';
+                    } else {
+                        row.querySelector('.add-new-btn').style.display = 'inline-block';
+                    }
+                }
+            }
+        }
+        updateTotal();
+    } catch (err) { console.error(err); }
+}
+
+// Update Total
+async function updateTotal() {
+    if(!DB) return;
+    const { data } = await DB.from('monthly_expenses').select('amount').eq('month', `${currentMonth}-01`);
+    const total = data ? data.reduce((s, r) => s + r.amount, 0) : 0;
+    document.getElementById('headerTotal').textContent = total.toFixed(2);
+}
+
+// Search Functions
+function initSearchTools() { renderMonthlyGrid(); renderYearlyGrid(); }
+window.switchSearchMode = function(mode) {
+    document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.search-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`panel-${mode}`).classList.add('active');
+    event.target.classList.add('active');
+    hideSearchResults();
+};
+function hideSearchResults() {
+    document.getElementById('searchResultsContainer').classList.add('hidden');
+    document.getElementById('resultLabel').classList.add('hidden');
+}
+function renderMonthlyGrid() {
+    const grid = document.getElementById('monthlyGrid'); grid.innerHTML = '';
+    const cy = new Date().getFullYear();
+    MONTHS.forEach((m, i) => {
+        const val = `${cy}-${String(i+1).padStart(2,'0')}`;
+        const chip = document.createElement('div'); chip.className = 'month-chip'; chip.textContent = m;
+        chip.onclick = () => executeSearch(val, `Monthly: ${m} ${cy}`); grid.appendChild(chip);
+    });
+}
+function renderYearlyGrid() {
+    const grid = document.getElementById('yearlyGrid'); grid.innerHTML = '';
+    for(let y = 2026; y <= 2036; y++) {
+        const chip = document.createElement('div'); chip.className = 'year-chip'; chip.textContent = y;
+        chip.onclick = () => selectYear(y); grid.appendChild(chip);
+    }
+}
+window.selectYear = function(year) {
+    document.querySelectorAll('.year-chip').forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+    const mg = document.getElementById('yearlyMonthGrid'); mg.style.display = 'flex'; mg.innerHTML = '';
+    MONTHS.forEach((m, i) => {
+        const val = `${year}-${String(i+1).padStart(2,'0')}`;
+        const chip = document.createElement('div'); chip.className = 'month-chip'; chip.textContent = m;
+        chip.onclick = () => executeSearch(val, `Monthly: ${m} ${year}`); mg.appendChild(chip);
+    });
+};
+window.searchByRange = function() {
+    const from = document.getElementById('searchFrom').value;
+    const to = document.getElementById('searchTo').value;
+    if(!from || !to) { alert("Select dates."); return; }
+    DB.from('monthly_expenses').select('*').gte('entry_date', from).lte('entry_date', to).order('entry_date', {ascending: false}).then(({ data, error }) => {
+        if(error) { alert("Error: " + error.message); return; }
+        renderSearchResults(data, `Range: ${from} to ${to}`);
+    });
+};
+function executeSearch(monthVal, label) {
+    DB.from('monthly_expenses').select('*').eq('month', `${monthVal}-01`).order('entry_date', {ascending: false}).then(({ data, error }) => {
+        if(error) { alert("Error: " + error.message); return; }
+        renderSearchResults(data, label);
+    });
+}
+function renderSearchResults(data, label) {
+    currentSearchData = data || [];
+    document.getElementById('searchTools').style.display = 'none';
+    document.getElementById('resultLabel').textContent = `Showing results for: ${label}`;
+    document.getElementById('resultLabel').classList.remove('hidden');
+    const tbody = document.getElementById('searchExpensesBody'); tbody.innerHTML = '';
+    if(!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">No results found</td></tr>';
+        document.getElementById('searchTotal').textContent = '0.00';
+        document.getElementById('searchResultsContainer').classList.remove('hidden'); return;
+    }
+    let total = 0;
+    data.forEach(row => {
+        total += row.amount;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td><strong>${row.item_name}</strong></td><td>${row.note || '-'}</td><td>${row.price}</td><td>${row.entry_date || row.created_at.split('T')[0]}</td><td style="font-weight:bold; color:#059669;">${row.amount.toFixed(2)} Dh</td>`;
+        tbody.appendChild(tr);
+    });
+    document.getElementById('searchTotal').textContent = total.toFixed(2);
+    document.getElementById('searchResultsContainer').classList.remove('hidden');
+}
+
+// Export Functions
+window.exportCSV = function(source) {
+    let data = [];
+    if(source === 'current') {
+        DB.from('monthly_expenses').select('*').eq('month', `${currentMonth}-01`).then(({ data: r, error }) => {
+            if(error || !r) return alert("No data.");
+            downloadCSV(r, `MonthlyExpenses_${currentMonth}`);
+        });
+    } else {
+        if(!currentSearchData.length) return alert("No data.");
+        downloadCSV(currentSearchData, `MonthlyExpenses_Search`);
+    }
+};
+function downloadCSV(data, filename) {
+    let csv = 'Item,Note,Price (DH),Date,Amount (DH)\n';
+    data.forEach(row => { csv += `"${row.item_name}","${row.note || ''}","${row.price}","${row.entry_date || ''}","${row.amount}"\n`; });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = `${filename}.csv`; a.click();
+}
+window.exportPDF = function(source) {
+    let data = [];
+    if(source === 'current') {
+        DB.from('monthly_expenses').select('*').eq('month', `${currentMonth}-01`).then(({ data: r, error }) => {
+            if(error || !r) return alert("No data.");
+            generatePDF(r, `Monthly Expenses - ${currentMonth}`);
+        });
+    } else {
+        if(!currentSearchData.length) return alert("No data.");
+        generatePDF(currentSearchData, `Monthly Expenses - Search Results`);
+    }
+};
+function generatePDF(data, title) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(18); doc.text(title, 14, 20);
+    doc.setFontSize(10); doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 28);
+    doc.autoTable({
+        startY: 35, head: [['Item', 'Note', 'Price', 'Date', 'Amount']],
+        body: data.map(r => [r.item_name, r.note || '', `${r.price} DH`, r.entry_date || '', `${r.amount.toFixed(2)} DH`]),
+        theme: 'grid', headStyles: { fillColor: [17, 24, 39] },
+        foot: [['', '', '', 'Total:', `${data.reduce((s,r) => s+r.amount, 0).toFixed(2)} DH`]],
+        footStyles: { fillColor: [243, 244, 246], textColor: [0,0,0], fontStyle: 'bold' }
+    });
+    doc.save(`${title.replace(/\s+/g, '_')}.pdf`);
+}
+</script>
+</body>
+</html>
