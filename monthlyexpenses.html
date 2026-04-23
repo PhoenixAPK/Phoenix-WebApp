@@ -36,19 +36,15 @@ th { padding: 15px 10px; font-family: 'Times New Roman', serif; font-weight: bol
 td { padding: 8px; border-bottom: 1px solid #eee; font-size: 0.85rem; vertical-align: middle; }
 tr:hover td { background: #f9f9f9; }
 
-/* 🔹 COMPACT INPUTS - NO GAPS */
 .input-cell { display: flex; gap: 0; justify-content: center; align-items: center; }
-.input-cell input, .input-cell select { padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; width: 100%; margin: 0; }
+.input-cell input { padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; width: 100%; margin: 0; }
 .price-input { max-width: 70px; }
 .date-input { max-width: 110px; }
 .note-input { max-width: 220px; }
 .name-input { max-width: 140px; font-weight: 600; }
-
-/* 🔹 ENABLED INPUTS - WHITE BACKGROUND */
 input:not(:disabled) { background: #ffffff; }
 input:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
 
-/* 🔹 ACTION BUTTONS */
 .action-btns { display: flex; gap: 4px; justify-content: center; align-items: center; flex-wrap: wrap; }
 .action-btn { border: none; padding: 6px 9px; border-radius: 4px; font-size: 9px; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; white-space: nowrap; }
 .save-btn { background: #2e7d32; }
@@ -61,14 +57,10 @@ input:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
 .saved-row:hover { background: #e5e7eb; }
 .saved-row.selected { background: #dbeafe; border-left: 3px solid #2563eb; font-weight: 600; color: #1e40af; padding-left: 2px; }
 
-/* 🔹 BOTTOM CONTROLS */
 .bottom-controls { margin-top: 20px; display: flex; justify-content: center; gap: 16px; align-items: center; }
-.add-charge-btn, .reset-btn { padding: 10px 20px; background: #fff; border: 2px dashed #d1d5db; border-radius: 8px; color: #6b7280; font-weight: 600; cursor: pointer; font-size: 14px; }
-.add-charge-btn:hover, .reset-btn:hover { border-color: #9ca3af; background: #f9fafb; }
-.reset-btn { border-style: solid; border-color: #dc2626; color: #dc2626; }
-.reset-btn:hover { background: #fef2f2; }
+.add-charge-btn { padding: 10px 20px; background: #fff; border: 2px dashed #d1d5db; border-radius: 8px; color: #6b7280; font-weight: 600; cursor: pointer; font-size: 14px; }
+.add-charge-btn:hover { border-color: #9ca3af; background: #f9fafb; }
 
-/* Search Styles */
 .search-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
 .search-tab { padding: 10px 24px; border: 1px solid #d1d5db; border-radius: 20px; background: #fff; cursor: pointer; font-size: 13px; font-weight: 600; }
 .search-tab.active { background: #111827; color: #fff; border-color: #111827; }
@@ -124,7 +116,6 @@ input:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
         </table>
     </div>
     <div class="bottom-controls">
-        <button class="reset-btn" onclick="resetPage()">🔄 Reset Page</button>
         <button class="add-charge-btn" onclick="addAdditionalCharge()">+ Add Additional Charge</button>
     </div>
 </div>
@@ -133,14 +124,12 @@ input:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
     <div class="section-header">
         <button class="back-btn" onclick="handleSearchReturn()">← Return</button>
     </div>
-
     <div id="searchTools">
         <div class="search-nav">
             <button class="search-tab active" onclick="switchSearchMode('range')">📅 Dates (From/To)</button>
             <button class="search-tab" onclick="switchSearchMode('monthly')">📆 Monthly</button>
             <button class="search-tab" onclick="switchSearchMode('yearly')">🗓️ Yearly</button>
         </div>
-
         <div id="panel-range" class="search-panel active">
             <span class="search-label">From:</span>
             <input type="date" id="searchFrom" class="search-input">
@@ -148,19 +137,15 @@ input:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
             <input type="date" id="searchTo" class="search-input">
             <button class="search-submit" onclick="searchByRange()">Search</button>
         </div>
-
         <div id="panel-monthly" class="search-panel">
             <div class="months-horizontal" id="monthlyGrid"></div>
         </div>
-
         <div id="panel-yearly" class="search-panel">
             <div class="years-horizontal" id="yearlyGrid"></div>
             <div class="months-horizontal" id="yearlyMonthGrid" style="display:none; margin-top:10px;"></div>
         </div>
     </div>
-
     <div id="resultLabel" class="result-label hidden"></div>
-
     <div id="searchResultsContainer" class="hidden">
         <div class="queue-container">
             <div class="queue-header-box">
@@ -190,17 +175,21 @@ input:disabled { background: #f3f4f6; color: #6b7280; cursor: not-allowed; }
 </div>
 
 <script>
-// ✅ SUPABASE INITIALIZATION
+// ✅ SUPABASE CONFIGURATION
 const SUPABASE_URL = "https://puymabrkwtpvhropcvqk.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk";
 
+// Initialize Supabase
 let DB;
 try {
-    if (typeof supabase === 'undefined') throw new Error("Supabase CDN not loaded");
+    if (typeof supabase === 'undefined') {
+        throw new Error("Supabase library not loaded");
+    }
     DB = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    console.log("✅ Supabase client initialized successfully");
+    console.log("✅ Supabase initialized:", SUPABASE_URL);
 } catch (err) {
     console.error("❌ Supabase init failed:", err);
+    alert("Database connection failed: " + err.message);
 }
 
 const FIXED_ITEMS = [
@@ -214,6 +203,7 @@ let currentMonth = new Date().toISOString().slice(0, 7);
 let currentSearchData = [];
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("📄 Page loaded, initializing...");
     renderFixedRows('expensesBody');
     initSearchTools();
     loadMonthData(currentMonth);
@@ -263,7 +253,7 @@ window.showSearch = function() {
     resetSearchState();
 };
 
-// Render Fixed Rows - Inputs START ENABLED
+// Render Fixed Rows - Inputs ALWAYS ENABLED
 function renderFixedRows(tbodyId) {
     const tbody = document.getElementById(tbodyId);
     tbody.innerHTML = '';
@@ -281,7 +271,7 @@ function renderFixedRows(tbodyId) {
                 <div class="action-btns">
                     <button class="action-btn save-btn" onclick="saveEntry('${rowId}')">SAVE</button>
                     <button class="action-btn edit-btn" onclick="enableEditMode('${rowId}')">EDIT</button>
-                    <button class="action-btn add-new-btn" onclick="resetRow('${rowId}')">ADD NEW</button>
+                    <button class="action-btn add-new-btn" onclick="clearInputs('${rowId}')">ADD NEW</button>
                 </div>
             </td>
         `;
@@ -289,7 +279,7 @@ function renderFixedRows(tbodyId) {
     });
 }
 
-// Add Additional Charge - Inputs START ENABLED
+// Add Additional Charge - Inputs ALWAYS ENABLED
 window.addAdditionalCharge = function() {
     const tbody = document.getElementById('expensesBody');
     const rowId = `row-additional-${Date.now()}`;
@@ -312,17 +302,9 @@ window.addAdditionalCharge = function() {
     tbody.appendChild(tr);
 };
 
-// Enable Edit Mode - Makes inputs editable and saved entries clickable
+// Enable Edit Mode
 window.enableEditMode = function(rowId) {
     const row = document.getElementById(rowId);
-    
-    // ENABLE all inputs
-    row.querySelector('.note-input').disabled = false;
-    row.querySelector('.price-input').disabled = false;
-    row.querySelector('.date-input').disabled = false;
-    if (row.querySelector('.name-input')) {
-        row.querySelector('.name-input').disabled = false;
-    }
     
     // Show Save button, hide Edit
     row.querySelector('.save-btn').style.display = 'inline-block';
@@ -330,7 +312,7 @@ window.enableEditMode = function(rowId) {
     if (row.querySelector('.delete-btn')) row.querySelector('.delete-btn').style.display = 'none';
     if (row.querySelector('.add-new-btn')) row.querySelector('.add-new-btn').style.display = 'none';
     
-    // Add click listeners to saved rows to make them selectable
+    // Add click listeners to saved rows
     row.querySelectorAll('.saved-row').forEach(el => {
         el.onclick = function() { selectSavedEntry(rowId, this); };
     });
@@ -339,33 +321,28 @@ window.enableEditMode = function(rowId) {
 // Select Saved Entry for Editing
 window.selectSavedEntry = function(rowId, element) {
     const row = document.getElementById(rowId);
-    
-    // Remove selection from others
     row.querySelectorAll('.saved-row').forEach(el => el.classList.remove('selected'));
-    // Highlight clicked
     element.classList.add('selected');
     
-    // Get data from selected entry
     const dbId = element.dataset.dbId;
     const note = element.dataset.note || '';
     const price = element.dataset.price || '0';
     const date = element.dataset.date || new Date().toISOString().slice(0,10);
     
-    // Populate inputs with selected data
     row.querySelector('.note-input').value = note;
     row.querySelector('.price-input').value = price;
     row.querySelector('.date-input').value = date;
-    
-    // Store the ID we're editing
     row.dataset.editingId = dbId;
-    
-    // Focus on note field
     row.querySelector('.note-input').focus();
 };
 
-// Save Entry (Handles both INSERT and UPDATE)
+// Save Entry - ALWAYS keeps inputs enabled and clears them
 window.saveEntry = async function(rowId) {
-    if (!DB) { alert("Database not connected. Please test on your local server or hosted domain, not w3schools."); return; }
+    if (!DB) { 
+        alert("❌ Database not connected. Check console for details.");
+        console.error("DB object is null");
+        return; 
+    }
     
     const row = document.getElementById(rowId);
     const editingId = row.dataset.editingId;
@@ -379,22 +356,30 @@ window.saveEntry = async function(rowId) {
     if (!itemName || !price) { alert("Please enter Item Name and Price."); return; }
 
     try {
+        console.log("💾 Saving data...", { itemName, note, price, date, editingId });
+        
         if (editingId) {
-            // UPDATE existing record
-            const { error } = await DB.from('monthly_expenses').update({
+            // UPDATE existing
+            console.log("🔄 Updating record ID:", editingId);
+            const { data, error } = await DB.from('monthly_expenses').update({
                 item_name: itemName,
                 note: note,
                 price: price,
                 amount: price,
                 entry_date: date,
                 updated_at: new Date().toISOString()
-            }).eq('id', editingId);
+            }).eq('id', editingId).select();
             
-            if (error) throw error;
+            if (error) {
+                console.error("❌ Update error:", error);
+                throw error;
+            }
+            console.log("✅ Update successful:", data);
             delete row.dataset.editingId;
         } else {
-            // INSERT new record
-            const { error, data } = await DB.from('monthly_expenses').insert([{
+            // INSERT new
+            console.log("➕ Inserting new record");
+            const { data, error } = await DB.from('monthly_expenses').insert([{
                 month: `${date.slice(0,7)}-01`,
                 item_name: itemName,
                 note: note,
@@ -403,16 +388,20 @@ window.saveEntry = async function(rowId) {
                 entry_date: date
             }]).select();
             
-            if (error) throw error;
+            if (error) {
+                console.error("❌ Insert error:", error);
+                throw error;
+            }
+            console.log("✅ Insert successful:", data);
             if (data && data[0]) {
                 row.dataset.dbId = data[0].id;
             }
         }
 
-        // Disable inputs after save
-        disableRowInputs(rowId);
+        // ✅ CLEAR inputs and keep them ENABLED (never disable)
+        clearInputs(rowId);
         
-        // Show appropriate buttons
+        // Show buttons
         row.querySelector('.save-btn').style.display = 'inline-block';
         row.querySelector('.edit-btn').style.display = 'inline-block';
         if (row.dataset.isAdditional === 'true') {
@@ -421,17 +410,15 @@ window.saveEntry = async function(rowId) {
             row.querySelector('.add-new-btn').style.display = 'inline-block';
         }
 
-        // Clear selection
         row.querySelectorAll('.saved-row').forEach(el => el.classList.remove('selected'));
         delete row.dataset.editingId;
 
-        // Refresh history list
         await loadRowHistory(rowId, itemName);
-        updateTotal();
+        await updateTotal();
         
     } catch (err) {
-        console.error(err);
-        alert("Error saving: " + err.message + "\n\nNote: If testing on w3schools, CORS will block requests. Please test on localhost or your domain.");
+        console.error("💥 Save error:", err);
+        alert("❌ Error saving: " + err.message + "\n\nCheck browser console for details.");
     }
 };
 
@@ -459,31 +446,29 @@ window.deleteEntry = async function(rowId) {
     }
 };
 
-// Disable row inputs
-function disableRowInputs(rowId) {
-    const row = document.getElementById(rowId);
-    row.querySelector('.note-input').disabled = true;
-    row.querySelector('.price-input').disabled = true;
-    row.querySelector('.date-input').disabled = true;
-    if (row.querySelector('.name-input')) {
-        row.querySelector('.name-input').disabled = true;
-    }
-    // Remove click handlers
-    row.querySelectorAll('.saved-row').forEach(el => el.onclick = null);
-}
-
-// Reset Row (Add New)
-function resetRow(rowId) {
+// Clear Inputs - Keep them ENABLED and ready for new entry
+function clearInputs(rowId) {
     const row = document.getElementById(rowId);
     const nameInput = row.querySelector('.name-input');
     if(nameInput) nameInput.value = '';
     row.querySelector('.note-input').value = '';
     row.querySelector('.price-input').value = '';
-    row.querySelector('.add-new-btn').style.display = 'none';
+    row.querySelector('.date-input').value = new Date().toISOString().slice(0,10);
+    
+    // Remove selection
     row.querySelectorAll('.saved-row').forEach(el => el.classList.remove('selected'));
+    row.querySelectorAll('.saved-row').forEach(el => el.onclick = null);
+    
+    // Keep inputs ENABLED (never disable)
+    row.querySelector('.note-input').disabled = false;
+    row.querySelector('.price-input').disabled = false;
+    row.querySelector('.date-input').disabled = false;
+    if (row.querySelector('.name-input')) {
+        row.querySelector('.name-input').disabled = false;
+    }
 }
 
-// Load History for a Specific Row
+// Load History
 async function loadRowHistory(rowId, itemName) {
     if(!DB) return;
     const listDiv = document.getElementById(`list-${rowId}`);
@@ -496,7 +481,8 @@ async function loadRowHistory(rowId, itemName) {
             .eq('item_name', itemName)
             .order('entry_date', { ascending: false });
             
-        if (error || !data) { listDiv.innerHTML = ''; return; }
+        if (error) throw error;
+        if (!data) { listDiv.innerHTML = ''; return; }
         
         listDiv.innerHTML = '';
         data.forEach(e => {
@@ -509,58 +495,42 @@ async function loadRowHistory(rowId, itemName) {
             div.innerHTML = `<span>${e.entry_date || e.created_at.split('T')[0]} | ${e.note || 'No note'}</span> <span>${e.amount.toFixed(2)} Dh</span>`;
             listDiv.appendChild(div);
         });
-    } catch (err) { console.error(err); }
+    } catch (err) { console.error("Load history error:", err); }
 }
-
-// Reset Page - Clear everything but keep inputs ENABLED
-window.resetPage = function() {
-    if (!confirm("Are you sure you want to reset the page? All unsaved data will be lost.")) return;
-    
-    // Clear and ENABLE all inputs
-    document.querySelectorAll('.note-input, .price-input, .date-input, .name-input').forEach(input => {
-        input.disabled = false; // ENABLE inputs
-        if(input.type === 'date') {
-            input.value = new Date().toISOString().slice(0,10);
-        } else {
-            input.value = '';
-        }
-    });
-
-    // Clear saved lists
-    document.querySelectorAll('.saved-list').forEach(list => list.innerHTML = '');
-    document.querySelectorAll('.saved-row').forEach(el => { 
-        el.classList.remove('selected'); 
-        el.onclick = null; 
-    });
-    
-    // Reset buttons for fixed items
-    document.querySelectorAll('tr[data-is-fixed="true"] .save-btn').forEach(btn => btn.style.display = 'inline-block');
-    document.querySelectorAll('tr[data-is-fixed="true"] .edit-btn').forEach(btn => btn.style.display = 'none');
-    document.querySelectorAll('tr[data-is-fixed="true"] .add-new-btn').forEach(btn => btn.style.display = 'none');
-
-    // Reset buttons for additional items
-    document.querySelectorAll('tr[data-is-additional="true"] .save-btn').forEach(btn => btn.style.display = 'inline-block');
-    document.querySelectorAll('tr[data-is-additional="true"] .edit-btn').forEach(btn => btn.style.display = 'none');
-    document.querySelectorAll('tr[data-is-additional="true"] .delete-btn').forEach(btn => btn.style.display = 'inline-block');
-
-    // Reset total
-    document.getElementById('headerTotal').textContent = '0.00';
-};
 
 // Load Month Data
 async function loadMonthData(month) {
-    if(!month || !DB) return;
+    if(!month || !DB) {
+        console.error("Cannot load ", { month, DB });
+        return;
+    }
     currentMonth = month;
     document.querySelectorAll('.saved-list').forEach(el => el.innerHTML = '');
     document.querySelectorAll('.save-btn').forEach(btn => btn.style.display = 'inline-block');
     document.querySelectorAll('.edit-btn, .delete-btn, .add-new-btn').forEach(btn => btn.style.display = 'none');
 
     try {
+        console.log("📥 Loading data for month:", month);
         const { data, error } = await DB.from('monthly_expenses').select('*').eq('month', `${month}-01`);
-        if (error || !data) { updateTotal(); return; }
+        
+        if (error) {
+            console.error("❌ Load error:", error);
+            throw error;
+        }
+        
+        if (!data) { 
+            console.log("No data found");
+            await updateTotal(); 
+            return; 
+        }
+
+        console.log("✅ Loaded", data.length, "records");
 
         const items = {};
-        data.forEach(d => { if (!items[d.item_name]) items[d.item_name] = []; items[d.item_name].push(d); });
+        data.forEach(d => { 
+            if (!items[d.item_name]) items[d.item_name] = []; 
+            items[d.item_name].push(d); 
+        });
 
         for (const [itemName, entries] of Object.entries(items)) {
             let rowId = `row-${itemName.replace(/[^a-zA-Z0-9]/g, '-')}`;
@@ -578,7 +548,7 @@ async function loadMonthData(month) {
                 await loadRowHistory(rowId, itemName);
                 
                 if (entries.length > 0) {
-                    disableRowInputs(rowId);
+                    // Show Edit button when data exists
                     row.querySelector('.save-btn').style.display = 'inline-block';
                     row.querySelector('.edit-btn').style.display = 'inline-block';
                     if (row.dataset.isAdditional === 'true') {
@@ -589,20 +559,29 @@ async function loadMonthData(month) {
                 }
             }
         }
-        updateTotal();
-    } catch (err) { console.error(err); }
+        await updateTotal();
+    } catch (err) { 
+        console.error("💥 Load month data error:", err);
+        alert("Error loading  " + err.message);
+    }
 }
 
 // Update Total
 async function updateTotal() {
     if(!DB) return;
-    const { data } = await DB.from('monthly_expenses').select('amount').eq('month', `${currentMonth}-01`);
-    const total = data ? data.reduce((s, r) => s + r.amount, 0) : 0;
-    document.getElementById('headerTotal').textContent = total.toFixed(2);
+    try {
+        const { data, error } = await DB.from('monthly_expenses').select('amount').eq('month', `${currentMonth}-01`);
+        if (error) throw error;
+        const total = data ? data.reduce((s, r) => s + r.amount, 0) : 0;
+        document.getElementById('headerTotal').textContent = total.toFixed(2);
+    } catch (err) {
+        console.error("Update total error:", err);
+    }
 }
 
 // Search Functions
 function initSearchTools() { renderMonthlyGrid(); renderYearlyGrid(); }
+
 window.switchSearchMode = function(mode) {
     document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.search-panel').forEach(p => p.classList.remove('active'));
@@ -610,10 +589,12 @@ window.switchSearchMode = function(mode) {
     event.target.classList.add('active');
     hideSearchResults();
 };
+
 function hideSearchResults() {
     document.getElementById('searchResultsContainer').classList.add('hidden');
     document.getElementById('resultLabel').classList.add('hidden');
 }
+
 function renderMonthlyGrid() {
     const grid = document.getElementById('monthlyGrid'); grid.innerHTML = '';
     const cy = new Date().getFullYear();
@@ -623,6 +604,7 @@ function renderMonthlyGrid() {
         chip.onclick = () => executeSearch(val, `Monthly: ${m} ${cy}`); grid.appendChild(chip);
     });
 }
+
 function renderYearlyGrid() {
     const grid = document.getElementById('yearlyGrid'); grid.innerHTML = '';
     for(let y = 2026; y <= 2036; y++) {
@@ -630,6 +612,7 @@ function renderYearlyGrid() {
         chip.onclick = () => selectYear(y); grid.appendChild(chip);
     }
 }
+
 window.selectYear = function(year) {
     document.querySelectorAll('.year-chip').forEach(c => c.classList.remove('active'));
     event.target.classList.add('active');
@@ -640,6 +623,7 @@ window.selectYear = function(year) {
         chip.onclick = () => executeSearch(val, `Monthly: ${m} ${year}`); mg.appendChild(chip);
     });
 };
+
 window.searchByRange = function() {
     const from = document.getElementById('searchFrom').value;
     const to = document.getElementById('searchTo').value;
@@ -649,12 +633,14 @@ window.searchByRange = function() {
         renderSearchResults(data, `Range: ${from} to ${to}`);
     });
 };
+
 function executeSearch(monthVal, label) {
     DB.from('monthly_expenses').select('*').eq('month', `${monthVal}-01`).order('entry_date', {ascending: false}).then(({ data, error }) => {
         if(error) { alert("Error: " + error.message); return; }
         renderSearchResults(data, label);
     });
 }
+
 function renderSearchResults(data, label) {
     currentSearchData = data || [];
     document.getElementById('searchTools').style.display = 'none';
@@ -681,7 +667,7 @@ function renderSearchResults(data, label) {
 window.exportCSV = function(source) {
     let data = [];
     if(source === 'current') {
-        DB.from('monthly_expenses').select('*').eq('month', `${currentMonth}-01`).then(({ data: r, error }) => {
+        DB.from('monthly_expenses').select('*').eq('month', `${currentMonth}-01`).then(({  r, error }) => {
             if(error || !r) return alert("No data.");
             downloadCSV(r, `MonthlyExpenses_${currentMonth}`);
         });
@@ -690,6 +676,7 @@ window.exportCSV = function(source) {
         downloadCSV(currentSearchData, `MonthlyExpenses_Search`);
     }
 };
+
 function downloadCSV(data, filename) {
     let csv = 'Item,Note,Price (DH),Date,Amount (DH)\n';
     data.forEach(row => { csv += `"${row.item_name}","${row.note || ''}","${row.price}","${row.entry_date || ''}","${row.amount}"\n`; });
@@ -697,10 +684,11 @@ function downloadCSV(data, filename) {
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
     a.download = `${filename}.csv`; a.click();
 }
+
 window.exportPDF = function(source) {
     let data = [];
     if(source === 'current') {
-        DB.from('monthly_expenses').select('*').eq('month', `${currentMonth}-01`).then(({ data: r, error }) => {
+        DB.from('monthly_expenses').select('*').eq('month', `${currentMonth}-01`).then(({  r, error }) => {
             if(error || !r) return alert("No data.");
             generatePDF(r, `Monthly Expenses - ${currentMonth}`);
         });
@@ -709,6 +697,7 @@ window.exportPDF = function(source) {
         generatePDF(currentSearchData, `Monthly Expenses - Search Results`);
     }
 };
+
 function generatePDF(data, title) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
