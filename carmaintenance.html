@@ -120,7 +120,7 @@ tr:hover td { background: #f9f9f9; }
 
 <div id="searchSection" class="section-view">
     <div class="section-header">
-      <button class="back-btn" onclick="goToSearchMain()">← Return</button>
+        <button class="back-btn" onclick="handleSearchReturn()">← Return</button>
     </div>
 
     <div id="searchTools">
@@ -203,11 +203,21 @@ window.goToMainMenu = function() {
     document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
 };
 
-window.goToSearchMain = function() {
-    resetSearchState();
-    document.getElementById('searchTools').style.display = 'block';
-    document.getElementById('searchResultsContainer').classList.add('hidden');
-    document.getElementById('resultLabel').classList.add('hidden');
+// 🔹 SMART RETURN BUTTON LOGIC
+window.handleSearchReturn = function() {
+    // Check if we're currently viewing search results
+    const resultsVisible = !document.getElementById('searchResultsContainer').classList.contains('hidden');
+    
+    if (resultsVisible) {
+        // We're viewing results → go back to search tools
+        resetSearchState();
+        document.getElementById('searchTools').style.display = 'block';
+        document.getElementById('searchResultsContainer').classList.add('hidden');
+        document.getElementById('resultLabel').classList.add('hidden');
+    } else {
+        // We're at search tools → go back to main menu
+        goToMainMenu();
+    }
 };
 
 function resetSearchState() {
