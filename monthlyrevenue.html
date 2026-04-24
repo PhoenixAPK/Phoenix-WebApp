@@ -84,7 +84,7 @@ tr:hover td { background: #f9f9f9; }
         <div class="queue-header-box">
             <div class="header-title">MONTHLY REVENUE</div>
             <div class="header-stats">
-                <div>Total | <span id="revenueTotal">0.00</span> Dh</div>
+                <div>Total | <span id="revenueTotal">0.00 Dh</span></div>
                 <div class="export-buttons">
                     <button class="export-btn" onclick="exportPDF('revenue')">📄 PDF</button>
                     <button class="export-btn" onclick="exportCSV('revenue')">📊 CSV</button>
@@ -119,7 +119,7 @@ tr:hover td { background: #f9f9f9; }
         <div class="queue-header-box">
             <div class="header-title">MONTHLY FUNDS ALLOCATION</div>
             <div class="header-stats">
-                <div>Total | <span id="allocationTotal">0.00</span> Dh</div>
+                <div>Total | <span id="allocationTotal">0.00 Dh</span></div>
                 <div class="export-buttons">
                     <button class="export-btn" onclick="exportPDF('allocation')">📄 PDF</button>
                     <button class="export-btn" onclick="exportCSV('allocation')">📊 CSV</button>
@@ -189,7 +189,7 @@ tr:hover td { background: #f9f9f9; }
             <div class="queue-header-box">
                 <div class="header-title">MONTHLY REVENUE</div>
                 <div class="header-stats">
-                    <div>Total | <span id="searchRevenueTotal">0.00</span> Dh</div>
+                    <div>Total | <span id="searchRevenueTotal">0.00 Dh</span></div>
                 </div>
             </div>
             <table>
@@ -217,7 +217,7 @@ tr:hover td { background: #f9f9f9; }
             <div class="queue-header-box">
                 <div class="header-title">MONTHLY FUNDS ALLOCATION</div>
                 <div class="header-stats">
-                    <div>Total | <span id="searchAllocationTotal">0.00</span> Dh</div>
+                    <div>Total | <span id="searchAllocationTotal">0.00 Dh</span></div>
                 </div>
             </div>
             <table>
@@ -251,7 +251,6 @@ const DB = window.supabase.createClient(
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 let currentMonth = new Date().toISOString().slice(0, 7);
-let currentSearchData = [];
 
 // 🔹 INIT
 document.addEventListener('DOMContentLoaded', () => {
@@ -303,12 +302,29 @@ window.showSearch = function() {
     resetSearchState();
 };
 
-// 🔹 DATA FETCHING & CALCULATION LOGIC
+// 🔹 DATA FETCHING & ✅ CORRECT CALCULATION LOGIC
 async function fetchTableSum(tableName, valueColumn, month) {
     try {
-        const { data, error } = await DB.from(tableName).select(valueColumn).eq('month', `${month}-01`);
-        if (error || !data) return 0;
-        return data.reduce((sum, row) => sum + (parseFloat(row[valueColumn]) || 0), 0);
+        if (tableName === 'payments') {
+            // Payments table uses created_at, filter by month range & status
+            const startDate = `${month}-01`;
+            const [year, monthNum] = month.split('-').map(Number);
+            const nextMonth = new Date(year, monthNum, 1).toISOString().slice(0, 10);
+            
+            const { data, error } = await DB.from(tableName)
+                .select(valueColumn)
+                .eq('status', 'completed')
+                .gte('created_at', startDate)
+                .lt('created_at', nextMonth);
+            
+            if (error || !data) return 0;
+            return data.reduce((sum, row) => sum + (parseFloat(row[valueColumn]) || 0), 0);
+        } else {
+            // Standard tables with 'month' column
+            const { data, error } = await DB.from(tableName).select(valueColumn).eq('month', `${month}-01`);
+            if (error || !data) return 0;
+            return data.reduce((sum, row) => sum + (parseFloat(row[valueColumn]) || 0), 0);
+        }
     } catch (err) {
         console.error(`Error fetching ${tableName}:`, err);
         return 0;
@@ -332,42 +348,26 @@ async function loadRevenueData(month) {
     document.getElementById('carAmount').textContent = car.toFixed(2);
     document.getElementById('paymentsAmount').textContent = payments.toFixed(2);
     
-    // Calculation: Monthly Total = Expenses + Printer + Car
-    const monthlyTotal = expenses + printer + car;
+    // ✅ CORRECT CALCULATION: Paid/Completed - Expenses - Printer - Car
+    const finalBalance = payments - expenses - printer - car;
     
-    // Calculation: Remaining Balance = Monthly Total - Paid/Completed
-    const remainingBalance = monthlyTotal - payments;
-    
-    // Display Total (Remaining Balance)
+    // Display Total
     const revenueTotalEl = document.getElementById('revenueTotal');
-    revenueTotalEl.textContent = remainingBalance.toFixed(2);
+    revenueTotalEl.textContent = finalBalance.toFixed(2) + ' Dh';
+    revenueTotalEl.classList.toggle('negative', finalBalance < 0);
     
-    if (remainingBalance < 0) {
-        revenueTotalEl.classList.add('negative');
-    } else {
-        revenueTotalEl.classList.remove('negative');
-    }
-    
-    // 🔹 FUNDS ALLOCATION LOGIC
-    // Only apply allocation when Remaining Balance = 0 (all expenses paid)
-    let liquid = 0, employee = 0, blocked = 0, founder = 0;
-    let allocationTotal = 0;
-    
-    if (Math.abs(remainingBalance) < 0.01) {
-        // All expenses paid - apply 30/20/20/30 split to Monthly Total
-        liquid = monthlyTotal * 0.30;
-        employee = monthlyTotal * 0.20;
-        blocked = monthlyTotal * 0.20;
-        founder = monthlyTotal * 0.30;
-        allocationTotal = monthlyTotal;
-    }
+    // ✅ FUNDS ALLOCATION LOGIC (Applied to Final Balance)
+    const liquid = finalBalance * 0.30;
+    const blocked = finalBalance * 0.20;
+    const employee = finalBalance * 0.20;
+    const founder = finalBalance * 0.30;
     
     // Update DOM for Queue 2
     document.getElementById('liquidAmount').textContent = liquid.toFixed(2);
-    document.getElementById('employeeAmount').textContent = employee.toFixed(2);
     document.getElementById('blockedAmount').textContent = blocked.toFixed(2);
+    document.getElementById('employeeAmount').textContent = employee.toFixed(2);
     document.getElementById('founderAmount').textContent = founder.toFixed(2);
-    document.getElementById('allocationTotal').textContent = allocationTotal.toFixed(2);
+    document.getElementById('allocationTotal').textContent = finalBalance.toFixed(2) + ' Dh';
 }
 
 // 🔹 SEARCH FUNCTIONS
@@ -419,14 +419,13 @@ window.searchByRange = function() {
     const from = document.getElementById('searchFrom').value;
     const to = document.getElementById('searchTo').value;
     if(!from || !to) { alert("Select dates."); return; }
-    // Use first month of range for calculation
     const month = from.slice(0, 7);
     executeSearch(month, `Range: ${from} to ${to}`);
 };
 
 function executeSearch(monthVal, label) {
     loadRevenueData(monthVal).then(() => {
-        // Update search results view
+        // Mirror main view data to search results
         document.getElementById('searchExpenses').textContent = document.getElementById('expensesAmount').textContent;
         document.getElementById('searchPrinter').textContent = document.getElementById('printerAmount').textContent;
         document.getElementById('searchCar').textContent = document.getElementById('carAmount').textContent;
@@ -434,8 +433,8 @@ function executeSearch(monthVal, label) {
         document.getElementById('searchRevenueTotal').textContent = document.getElementById('revenueTotal').textContent;
         
         document.getElementById('searchLiquid').textContent = document.getElementById('liquidAmount').textContent;
-        document.getElementById('searchEmployee').textContent = document.getElementById('employeeAmount').textContent;
         document.getElementById('searchBlocked').textContent = document.getElementById('blockedAmount').textContent;
+        document.getElementById('searchEmployee').textContent = document.getElementById('employeeAmount').textContent;
         document.getElementById('searchFounder').textContent = document.getElementById('founderAmount').textContent;
         document.getElementById('searchAllocationTotal').textContent = document.getElementById('allocationTotal').textContent;
         
@@ -449,26 +448,14 @@ function executeSearch(monthVal, label) {
 // 🔹 EXPORT FUNCTIONS
 window.exportCSV = function(type) {
     if (type === 'revenue') {
-        let csv = 'Monthly Expenses (Dh),Printer Maintenance (Dh),Car Maintenance (Dh),Paid - Completed (Dh),Total Revenue (Dh)\n';
-        const e = document.getElementById('expensesAmount').textContent;
-        const p = document.getElementById('printerAmount').textContent;
-        const c = document.getElementById('carAmount').textContent;
-        const pay = document.getElementById('paymentsAmount').textContent;
-        const t = document.getElementById('revenueTotal').textContent;
-        csv += `${e},${p},${c},${pay},${t}\n`;
-        
+        let csv = 'Monthly Expenses,Printer Maintenance,Car Maintenance,Paid - Completed,Total Balance\n';
+        csv += `${document.getElementById('expensesAmount').textContent},${document.getElementById('printerAmount').textContent},${document.getElementById('carAmount').textContent},${document.getElementById('paymentsAmount').textContent},${document.getElementById('revenueTotal').textContent}\n`;
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
         a.download = `MonthlyRevenue_${currentMonth}.csv`; a.click();
     } else {
-        let csv = 'Liquid Funds (Dh),Employee Funds (Dh),Blocked Funds (Dh),Founder Equity (Dh),Total Allocation (Dh)\n';
-        const l = document.getElementById('liquidAmount').textContent;
-        const e = document.getElementById('employeeAmount').textContent;
-        const b = document.getElementById('blockedAmount').textContent;
-        const f = document.getElementById('founderAmount').textContent;
-        const t = document.getElementById('allocationTotal').textContent;
-        csv += `${l},${e},${b},${f},${t}\n`;
-        
+        let csv = 'Liquid Funds,Employee Funds,Blocked Funds,Founder Equity,Total Allocation\n';
+        csv += `${document.getElementById('liquidAmount').textContent},${document.getElementById('employeeAmount').textContent},${document.getElementById('blockedAmount').textContent},${document.getElementById('founderAmount').textContent},${document.getElementById('allocationTotal').textContent}\n`;
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
         a.download = `FundsAllocation_${currentMonth}.csv`; a.click();
@@ -489,10 +476,9 @@ window.exportPDF = function(type) {
                 document.getElementById('printerAmount').textContent + ' Dh',
                 document.getElementById('carAmount').textContent + ' Dh',
                 document.getElementById('paymentsAmount').textContent + ' Dh',
-                document.getElementById('revenueTotal').textContent + ' Dh'
+                document.getElementById('revenueTotal').textContent
             ]],
-            theme: 'grid',
-            headStyles: { fillColor: [17, 24, 39] }
+            theme: 'grid', headStyles: { fillColor: [17, 24, 39] }
         });
         doc.save(`MonthlyRevenue_${currentMonth}.pdf`);
     } else {
@@ -505,10 +491,9 @@ window.exportPDF = function(type) {
                 document.getElementById('employeeAmount').textContent + ' Dh',
                 document.getElementById('blockedAmount').textContent + ' Dh',
                 document.getElementById('founderAmount').textContent + ' Dh',
-                document.getElementById('allocationTotal').textContent + ' Dh'
+                document.getElementById('allocationTotal').textContent
             ]],
-            theme: 'grid',
-            headStyles: { fillColor: [17, 24, 39] }
+            theme: 'grid', headStyles: { fillColor: [17, 24, 39] }
         });
         doc.save(`FundsAllocation_${currentMonth}.pdf`);
     }
@@ -516,3 +501,4 @@ window.exportPDF = function(type) {
 </script>
 </body>
 </html>
+
