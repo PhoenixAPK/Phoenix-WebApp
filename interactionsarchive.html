@@ -10,132 +10,149 @@
        body { background: #ffffff; padding: 20px 40px; color: #111827; line-height: 1.5; }
        
        /* 🔹 VIEW CONTAINERS */
-       .view-section { display: none; max-width: 1200px; margin: 0 auto; animation: fadeIn 0.3s ease-out; }
+       .view-section { display: none; max-width: 1400px; margin: 0 auto; animation: fadeIn 0.3s ease-out; }
        .view-section.active { display: block; }
        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
        
-       /* 🔹 HEADER / RETURN BUTTON AREA */
+       /* 🔹 SECTION HEADER & RETURN BUTTON */
        .section-header { display: flex; align-items: center; margin-bottom: 24px; gap: 16px; }
        .back-btn { width: 90px; height: 34px; background: #e5e7eb; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
        .back-btn:hover { background: #d1d5db; }
        .page-title { font-size: 1.5rem; font-weight: 700; color: #111827; margin: 0; }
        
-       /* 🔹 MAIN LAYOUT - TWO COLUMNS SIDE BY SIDE */
-       .main-layout { 
-           display: flex; 
-           gap: 40px; 
-           justify-content: center; 
+       /* 🔹 SINGLE CONTAINER LAYOUT */
+       .main-container {
+           background: #fff;
+           border: 1px solid #e5e7eb;
+           border-radius: 12px;
+           padding: 40px;
+           box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+       }
+       
+       /* 🔹 SPLIT HEADER (50/50) - CENTERED */
+       .container-header {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           margin-bottom: 40px;
+           border-bottom: 1px solid #e5e7eb;
+           padding-bottom: 30px;
+       }
+       .container-header h2 {
+           font-size: 1.75rem;
+           font-weight: 700;
+           color: #111827;
+           flex: 1;
+           text-align: center;
+       }
+       
+       /* 🔹 TWO COLUMN LAYOUT */
+       .main-layout {
+           display: flex;
+           gap: 60px;
            align-items: flex-start;
-           margin-bottom: 32px;
+       }
+       .left-column, .right-column {
+           flex: 1;
        }
        
        /* 🔹 LEFT COLUMN - ARCHIVE */
-       .archive-column { 
-           flex: 1; 
-           max-width: 500px;
+       .archive-subtitle {
            text-align: center;
+           color: #6b7280;
+           font-size: 14px;
+           margin-bottom: 16px;
        }
-       .archive-title { 
-           font-size: 1.5rem; 
-           font-weight: 700; 
-           color: #111827; 
-           margin-bottom: 8px; 
-       }
-       .archive-subtitle { 
-           color: #6b7280; 
-           font-size: 14px; 
-           margin-bottom: 24px; 
-       }
-       
-       /* 🔹 RIGHT COLUMN - SEARCH */
-       .search-column { 
-           flex: 1; 
-           max-width: 500px;
-       }
-       .search-title { 
-           font-size: 1.5rem; 
-           font-weight: 700; 
-           color: #111827; 
-           margin-bottom: 20px; 
-           text-align: center;
-       }
-       
-       /* 🔹 SEARCH FIELDS - HALF WIDTH */
-       .search-row { 
-           display: flex; 
-           gap: 12px; 
-           margin-bottom: 12px; 
+       .year-selector {
+           display: flex;
+           align-items: center;
            justify-content: center;
+           gap: 16px;
+           margin-bottom: 30px;
        }
-       .search-input { 
-           flex: 1; 
-           max-width: 180px;
-           padding: 8px 12px; 
-           border: 1px solid #d1d5db; 
-           border-radius: 6px; 
-           font-size: 13px; 
+       .year-btn {
+           padding: 6px 14px;
            background: #fff;
-       }
-       .search-input:focus { 
-           outline: none; 
-           border-color: #3b82f6; 
-           box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-       }
-       .search-btn, .clear-btn { 
-           padding: 8px 16px; 
-           border: 1px solid #d1d5db; 
-           border-radius: 6px; 
-           font-size: 13px; 
-           font-weight: 600; 
-           cursor: pointer; 
-           background: #fff;
+           border: 1px solid #d1d5db;
+           border-radius: 6px;
+           cursor: pointer;
+           font-size: 13px;
+           font-weight: 500;
            color: #374151;
            transition: all 0.2s;
        }
-       .search-btn:hover, .clear-btn:hover { 
-           background: #f9fafb; 
-           border-color: #9ca3af; 
-       }
-       
-       /* 🔹 YEAR SELECTOR */
-       .year-selector { display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 24px; }
-       .year-btn { padding: 8px 16px; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; color: #374151; transition: all 0.2s; }
        .year-btn:hover:not(:disabled) { background: #f9fafb; border-color: #9ca3af; }
        .year-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+       #current-year-display { font-weight: 600; font-size: 15px; min-width: 50px; text-align: center; }
        
-       /* 🔹 MONTHS GRID */
-       .months-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+       /* 🔹 RIGHT COLUMN - SEARCH */
+       .search-grid {
+           display: grid;
+           grid-template-columns: 1fr 1fr auto;
+           gap: 12px;
+           align-items: center;
+       }
+       .search-input {
+           padding: 8px 12px;
+           border: 1px solid #d1d5db;
+           border-radius: 6px;
+           font-size: 14px;
+           background: #fff;
+           height: 38px;
+       }
+       .search-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+       .search-btn {
+           padding: 8px 20px;
+           border: 1px solid #d1d5db;
+           border-radius: 6px;
+           font-size: 14px;
+           font-weight: 600;
+           cursor: pointer;
+           background: #fff;
+           color: #374151;
+           transition: all 0.2s;
+           white-space: nowrap;
+           height: 38px;
+       }
+       .search-btn:hover { background: #f9fafb; border-color: #9ca3af; }
        
-       /* 🔹 MONTH CARD */
-       .month-card { background: #f8f9fa; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px 12px; text-align: center; cursor: pointer; transition: all 0.25s ease; position: relative; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-       .month-card:hover { border-color: #3b82f6; box-shadow: 0 4px 16px rgba(59,130,246,0.12), 0 2px 8px rgba(0,0,0,0.06); transform: translateY(-2px); background: #f1f5f9; }
-       .month-card .month-name { font-weight: 600; font-size: 13px; color: #111827; margin-bottom: 4px; }
-       .month-card .month-year { font-size: 11px; color: #6b7280; margin-bottom: 6px; }
-       .month-card .count-badge { display: inline-block; background: #111827; color: #fff; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 999px; }
-       .month-card.empty { opacity: 0.7; cursor: default; background: #f9fafb; }
-       .month-card.empty:hover { transform: none; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border-color: #e5e7eb; background: #f8f9fa; }
+       /* 🔹 FULL WIDTH MONTH GRID */
+       .months-grid {
+           display: grid;
+           grid-template-columns: repeat(4, 1fr);
+           gap: 20px;
+           width: 100%;
+           margin-top: 30px;
+           border-top: 1px solid #f3f4f6;
+           padding-top: 30px;
+       }
+       .month-card {
+           background: #f8f9fa;
+           border: 1px solid #e5e7eb;
+           border-radius: 12px;
+           padding: 24px 12px;
+           text-align: center;
+           cursor: pointer;
+           transition: all 0.2s;
+           min-height: 110px;
+           display: flex;
+           flex-direction: column;
+           justify-content: center;
+           align-items: center;
+       }
+       .month-card:hover { border-color: #3b82f6; background: #f1f5f9; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+       .month-card .month-name { font-weight: 600; font-size: 14px; color: #111827; margin-bottom: 6px; }
+       .month-card .month-year { font-size: 12px; color: #6b7280; margin-bottom: 12px; }
+       .month-card .count-badge { display: inline-block; background: #111827; color: #fff; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 999px; }
+       .month-card.empty { opacity: 0.6; cursor: default; }
+       .month-card.empty:hover { transform: none; background: #f8f9fa; border-color: #e5e7eb; box-shadow: none; }
        
-       /* 🔹 TABLE LAYOUT */
-       .inc-table-wrap { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-       
+       /* 🔹 QUEUE TABLE */
+       .inc-table-wrap { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-top: 32px; }
        table { width: 100%; border-collapse: collapse; }
        thead { background: #fafafa; border-bottom: 2px solid #e5e7eb; }
-       th { 
-           padding: 16px 24px; 
-           font-size: 11px; 
-           font-weight: 700; 
-           color: #6b7280; 
-           text-transform: uppercase; 
-           letter-spacing: 0.06em; 
-           text-align: center;
-       }
-       td { 
-           padding: 16px 24px; 
-           font-size: 14px; 
-           border-bottom: 1px solid #f3f4f6; 
-           text-align: center;
-           vertical-align: middle;
-       }
+       th { padding: 16px 24px; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.06em; text-align: center; }
+       td { padding: 16px 24px; font-size: 14px; border-bottom: 1px solid #f3f4f6; text-align: center; vertical-align: middle; }
        tr:last-child td { border-bottom: none; }
        tr:hover { background: #fafafa; }
        
@@ -146,8 +163,8 @@
        
        .inc-empty { padding: 40px; text-align: center; font-size: 14px; color: #6b7280; }
        
-       /* 🔹 TOAST NOTIFICATIONS */
-       .toast { position: fixed; bottom: 24px; right: 24px; padding: 14px 20px; border-radius: 10px; color: white; font-size: 14px; font-weight: 500; z-index: 10000; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: slideIn 0.3s ease-out; display: flex; align-items: center; gap: 10px; }
+       /* 🔹 TOAST */
+       .toast { position: fixed; bottom: 24px; right: 24px; padding: 14px 20px; border-radius: 10px; color: white; font-size: 14px; font-weight: 500; z-index: 10000; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: slideIn 0.3s ease-out; }
        .toast.success { background: #059669; }
        .toast.error { background: #dc2626; }
        .toast.warning { background: #d97706; }
@@ -155,13 +172,14 @@
        
        /* 🔹 RESPONSIVE */
        @media (max-width: 1100px) { 
-           .main-layout { flex-direction: column; align-items: center; } 
-           .archive-column, .search-column { max-width: 600px; width: 100%; }
+           .main-layout { flex-direction: column; gap: 40px; } 
+           .months-grid { grid-template-columns: repeat(3, 1fr); }
        }
        @media (max-width: 768px) { 
            body { padding: 16px; } 
-           .search-row { flex-direction: column; align-items: stretch; }
-           .search-input { max-width: 100%; }
+           .main-container { padding: 24px; }
+           .months-grid { grid-template-columns: repeat(2, 1fr); }
+           .search-grid { grid-template-columns: 1fr; }
            th:nth-child(3), td:nth-child(3) { display: none; } 
            th, td { padding: 12px 16px; }
        }
@@ -172,44 +190,49 @@
    <!-- 🔹 MAIN VIEW -->
    <div id="main-view" class="view-section active">
        
-       <!-- TWO COLUMNS SIDE BY SIDE -->
-       <div class="main-layout">
+       <!-- SINGLE CONTAINER -->
+       <div class="main-container">
            
-           <!-- LEFT: ARCHIVE -->
-           <div class="archive-column">
-               <h2 class="archive-title">Interactions Archive</h2>
-               <p class="archive-subtitle">Select a month to view archived interactions</p>
-               
-               <div class="year-selector">
-                   <button class="year-btn" id="prev-year-btn" onclick="changeYear(-1)">❮ Prev</button>
-                   <span id="current-year-display" style="font-weight: 600; font-size: 16px; min-width: 80px; text-align: center;">2026</span>
-                   <button class="year-btn" id="next-year-btn" onclick="changeYear(1)">Next ❯</button>
-               </div>
-               
-               <div class="months-grid" id="months-grid"></div>
+           <!-- 1. SPLIT HEADER - CENTERED -->
+           <div class="container-header">
+               <h2>Monthly Search</h2>
+               <h2>Quick Search</h2>
            </div>
            
-           <!-- RIGHT: SEARCH -->
-           <div class="search-column">
-               <h2 class="search-title">Interactions Search</h2>
+           <!-- 2. TWO COLUMN LAYOUT -->
+           <div class="main-layout">
                
-               <div class="search-row">
-                   <input type="text" class="search-input" id="s-name" placeholder="Name">
-                   <input type="text" class="search-input" id="s-phone" placeholder="Phone">
-                   <button class="search-btn" onclick="performSearch()">Search</button>
+               <!-- LEFT: ARCHIVE -->
+               <div class="left-column">
+                   <p class="archive-subtitle">Select a month to view archived interactions</p>
+                   <div class="year-selector">
+                       <button class="year-btn" id="prev-year-btn" onclick="changeYear(-1)">❮ Prev</button>
+                       <span id="current-year-display">2026</span>
+                       <button class="year-btn" id="next-year-btn" onclick="changeYear(1)">Next ❯</button>
+                   </div>
                </div>
                
-               <div class="search-row">
-                   <input type="email" class="search-input" id="s-email" placeholder="Email">
-                   <input type="text" class="search-input" id="s-address" placeholder="City">
-                   <button class="clear-btn" onclick="clearSearch()">Clear Search</button>
+               <!-- RIGHT: SEARCH -->
+               <div class="right-column">
+                   <div class="search-grid">
+                       <input type="text" class="search-input" id="s-name" placeholder="Name">
+                       <input type="text" class="search-input" id="s-phone" placeholder="Phone">
+                       <button class="search-btn" onclick="performSearch()">Search</button>
+                       <input type="email" class="search-input" id="s-email" placeholder="Email">
+                       <input type="text" class="search-input" id="s-address" placeholder="City">
+                       <button class="search-btn" onclick="clearSearch()">Clear Search</button>
+                   </div>
                </div>
+               
            </div>
+
+           <!-- 3. FULL WIDTH MONTH CARDS -->
+           <div class="months-grid" id="months-grid"></div>
            
        </div>
        
-       <!-- 🔹 SEARCH RESULTS (Hidden by default) -->
-       <div id="search-results" style="display:none; margin-top: 24px;">
+       <!-- 🔹 SEARCH RESULTS -->
+       <div id="search-results" style="display:none; margin-top: 32px;">
            <div class="inc-table-wrap">
                <table>
                    <thead>
@@ -227,7 +250,7 @@
        </div>
    </div>
  
-   <!-- 🔹 MONTH QUEUE SECTIONS (Generated dynamically) -->
+   <!-- 🔹 MONTH QUEUE SECTIONS -->
    <div id="month-views-container"></div>
  
    <script>
@@ -236,11 +259,14 @@
        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk";
        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
        
-       // 🔹 STATE & CONFIG
+       // 🔹 STATE
        let currentArchiveYear = 2026;
        const MIN_YEAR = 2026;
        const MAX_YEAR = 2036;
        const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+       
+       // 🔹 ROW MAP FOR ARCHIVE QUEUES (Same as incRowMap in interactions.html)
+       const archiveRowMap = {};
        
        // 🔹 UTILITIES
        function escapeHtml(text) { 
@@ -248,7 +274,6 @@
            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }; 
            return String(text).replace(/[&<>"']/g, m => map[m]); 
        }
-       
        function showToast(message, type = 'success') { 
            document.querySelectorAll('.toast').forEach(t => t.remove()); 
            const toast = document.createElement('div'); 
@@ -258,50 +283,33 @@
            setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateX(120%)'; setTimeout(() => toast.remove(), 300); }, 5000); 
        }
        
-       // 🔹 NAVIGATION & ROUTING
+       // 🔹 NAVIGATION
        function navigateTo(view, monthIndex = null) {
            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
            document.getElementById(view === 'main' ? 'main-view' : `month-${monthIndex}`).classList.add('active');
-           
            const hash = monthIndex !== null ? `#month-${monthIndex}` : '';
-           if (window.location.hash !== hash) {
-               history.pushState({ view, monthIndex }, '', window.location.pathname + hash);
-           }
-           
-           if (view === 'main') {
-               renderCalendar();
-           } else {
-               loadMonthQueue(currentArchiveYear, monthIndex);
-           }
+           if (window.location.hash !== hash) history.pushState({ view, monthIndex }, '', window.location.pathname + hash);
+           if (view === 'main') renderCalendar();
+           else loadMonthQueue(currentArchiveYear, monthIndex);
        }
-       
        function showMain() { navigateTo('main'); }
        function showMonth(monthIndex) { navigateTo('month', monthIndex); }
-       
-       // Handle browser back/forward
        window.addEventListener('popstate', (e) => {
-           if (e.state) {
-               navigateTo(e.state.view, e.state.monthIndex);
-           } else {
-               navigateTo('main');
-           }
+           if (e.state) navigateTo(e.state.view, e.state.monthIndex);
+           else navigateTo('main');
        });
        
-       // 🔹 SEARCH FUNCTIONALITY
+       // 🔹 SEARCH LOGIC
        async function performSearch() {
            const name = document.getElementById('s-name').value.trim();
            const phone = document.getElementById('s-phone').value.trim();
            const email = document.getElementById('s-email').value.trim();
            const address = document.getElementById('s-address').value.trim();
            
-           if (!name && !phone && !email && !address) {
-               showToast('⚠️ Please enter at least one search term', 'warning');
-               return;
-           }
+           if (!name && !phone && !email && !address) { showToast('⚠️ Please enter at least one search term', 'warning'); return; }
            
            try {
                let query = supabaseClient.from('interactions').select('*');
-               
                if (name) query = query.ilike('name', `%${name}%`);
                if (phone) query = query.ilike('phone', `%${phone}%`);
                if (email) query = query.ilike('email', `%${email}%`);
@@ -327,16 +335,14 @@
                            <td style="color:#374151">${escapeHtml(r.city || r.address || '—')}</td>
                            <td style="text-align:center;font-weight:600;color:#111827">${r.total_pictures || 0}</td>
                            <td style="display:flex;gap:8px;justify-content:center">
-                               <button class="inc-open-btn" onclick="archiveOpen('${r.id}','open')">Open</button>
-                               <button class="inc-open-btn invoice" onclick="archiveOpen('${r.id}','invoice')">Invoice</button>
+                               <button class="inc-open-btn" onclick="archiveOpen('${r.id}','${monthIndex}','open')">Open</button>
+                               <button class="inc-open-btn invoice" onclick="archiveOpen('${r.id}','${monthIndex}','invoice')">Invoice</button>
                            </td>
                        </tr>`;
                    }).join('');
                }
-               
                document.getElementById('search-results').style.display = 'block';
                showToast(`✅ Found ${data.length} interaction${data.length !== 1 ? 's' : ''}`, 'success');
-               
            } catch (err) {
                console.error('Search error:', err);
                showToast('❌ Search failed: ' + err.message, 'error');
@@ -359,10 +365,7 @@
            
            const grid = document.getElementById('months-grid');
            grid.innerHTML = '';
-           
            const now = new Date();
-           const currentMonth = now.getMonth();
-           const currentYear = now.getFullYear();
            
            MONTHS.forEach((monthName, monthIndex) => {
                const card = document.createElement('div');
@@ -372,34 +375,27 @@
                    <div class="month-year">${currentArchiveYear}</div>
                    <div class="count-badge" id="count-${monthIndex}">—</div>
                `;
-               
-               if (currentArchiveYear === currentYear && monthIndex === currentMonth) {
+               if (currentArchiveYear === now.getFullYear() && monthIndex === now.getMonth()) {
                    card.style.borderColor = '#3b82f6';
                    card.style.boxShadow = '0 0 0 2px rgba(59,130,246,0.2)';
                }
-               
                fetchArchiveCount(currentArchiveYear, monthIndex).then(count => {
                    const badge = card.querySelector('.count-badge');
                    badge.textContent = count > 0 ? `${count}` : '0';
-                   if (count === 0) {
-                       card.classList.add('empty');
-                   } else {
-                       card.onclick = () => showMonth(monthIndex);
-                   }
+                   if (count === 0) card.classList.add('empty');
+                   else card.onclick = () => showMonth(monthIndex);
                });
-               
                grid.appendChild(card);
            });
        }
        
        async function fetchArchiveCount(year, month) {
            try {
-               const startDate = new Date(Date.UTC(year, month, 1, 0, 0, 0));
-               const endDate = new Date(Date.UTC(year, month + 1, 0, 23, 59, 59, 999));
-               const { count, error } = await supabaseClient.from('interactions').select('*', { count: 'exact', head: true }).gte('created_at', startDate.toISOString()).lte('created_at', endDate.toISOString());
-               if (error) throw error;
-               return count || 0;
-           } catch (err) { return 0; }
+               const start = new Date(Date.UTC(year, month, 1, 0, 0, 0));
+               const end = new Date(Date.UTC(year, month + 1, 0, 23, 59, 59, 999));
+               const { count, error } = await supabaseClient.from('interactions').select('*', { count: 'exact', head: true }).gte('created_at', start.toISOString()).lte('created_at', end.toISOString());
+               return error ? 0 : (count || 0);
+           } catch { return 0; }
        }
        
        function changeYear(delta) {
@@ -424,13 +420,7 @@
                    <div class="inc-table-wrap">
                        <table>
                            <thead>
-                               <tr>
-                                   <th>ID</th>
-                                   <th>NAME / BUSINESS</th>
-                                   <th>CITY</th>
-                                   <th>PICS</th>
-                                   <th>ACTION</th>
-                               </tr>
+                               <tr><th>ID</th><th>NAME / BUSINESS</th><th>CITY</th><th>PICS</th><th>ACTION</th></tr>
                            </thead>
                            <tbody id="queue-list-${i}"></tbody>
                        </table>
@@ -440,22 +430,23 @@
            });
        }
        
-       // 🔹 LOAD DATA INTO QUEUE
        async function loadMonthQueue(year, monthIndex) {
            const tbody = document.getElementById(`queue-list-${monthIndex}`);
            tbody.innerHTML = '<tr><td colspan="5" class="inc-empty">🔄 Loading archived items…</td></tr>';
-           
-           const startDate = new Date(Date.UTC(year, monthIndex, 1, 0, 0, 0));
-           const endDate = new Date(Date.UTC(year, monthIndex + 1, 0, 23, 59, 59, 999));
+           const start = new Date(Date.UTC(year, monthIndex, 1, 0, 0, 0));
+           const end = new Date(Date.UTC(year, monthIndex + 1, 0, 23, 59, 59, 999));
            
            try {
-               const { data, error } = await supabaseClient.from('interactions').select('*').gte('created_at', startDate.toISOString()).lte('created_at', endDate.toISOString()).order('created_at', { ascending: false });
+               const { data, error } = await supabaseClient.from('interactions').select('*').gte('created_at', start.toISOString()).lte('created_at', end.toISOString()).order('created_at', { ascending: false });
                if (error) throw error;
-               
                if (!data || data.length === 0) { 
                    tbody.innerHTML = `<tr><td colspan="5" class="inc-empty">✅ No archived items found</td></tr>`; 
                    return; 
                }
+               
+               // ✅ CACHE ROWS IN archiveRowMap (Same as incRowMap in interactions.html)
+               archiveRowMap[`month-${monthIndex}`] = {};
+               data.forEach(r => { archiveRowMap[`month-${monthIndex}`][String(r.id)] = r; });
                
                tbody.innerHTML = data.map(r => {
                    const displayId = r.record_id || String(r.id).slice(0, 8);
@@ -470,70 +461,79 @@
                        <td style="color:#374151">${escapeHtml(r.city || r.address || '—')}</td>
                        <td style="text-align:center;font-weight:600;color:#111827">${r.total_pictures || 0}</td>
                        <td style="display:flex;gap:8px;justify-content:center">
-                           <button class="inc-open-btn" onclick="archiveOpen('${r.id}','open')">Open</button>
-                           <button class="inc-open-btn invoice" onclick="archiveOpen('${r.id}','invoice')">Invoice</button>
+                           <button class="inc-open-btn" onclick="archiveOpen('${r.id}','${monthIndex}','open')">Open</button>
+                           <button class="inc-open-btn invoice" onclick="archiveOpen('${r.id}','${monthIndex}','invoice')">Invoice</button>
                        </td>
                    </tr>`;
                }).join('');
-               
            } catch (err) { 
                tbody.innerHTML = `<tr><td colspan="5" class="inc-empty" style="color:#dc2626">❌ Load failed: ${escapeHtml(err.message)}</td></tr>`; 
            }
        }
        
-       // 🔹 OPEN/INVOICE ACTIONS
-       function archiveOpen(id, action = 'open') {
-           supabaseClient.from('interactions').select('*').eq('id', id).single().then(({  r, error }) => {
-               if (error || !r) { showToast('❌ Request data not found', 'error'); return; }
+       // 🔹 ✅ EXACT COPY OF incOpenFromIncomplete FROM interactions.html
+       function archiveOpen(id, monthIndex, action = 'open') {
+           // ✅ Get record from cached map (same as incRowMap strategy)
+           const r = archiveRowMap[`month-${monthIndex}`]?.[id];
+           if (!r) { showToast('❌ Request data not found', 'error'); return; }
+           
+           if (action === 'invoice') {
+               // 🔹 INVOICE: Detect mode and open admininvoice accordingly (EXACT COPY FROM interactions.html)
+               const mode = (r.mode || '').toLowerCase();
+               const modeParam = mode === 'client' ? 'client' : 'entrepreneur';
+               const params = new URLSearchParams({ 
+                   request_id: id, 
+                   mode: modeParam, 
+                   name: r.name || '', 
+                   phone: r.phone || '', 
+                   email: r.email || '', 
+                   address: r.address || '', 
+                   city: r.city || '', 
+                   units: r.total_pictures || 0, 
+                   source: r.source || '', 
+                   note: r.note || '' 
+               });
                
-               if (action === 'invoice') {
-                   const mode = (r.mode || '').toLowerCase();
-                   const params = new URLSearchParams({ request_id: id, mode: mode === 'client' ? 'client' : 'entrepreneur', name: r.name || '', phone: r.phone || '', email: r.email || '', address: r.address || '', city: r.city || '', units: r.total_pictures || 0, source: r.source || '', note: r.note || '' });
-                   window.location.href = `admininvoice.html?${params}`;
-                   return;
+               // Try to open in parent frame if embedded (same logic as interactions.html)
+               if (window.parent && window.parent !== window) {
+                   const frame = window.parent.document.getElementById('content-frame');
+                   if (frame) { 
+                       frame.src = `admininvoice.html?${params}`; 
+                       showToast('🔄 Opening invoice editor...', 'success'); 
+                       return; 
+                   }
                }
-               
-               const encodedData = encodeURIComponent(JSON.stringify(r));
-               window.location.href = `interactions.html?load=${encodedData}`;
-           }).catch(err => showToast('❌ Failed to open interaction', 'error'));
+               // Fallback to direct navigation
+               window.location.href = `admininvoice.html?${params}`;
+               return;
+           }
+           
+           // 🔹 OPEN: EXACT COPY OF loadOriginal FROM interactions.html
+           // This redirects to interactions.html with the data encoded in URL
+           const encodedData = encodeURIComponent(JSON.stringify(r));
+           window.location.href = `interactions.html?load=${encodedData}`;
        }
        
-       // 🔹 AUTOMATIC MONTHLY ARCHIVE ROLLOVER
+       // 🔹 AUTO-ARCHIVE ROLLOVER
        async function autoArchivePreviousMonth() {
            const now = new Date();
-           const currentMonth = now.getMonth();
-           const currentYear = now.getFullYear();
-           
-           let prevMonth = currentMonth - 1;
-           let prevYear = currentYear;
+           let prevMonth = now.getMonth() - 1;
+           let prevYear = now.getFullYear();
            if (prevMonth < 0) { prevMonth = 11; prevYear--; }
            
            const lastArchived = localStorage.getItem('phoenix_last_archived');
-           const lastArchivedKey = `${prevYear}-${prevMonth}`;
-           if (lastArchived === lastArchivedKey) return;
+           if (lastArchived === `${prevYear}-${prevMonth}`) return;
            
            try {
-               const startDate = new Date(Date.UTC(prevYear, prevMonth, 1, 0, 0, 0));
-               const endDate = new Date(Date.UTC(prevYear, prevMonth + 1, 0, 23, 59, 59, 999));
-               
-               const { data, error } = await supabaseClient
-                   .from('interactions')
-                   .update({ status: 'archived', archived_at: new Date().toISOString() })
-                   .gte('created_at', startDate.toISOString())
-                   .lte('created_at', endDate.toISOString())
-                   .neq('status', 'archived')
-                   .select('id');
-               
+               const start = new Date(Date.UTC(prevYear, prevMonth, 1, 0, 0, 0));
+               const end = new Date(Date.UTC(prevYear, prevMonth + 1, 0, 23, 59, 59, 999));
+               const { data, error } = await supabaseClient.from('interactions').update({ archived_at: new Date().toISOString() }).gte('created_at', start.toISOString()).lte('created_at', end.toISOString()).is('archived_at', null).select('id');
                if (error) throw error;
-               
                if (data && data.length > 0) {
-                   localStorage.setItem('phoenix_last_archived', lastArchivedKey);
-                   console.log(`✅ Auto-archived ${data.length} interactions from ${MONTHS[prevMonth]} ${prevYear}`);
+                   localStorage.setItem('phoenix_last_archived', `${prevYear}-${prevMonth}`);
                    showToast(`📦 Archived ${data.length} interactions from ${MONTHS[prevMonth]}`, 'success');
                }
-           } catch (err) {
-               console.error('Auto-archive error:', err);
-           }
+           } catch (err) { console.log('Archive note:', err.message); }
        }
        
        // 🔹 INIT
@@ -543,13 +543,10 @@
            renderCalendar();
            
            const hash = window.location.hash;
-           const monthMatch = hash.match(/^#month-(\d+)$/);
-           if (monthMatch) {
-               const monthIdx = parseInt(monthMatch[1]);
-               if (monthIdx >= 0 && monthIdx <= 11) {
-                   navigateTo('month', monthIdx);
-                   return;
-               }
+           const match = hash.match(/^#month-(\d+)$/);
+           if (match) {
+               const idx = parseInt(match[1]);
+               if (idx >= 0 && idx <= 11) { navigateTo('month', idx); return; }
            }
            navigateTo('main');
        });
