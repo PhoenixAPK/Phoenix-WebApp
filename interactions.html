@@ -637,7 +637,35 @@
  
        // 🔹 NO SECTION ACTIVE ON LOAD - Wait for user click
        document.addEventListener('DOMContentLoaded', () => {
-           // All sections hidden by default, no button active
+           // 🔹 HANDLE URL PARAMETER FOR "OPEN" BUTTON FROM ARCHIVE
+           const urlParams = new URLSearchParams(window.location.search);
+           const loadData = urlParams.get('load');
+           
+           if (loadData) {
+               try {
+                   const item = JSON.parse(decodeURIComponent(loadData));
+                   // Load the interaction data into the form
+                   showSection('new-section', document.querySelector('.main-btn'));
+                   document.getElementById('source').value = item.source || ''; handleSourceChange();
+                   document.getElementById('mode').value = item.mode || ''; handleModeChange();
+                   document.getElementById('name').value = item.name || '';
+                   document.getElementById('phone').value = item.phone || '';
+                   document.getElementById('email').value = item.email || '';
+                   document.getElementById('address').value = item.address || '';
+                   document.getElementById('city').value = item.city || '';
+                   document.getElementById('pics').value = item.total_pictures || 0;
+                   const savedTime = new Date(item.created_at).toLocaleString();
+                   const existingNote = item.note || '';
+                   document.getElementById('note').value = existingNote + (existingNote ? "\n\n" : "") + `[Loaded: ${savedTime}]`;
+                   showToast('Interaction loaded for editing', 'success');
+                   
+                   // Clean up URL
+                   window.history.replaceState({}, document.title, window.location.pathname);
+               } catch (e) {
+                   console.error('Load error:', e);
+                   showToast('❌ Failed to load interaction data', 'error');
+               }
+           }
        });
        
        // 🔹 SURGICAL ADDITION: Hard reset when leaving any section (EXPAND ONLY)
