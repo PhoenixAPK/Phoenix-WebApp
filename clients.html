@@ -367,7 +367,7 @@ window.loadClient = async function(client) {
   await loadHistory(client);
 };
 
-// 🔹 History Indicator Logic
+// 🔹 History Indicator Logic - ✅ SURGICAL FIX APPLIED
 async function loadHistory(client) {
   if (!window.supabaseClient) {
     document.getElementById("requests").innerHTML = '<div class="history-empty">Demo Mode: History unavailable</div>';
@@ -407,14 +407,19 @@ async function loadHistory(client) {
   
   const { data: intData, error: intError } = await intQuery;
 
-  // 3. Invoices
+  // 3. ✅ Invoices - Query payments table (NOT invoices!) - SURGICAL FIX
   let invFilters = [
-    buildOrFilter('client_name', client.name),
-    buildOrFilter('client_phone', client.contact),
-    buildOrFilter('client_email', client.email)
+    buildOrFilter('name', client.name),
+    buildOrFilter('contact', client.contact),
+    buildOrFilter('email', client.email)
   ].filter(Boolean);
   
-  let invQuery = window.supabaseClient.from('invoices').select('*').order('created_at', { ascending: false });
+  let invQuery = window.supabaseClient
+    .from('payments')  // ✅ Changed from 'invoices' to 'payments'
+    .select('*')
+    .eq('status', 'completed')  // ✅ Only show completed payments
+    .order('created_at', { ascending: false });
+  
   if (invFilters.length > 0) invQuery = invQuery.or(invFilters.join(','));
   
   const { data: invData, error: invError } = await invQuery;
@@ -447,14 +452,14 @@ async function loadHistory(client) {
     intContainer.innerHTML = '<div class="history-empty">No interactions found</div>';
   }
 
-  // Render Invoices
+  // ✅ Render Invoices from payments table - SURGICAL FIX
   const invContainer = document.getElementById("invoice");
   invContainer.innerHTML = '';
   if (invData && invData.length > 0) {
     invData.forEach(inv => {
-      const wsCount = inv.workspaces ? (Array.isArray(inv.workspaces) ? inv.workspaces.length : 0) : 0;
-      const id = inv.ir_code || inv.record_id || inv.id;
-      invContainer.innerHTML += `<div class="history-item"><span class="history-id">${id}</span> <span class="history-date">${formatDate(inv.created_at)}</span> <span class="history-detail">• Workspace ${wsCount}</span></div>`;
+      const id = inv.invoice_id || inv.record_id || inv.id;
+      const total = inv.total ? `${inv.total.toFixed(3)} Dh` : '-';
+      invContainer.innerHTML += `<div class="history-item"><span class="history-id">${id}</span> <span class="history-date">${formatDate(inv.created_at)}</span> <span class="history-detail">• ${total}</span></div>`;
     });
   } else {
     invContainer.innerHTML = '<div class="history-empty">No invoices found</div>';
