@@ -3,169 +3,406 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Phoenix Printing Solutions | Redefine Your Space</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400:700&family=Plus+Jakarta+Sans:wght@300:500:800&family=Roboto:wght@400:500:700&display=swap" rel="stylesheet">
-  <script src="assets/js/auth.js"></script>
+  <title>Phoenix Printing Solutions | Archive</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/supabase.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    :root { --glass: rgba(0,0,0,0.6); --glass-border: rgba(255,255,255,0.2); --electric-lime:#00FF87; --fire-orange:#ff4d00; --fire-yellow:#ffcc00; --pps-green:#066d44; --pps-admin-green:#046C4E; }
-    *{margin:0;padding:0;box-sizing:border-box}
-    body { background:#ffffff; }
-    body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:none;z-index:-1}
-    nav{padding:20px 5%;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(20px);position:fixed;width:100%;top:0;z-index:1000;border-bottom:1px solid var(--glass-border)}
-    .brand-name{font-family:'Syncopate',sans-serif;font-weight:700;font-size:1.4rem;letter-spacing:2px;text-transform:uppercase;color:#000;text-shadow:0 0 5px #fff,0 0 10px #ffcc00,0 0 20px #ff4d00}
-    .nav-buttons{display:flex;gap:20px}
-    .nav-btn{text-decoration:none;color:#000;font-family:'Syncopate',sans-serif;font-size:.7rem;font-weight:700;padding:10px 18px;border-radius:5px;transition:.3s;border:1px solid transparent}
-    .nav-btn:hover{color:var(--electric-lime);border-color:var(--electric-lime);background:rgba(0,255,135,0.1)}
-    .main-content{width:100%;display:flex;justify-content:center}
+    :root { --pps-green: #046C4E; --text-primary: #111827; --text-secondary: #6b7280; --border-color: #e5e7eb; --hover-bg: #f9fafb; --card-bg: #f8f9fa; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: #f3f4f6; padding: 20px; color: var(--text-primary); }
     
-    .queue-container{margin:40px auto 0;width:90%;max-width:1200px;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e0e0e0;box-shadow:0 4px 20px rgba(0,0,0,0.08);color:#000}
-    
-    .queue-header-box{
-      background:#e5e7eb;
-      color:#000;
-      padding:0;
-      display:grid;
-      grid-template-columns: 60% 40%;
-      border-bottom:1px solid #d1d5db;
-    }
-    .header-title{
-      padding:12px 30px;
-      font-family:'Times New Roman', Times, serif;
-      font-weight:bold;
-      font-size:1.1rem;
-      letter-spacing:2px;
-      display:flex;
-      align-items:center;
-      justify-content: center;
-    }
-    .header-stats{
-      padding:12px 30px;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      border-left:1px solid #d1d5db;
-      font-family:'Times New Roman', Times, serif;
-    }
-    .stats-count{
-      font-size:1.1rem;
-      font-weight:bold;
-      color:#000;
-    }
-    
-    table{width:100%;border-collapse:collapse;text-align:left}
-    thead{background:#fafafa}
-    th{
-      padding:15px 30px;
-      font-family:'Times New Roman', Times, serif;
-      font-weight:bold;
-      font-size:0.85rem;
-      border-bottom:1px solid #e0e0e0;
-      color:#000;
-    }
-    td{
-      padding:18px 30px;
-      border-bottom:1px solid #eee;
-      font-size:0.85rem;
-      color:#000;
-    }
-    tr:hover td{background:#f9f9f9}
-    .ref-code{font-family:monospace;font-weight:bold;color:#000}
-    .action-cell{display:flex;gap:10px;align-items:center}
-    .btn-action{border:none;padding:8px 16px;border-radius:6px;font-size:10px;font-weight:bold;cursor:pointer;color:white;text-transform:uppercase;transition:opacity .2s}
-    .activate-btn{background:#2e7d32}
-    .delete-btn{background:#c62828}
-    .btn-action:hover{opacity:0.8}
-    footer{position:fixed;bottom:0;left:0;right:0;height:68px;background:rgba(0,0,0,0.85);border-top:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;z-index:1000}
-    .footer-logo{height:30px;margin-right:15px}
-    footer p{font-family:'Syncopate';font-size:0.62rem;letter-spacing:3px;opacity:0.7;color:#000;margin:0}
-
-    .queue-info {
-      font-family: 'Times New Roman', Times, serif;
-      font-weight: normal;
-      font-size: 0.9rem;
-    }
-    .mode-badge {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: bold;
-      text-transform: uppercase;
-      border: 1px solid;
-    }
-    .mode-client {
-      background: rgba(0, 212, 255, 0.1);
-      color: #00d4ff;
-      border-color: #00d4ff;
-    }
-    .mode-entrepreneur {
-      background: rgba(255, 204, 0, 0.1);
-      color: #ffcc00;
-      border-color: #ffcc00;
+    /* 🔹 MAIN CONTAINER CARD - Identical to interactions-archive */
+    .main-container { 
+        max-width: 1400px; 
+        margin: 0 auto; 
+        background: #fff; 
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
+    /* 🔹 HEADER TITLES */
+    .container-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 30px;
+    }
+    .container-header h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #111827;
+        flex: 1;
+        text-align: center;
+    }
+
+    /* 🔹 TWO COLUMN LAYOUT FOR CONTROLS */
+    .main-layout {
+        display: flex;
+        gap: 60px;
+        align-items: flex-start;
+    }
+    .left-column, .right-column {
+        flex: 1;
+    }
+
+    /* 🔹 LEFT COLUMN: MONTHLY SEARCH */
+    .archive-subtitle {
+        text-align: center;
+        color: #6b7280;
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+    .year-selector {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        margin-bottom: 30px;
+    }
+    .year-btn {
+        padding: 6px 14px;
+        background: #fff;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        color: #374151;
+        transition: all 0.2s;
+    }
+    .year-btn:hover:not(:disabled) { background: #f9fafb; border-color: #9ca3af; }
+    .year-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    #current-year-display { font-weight: 600; font-size: 15px; min-width: 50px; text-align: center; }
+    
+    /* 🔹 FULL WIDTH MONTH GRID - Identical to interactions-archive */
+    .months-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        width: 100%;
+        margin-top: 30px;
+        border-top: 1px solid #f3f4f6;
+        padding-top: 30px;
+    }
+    .month-card {
+        background: #f8f9fa;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 24px 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        min-height: 110px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    .month-card:hover { border-color: #3b82f6; background: #f1f5f9; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .month-card .month-name { font-weight: 600; font-size: 14px; color: #111827; margin-bottom: 6px; }
+    .month-card .month-year { font-size: 12px; color: #6b7280; margin-bottom: 12px; }
+    .month-card .count-badge { display: inline-block; background: #111827; color: #fff; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 999px; }
+    .month-card.empty { opacity: 0.6; cursor: default; }
+    .month-card.empty:hover { transform: none; background: #f8f9fa; border-color: #e5e7eb; box-shadow: none; }
+
+    /* 🔹 RIGHT COLUMN: QUICK SEARCH */
+    .search-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr auto;
+        gap: 12px;
+        align-items: center;
+    }
+    .search-input {
+        padding: 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 14px;
+        background: #fff;
+        height: 38px;
+    }
+    .search-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .search-btn {
+        padding: 8px 20px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        background: #fff;
+        color: #374151;
+        height: 38px;
+        transition: all 0.2s;
+    }
+    .search-btn:hover { background: #f9fafb; border-color: #9ca3af; }
+
+    /* 🔹 QUEUE SECTION (Hidden by default) */
+    #queue-section { display: none; margin-top: 32px; }
+    
+    /* 🔹 RETURN BUTTON */
+    .return-btn {
+        padding: 8px 16px;
+        background: #e5e7eb;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        color: #374151;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .return-btn:hover { background: #d1d5db; }
+    
+    /* 🔹 QUEUE TABLE STYLES */
+    .queue-container { margin: 0 auto; width: 100%; background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); }
+    .queue-header-box { 
+        background: #f9fafb; 
+        padding: 16px 20px; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        border-bottom: 1px solid var(--border-color); 
+    }
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .header-title { font-weight: 700; font-size: 1rem; color: #111827; }
+    .stats-count { font-size: 0.875rem; font-weight: 500; color: var(--text-secondary); }
+    
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    thead { background: #f9fafb; }
+    th { padding: 12px 20px; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); }
+    td { padding: 14px 20px; border-bottom: 1px solid var(--border-color); font-size: 0.875rem; color: #111827; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9fafb; }
+    .ref-code { font-family: monospace; font-weight: 600; color: #4b5563; }
+    .action-cell { display: flex; gap: 8px; align-items: center; }
+    .btn-action { border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer; color: white; transition: opacity .2s; }
+    .activate-btn { background: var(--pps-green); }
+    .delete-btn { background: #ef4444; }
+    .btn-action:hover { opacity: 0.9; }
+
+    .mode-badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+    .mode-client { background: #dbeafe; color: #1e40af; }
+    .mode-entrepreneur { background: #fef3c7; color: #92400e; }
+
+    /* Hidden Invoice Wrapper */
     #hiddenInvoiceWrap { position: absolute; left: -9999px; top: 0; width: 800px; color: #333; }
-    .invoice-container { padding: 30px; background: #ffffff; border-radius: 12px; }
-    .invoice-header { text-align: center; margin-bottom: 8px; display: flex; flex-direction: column; align-items: center; }
-    .invoice-header img { max-height: 60px; margin-bottom: 8px; }
-    .invoice-header h1 { margin: 0; font-size: 22px; font-weight: 700; color: var(--pps-admin-green); }
-    .invoice-title { text-align: center; font-weight: 700; font-size: 18px; margin: 20px 0 8px; text-transform: uppercase; color: var(--pps-admin-green); }
-    .invoice-client-info { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; }
-    .invoice-client-line { display: flex; justify-content: center; width: 100%; max-width: 350px; font-size: 14px; color: #444; line-height: 1.6; }
-    .invoice-client-label { width: 110px; text-align: right; font-weight: 700; margin-right: 10px; font-size: 13px; }
-    .invoice-client-value { text-align: left; flex: 1; font-size: 13px; }
+    .invoice-container { padding: 30px; background: #ffffff; }
+    .invoice-header { text-align: center; margin-bottom: 20px; }
+    .invoice-header h1 { font-size: 24px; font-weight: 700; color: var(--pps-green); margin: 0; }
+    .invoice-title { text-align: center; font-weight: 700; font-size: 18px; margin: 20px 0; text-transform: uppercase; }
     .invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
     .invoice-table th, .invoice-table td { border: 1px solid #e0e0e0; padding: 8px; text-align: center; font-size: 12px; }
-    .invoice-table th { background: var(--pps-admin-green); color: #fff; font-weight: 700; }
-    .invoice-table td.total { font-weight: bold; background: #cdeacf; color: #333; }
-    .invoice-additional-costs { width: 50%; margin-left: auto; font-size: 13px; margin-bottom: 20px; }
-    .invoice-additional-costs table { width: 100%; border: none; }
-    .invoice-additional-costs td { padding: 6px; text-align: left; border: none; }
-    .invoice-additional-costs td.value { text-align: right; }
-    .invoice-grand-total { font-weight: bold; background: #cdeacf; text-align: right; padding: 8px; margin-top: 8px; font-size: 14px; }
-    .invoice-footer { display: flex; font-size: 11px; justify-content: center; gap: 15px; margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px; color: #666; }
+    .invoice-table th { background: var(--pps-green); color: #fff; }
+    
+    /* Responsive */
+    @media (max-width: 1100px) { 
+        .main-layout { flex-direction: column; gap: 40px; } 
+        .months-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 768px) { 
+        body { padding: 16px; } 
+        .main-container { padding: 24px; }
+        .months-grid { grid-template-columns: repeat(2, 1fr); }
+        .search-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  
 
-  <div class="main-content">
-    <div class="queue-container">
-      <div class="queue-header-box">
-        <div class="header-title">ARCHIVE HISTORY</div>
-        <div class="header-stats">
-          <div class="stats-count" id="archiveCount">0 Items</div>
+  <div class="main-container">
+      <!-- 1. SPLIT HEADER - CENTERED -->
+      <div class="container-header">
+          <h2>Monthly Search</h2>
+          <h2>Quick Search</h2>
+      </div>
+      
+      <!-- 2. TWO COLUMN LAYOUT -->
+      <div class="main-layout">
+          
+          <!-- LEFT: ARCHIVE CONTROLS -->
+          <div class="left-column">
+              <p class="archive-subtitle">Select a month to view archived interactions</p>
+              <div class="year-selector">
+                  <button class="year-btn" id="prev-year-btn" onclick="changeYear(-1)">❮ Prev</button>
+                  <span id="current-year-display">2026</span>
+                  <button class="year-btn" id="next-year-btn" onclick="changeYear(1)">Next ❯</button>
+              </div>
+          </div>
+          
+          <!-- RIGHT: SEARCH -->
+          <div class="right-column">
+              <div class="search-grid">
+                  <input type="text" class="search-input" id="s-name" placeholder="Name" oninput="performSearch()">
+                  <input type="text" class="search-input" id="s-phone" placeholder="Phone" oninput="performSearch()">
+                  <button class="search-btn" onclick="performSearch()">Search</button>
+                  <input type="email" class="search-input" id="s-email" placeholder="Email" oninput="performSearch()">
+                  <input type="text" class="search-input" id="s-city" placeholder="City" oninput="performSearch()">
+                  <button class="search-btn" onclick="clearSearch()">Clear Search</button>
+              </div>
+          </div>
+          
+      </div>
+
+      <!-- 3. FULL WIDTH MONTH CARDS -->
+      <div class="months-grid" id="months-grid"></div>
+       
+      <!-- 4. QUEUE SECTION (Hidden by default) -->
+      <div id="queue-section">
+        <div class="queue-container">
+          <div class="queue-header-box">
+            <div class="header-left">
+              <button class="return-btn" onclick="showMainView()">← Return</button>
+              <div class="header-title">ARCHIVED ITEMS</div>
+            </div>
+            <div class="stats-count" id="archiveCount">0 Items</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Ref Code</th>
+                <th>Name</th>
+                <th>City</th>
+                <th>Workspace</th>
+                <th>Mode</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="archiveBody"></tbody>
+          </table>
         </div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>REF CODE</th>
-            <th>Name</th>
-            <th>City</th>
-            <th>Workspace</th>
-            <th>Mode</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="archiveBody"></tbody>
-      </table>
-    </div>
+
   </div>
 
+  <!-- Hidden Invoice Wrapper -->
   <div id="hiddenInvoiceWrap"></div>
-
-  
 
   <script>
   (function(){
+    const SUPABASE_URL = "https://puymabrkwtpvhropcvqk.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1eW1hYnJrd3Rwdmhyb3BjdnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyOTEyOTUsImV4cCI6MjA4ODg2NzI5NX0.kg7WvMRblzVf2iaQbt4Zz7DuNDgHGn9AKFHM_maGiTk";
+    window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    
     const LOGO_PATH = '../assets/images/PPS logo.png';
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    let currentArchiveYear = new Date().getFullYear();
+    let allArchivedData = []; 
 
+    // 🔹 UI FUNCTIONS
+    window.showMonth = function(monthIndex) {
+        // Hide main view elements, show queue
+        document.querySelector('.main-layout').style.display = 'none';
+        document.querySelector('.months-grid').style.display = 'none';
+        document.querySelector('.container-header').style.display = 'none';
+        document.getElementById('queue-section').style.display = 'block';
+        
+        const filtered = allArchivedData.filter(req => {
+            const created = new Date(req.created_at);
+            return created.getFullYear() === currentArchiveYear && created.getMonth() === monthIndex;
+        });
+        render(filtered);
+    }
+
+    window.showMainView = function() {
+        // Show main view elements, hide queue
+        document.querySelector('.main-layout').style.display = 'flex';
+        document.querySelector('.months-grid').style.display = 'grid';
+        document.querySelector('.container-header').style.display = 'flex';
+        document.getElementById('queue-section').style.display = 'none';
+        window.renderCalendar();
+    }
+
+    // 🔹 UPDATED SEARCH LOGIC
+    window.performSearch = function() {
+        const name = document.getElementById('s-name').value.trim().toLowerCase();
+        const phone = document.getElementById('s-phone').value.trim().toLowerCase();
+        const email = document.getElementById('s-email').value.trim().toLowerCase();
+        const city = document.getElementById('s-city').value.trim().toLowerCase();
+
+        // 1. If all empty, return to main view
+        if (!name && !phone && !email && !city) {
+            window.showMainView();
+            return;
+        }
+
+        // 2. Filter the data
+        const filtered = allArchivedData.filter(req => {
+            const matchName = !name || (req.client?.name || '').toLowerCase().includes(name);
+            const matchPhone = !phone || (req.client?.phone || req.business?.phone || '').toLowerCase().includes(phone);
+            const matchEmail = !email || (req.client?.email || '').toLowerCase().includes(email);
+            const matchCity = !city || (req.location?.city || '').toLowerCase().includes(city);
+            return matchName && matchPhone && matchEmail && matchCity;
+        });
+
+        // 3. Check if we found any matches
+        if (filtered.length > 0) {
+            // Found results: Hide ONLY month cards, keep search tools visible
+            document.querySelector('.months-grid').style.display = 'none';
+            document.getElementById('queue-section').style.display = 'block';
+            render(filtered);
+        } else {
+            // No results: Keep Main View unchanged (Month Cards visible)
+            document.getElementById('queue-section').style.display = 'none';
+            document.querySelector('.months-grid').style.display = 'grid';
+        }
+    }
+
+    window.clearSearch = function() {
+        document.getElementById('s-name').value = '';
+        document.getElementById('s-phone').value = '';
+        document.getElementById('s-email').value = '';
+        document.getElementById('s-city').value = '';
+        window.showMainView();
+    }
+
+    window.renderCalendar = function() {
+        const grid = document.getElementById('months-grid');
+        grid.innerHTML = '';
+        
+        MONTHS.forEach((monthName, monthIndex) => {
+            const card = document.createElement('div');
+            card.className = 'month-card';
+            
+            const count = allArchivedData.filter(req => {
+                if (!req.created_at) return false;
+                const created = new Date(req.created_at);
+                return created.getFullYear() === currentArchiveYear && created.getMonth() === monthIndex;
+            }).length;
+
+            card.innerHTML = `
+                <div class="month-name">${monthName}</div>
+                <div class="month-year">${currentArchiveYear}</div>
+                <div class="count-badge">${count}</div>
+            `;
+            
+            if (count > 0) {
+                card.onclick = () => window.showMonth(monthIndex);
+            } else {
+                card.classList.add('empty');
+            }
+            grid.appendChild(card);
+        });
+    }
+
+    window.changeYear = function(delta) {
+        currentArchiveYear += delta;
+        document.getElementById('current-year-display').textContent = currentArchiveYear;
+        window.renderCalendar();
+    };
+
+    // 🔹 PDF GENERATION LOGIC
     async function generateVisualInvoicePDF(req) {
       const isEnt = req.is_entrepreneur || false;
       const basePrice = isEnt ? 200 : 250;
@@ -177,15 +414,9 @@
         const h = parseFloat(ws.height) || 0;
         const w = parseFloat(ws.width) || 0;
         const actual = h * w;
-        let charge = 0;
-        if(actual > 0){
-          if(actual <= 1) charge = 1;
-          else if(actual <= 1.49) charge = 1.5;
-          else if(actual <= 1.99) charge = 2;
-          else charge = Math.ceil(actual * 2) / 2;
-        }
+        let charge = actual <= 1 ? 1 : Math.ceil(actual * 2) / 2;
         totalChargeArea += charge;
-        return `<tr><td>Workspace ${i+1}</td><td>${h.toFixed(2)}x${w.toFixed(2)}</td><td>${actual.toFixed(2)}</td><td>${charge.toFixed(2)}</td><td>${basePrice.toFixed(2)}</td><td>${(charge*basePrice).toFixed(2)}</td></tr>`;
+        return `<tr><td>Workspace ${i+1}</td><td>${h}x${w}</td><td>${actual.toFixed(2)}</td><td>${charge.toFixed(2)}</td><td>${basePrice}</td><td>${(charge*basePrice).toFixed(2)}</td></tr>`;
       }).join('');
 
       const baseCost = totalChargeArea * basePrice;
@@ -195,27 +426,16 @@
       const wrap = document.getElementById('hiddenInvoiceWrap');
       wrap.innerHTML = `
         <div class="invoice-container">
-          <div class="invoice-header"><img src="${LOGO_PATH}" alt="Logo" /><h1>Phoenix Printing Solutions</h1></div>
-          <div class="invoice-title">Invoice: ${isEnt ? 'Business' : 'Client'} - ${req.client?.name || 'Customer'}</div>
-          <div class="invoice-client-info">
-            <div class="invoice-client-line"><div class="invoice-client-label">${isEnt ? 'Business Name:' : 'Client Name:'}</div><div class="invoice-client-value">${req.client?.name || 'N/A'}</div></div>
-            <div class="invoice-client-line"><div class="invoice-client-label">Phone:</div><div class="invoice-client-value">${phone}</div></div>
-            <div class="invoice-client-line"><div class="invoice-client-label">City:</div><div class="invoice-client-value">${city}</div></div>
-          </div>
+          <div class="invoice-header"><h1>Phoenix Printing Solutions</h1></div>
+          <div class="invoice-title">Invoice - ${req.client?.name}</div>
           <table class="invoice-table">
-            <thead><tr><th>Item</th><th>Size</th><th>Actual</th><th>Charge</th><th>Price</th><th>Cost</th></tr></thead>
-            <tbody>${rowsHtml}<tr class="total"><td colspan="3">Total Area</td><td>${totalChargeArea.toFixed(2)}</td><td></td><td>${baseCost.toFixed(2)}</td></tr></tbody>
+            <thead><tr><th>Item</th><th>Size</th><th>Charge</th><th>Price</th><th>Cost</th></tr></thead>
+            <tbody>${rowsHtml}<tr><td colspan="4" style="text-align:right;font-weight:bold;">Total</td><td>${baseCost.toFixed(2)}</td></tr></tbody>
           </table>
-          <div class="invoice-additional-costs">
-            <table>
-              <tr><td>Travel Total</td><td class="value">${travel.toFixed(2)} DH</td></tr>
-              <tr style="font-weight:bold; background:#cdeacf;"><td style="padding:10px;">GRAND TOTAL</td><td class="value" style="padding:10px;">${grand.toFixed(2)} DH</td></tr>
-            </table>
-          </div>
-          <div class="invoice-footer"><div>Phoenix Printing Solutions</div><div>0667336303</div></div>
+          <div style="text-align:right; font-weight:bold; font-size:16px; margin-top:10px;">GRAND TOTAL: ${grand.toFixed(2)} DH</div>
         </div>`;
 
-      const canvas = await html2canvas(wrap, { scale: 2, useCORS: true });
+      const canvas = await html2canvas(wrap, { scale: 2 });
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF('p', 'mm', 'a4');
       pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
@@ -224,199 +444,71 @@
 
     async function uploadPdfToSupabase(req, pdfBlob) {
       const cleanName = (req.client?.name || "Customer").replace(/[^a-z0-9]/gi, '_');
-      const cleanCity = (req.location?.city || "City").replace(/[^a-z0-9]/gi, '_');
-      const refId = req.record_id || req.request_id.slice(0, 8).toUpperCase();
-      const fileName = `PPS-${cleanName}-${cleanCity}-${refId}.pdf`;
-
-      console.log("📤 Uploading to Supabase Storage:", fileName);
-      
-      // 🔹 Try both possible bucket names (case-sensitive)
-      const bucketNames = ["Archive-invoice", "archive-invoice", "archive_invoice"];
-      let uploadResult = null;
-      
-      for (const bucketName of bucketNames) {
-        try {
-          console.log(`🔍 Trying bucket: ${bucketName}`);
-          const { data, error } = await window.supabaseClient.storage
-            .from(bucketName)
-            .upload(`archive/${fileName}`, pdfBlob, { 
-              contentType: "application/pdf", 
-              upsert: true,
-              cacheControl: '3600'
-            });
-          
-          if (error) {
-            console.warn(`❌ Bucket ${bucketName} failed:`, error);
-            continue;
-          }
-          
-          console.log(`✅ Successfully uploaded to bucket: ${bucketName}`, data);
-          uploadResult = data;
-          break;
-        } catch (bucketErr) {
-          console.warn(`❌ Bucket ${bucketName} error:`, bucketErr);
-          continue;
-        }
-      }
-      
-      if (!uploadResult) {
-        throw new Error("Failed to upload to any storage bucket. Check bucket name and RLS policies.");
-      }
-      
-      return uploadResult;
+      const fileName = `PPS-${cleanName}-${req.request_id}.pdf`;
+      const { error } = await window.supabaseClient.storage.from("archive-invoice").upload(fileName, pdfBlob, { upsert: true });
+      if (error) throw error;
     }
 
     window.finishItem = async function(id) {
-      console.log("🔄 Starting archive process for ID:", id);
-      
       try {
-        // Step 1: Fetch the request data
-        console.log("1️⃣ Fetching request data...");
-        const { data: req, error: fetchError } = await window.supabaseClient
-          .from("pps_queue")
-          .select("*")
-          .eq("request_id", id)
-          .single();
+        const {  req } = await window.supabaseClient.from("pps_queue").select("*").eq("request_id", id).single();
+        if (!req) return;
         
-        if (fetchError) {
-          console.error("❌ Failed to fetch request:", fetchError);
-          alert("Error: Could not fetch request data.");
-          return;
-        }
-        
-        if (!req) {
-          console.error("❌ Request not found");
-          alert("Error: Request not found.");
-          return;
-        }
-        
-        console.log("✅ Request data fetched:", req);
-        
-        // Step 2: Generate PDF
-        console.log("2️⃣ Generating PDF...");
         const pdfBlob = await generateVisualInvoicePDF(req);
-        console.log("✅ PDF generated, size:", pdfBlob.size, "bytes");
-        
-        // Step 3: Upload to Supabase Storage
-        console.log("3️⃣ Uploading PDF to storage...");
         await uploadPdfToSupabase(req, pdfBlob);
-        console.log("✅ PDF uploaded successfully");
         
-        // Step 4: Delete from pps_queue
-        console.log("4️⃣ Deleting from pps_queue...");
-        const { error: delErr } = await window.supabaseClient
-          .from("pps_queue")
-          .delete()
-          .eq("request_id", id);
-        
-        if (delErr) {
-          console.error("❌ Failed to delete from queue:", delErr);
-          alert("PDF saved, but failed to remove from queue. Please try again.");
-          return;
-        }
-        
-        console.log("✅ Request deleted from queue");
-        
-        // Step 5: Refresh the list
-        fetchAndRender();
+        await window.supabaseClient.from("pps_queue").delete().eq("request_id", id);
+        await window.fetchAndRender();
         alert("✅ Archived and PDF saved successfully!");
-        
       } catch (err) {
-        console.error("❌ Critical error in finishItem:", err);
-        alert("Error finishing item: " + err.message + "\n\nCheck console for details.");
+        alert("Error: " + err.message);
       }
     };
 
     window.activateItem = async function(id){
       try{
-        const { error } = await window.supabaseClient.from('pps_queue')
-          .update({ status:'pending', created_at: new Date().toISOString() })
-          .eq('request_id', id);
-        if(error) throw error;
-        fetchAndRender();
+        await window.supabaseClient.from('pps_queue').update({ status:'pending' }).eq('request_id', id);
+        await window.fetchAndRender();
       } catch(err){ alert("Error activating item."); }
     }
 
-    async function fetchAndRender(){
+    window.fetchAndRender = async function(){
       try {
-        console.log("🔍 Starting fetchAndRender...");
+        const { data, error } = await window.supabaseClient.from('pps_queue').select('*').eq('status', 'archived').order('created_at', { ascending: false });
+        if (error) throw error;
         
-        if (!window.supabaseClient) {
-          console.error("❌ Supabase client not initialized");
-          return;
+        allArchivedData = data || [];
+        // Always render calendar when showing main view
+        if(document.getElementById('queue-section').style.display === 'none' || document.getElementById('queue-section').style.display === '') {
+            window.renderCalendar();
         }
-
-        console.log("📡 Querying database for archived items...");
-        
-        const { data, error } = await window.supabaseClient
-          .from('pps_queue')
-          .select('*')
-          .eq('status', 'archived')
-          .order('created_at', { ascending: false });
-        
-        console.log("📥 Database response:", { data, error });
-        
-        if(error) {
-          console.error("❌ Archive fetch error:", error);
-          document.getElementById('archiveBody').innerHTML = 
-            `<tr><td colspan="6" style="text-align:center; padding:50px; color:red;">Error loading data: ${error.message}</td></tr>`;
-          return;
-        }
-        
-        if (!data) {
-          console.warn("⚠️ No data returned from database");
-          document.getElementById('archiveBody').innerHTML = 
-            '<tr><td colspan="6" style="text-align:center; padding:50px; opacity:0.5;">No data returned</td></tr>';
-          return;
-        }
-        
-        console.log(`✅ Found ${data.length} archived items`);
-        render(data);
-      } catch(err) {
-        console.error("❌ Error in fetchAndRender:", err);
-        document.getElementById('archiveBody').innerHTML = 
-          `<tr><td colspan="6" style="text-align:center; padding:50px; color:red;">Error: ${err.message}</td></tr>`;
-      }
+      } catch(err) { console.error(err); }
     }
 
     function render(data){
-      console.log("🎨 Rendering data:", data);
-      
       var tbody=document.getElementById('archiveBody');
       var countLabel=document.getElementById('archiveCount');
-      if(!tbody) {
-        console.error("❌ tbody element not found");
-        return;
-      }
-      
       tbody.innerHTML='';
       countLabel.innerText = `${data.length} Items`;
       
       if(data.length === 0){
-        console.log("ℹ️ No archived items to display");
-        tbody.innerHTML='<tr><td colspan="6" style="text-align:center; padding:50px; opacity:0.5; font-family: Times New Roman;">No archived requests found.</td></tr>';
+        tbody.innerHTML='<tr><td colspan="6" style="text-align:center; padding:40px; color:#6b7280;">No archived requests found.</td></tr>';
         return;
       }
       
-      data.forEach(function(req, index){
-        console.log(`Processing item ${index + 1}:`, req);
-        
+      data.forEach(function(req){
         var tr=document.createElement('tr');
-        
         const displayId = req.record_id || `#${req.request_id.slice(0,8).toUpperCase()}`;
-        
         const mode = (req.sourceMode || req.source_mode || req.mode || 'client').toLowerCase();
         const modeClass = mode === 'entrepreneur' ? 'mode-entrepreneur' : 'mode-client';
-        const modeLabel = mode === 'entrepreneur' ? 'Entrepreneur' : 'Client';
-        
-        console.log(`  - Mode detected: ${mode}, Class: ${modeClass}, Label: ${modeLabel}`);
+        const modeLabel = mode === 'entrepreneur' ? 'Business' : 'Client';
         
         tr.innerHTML=`
-          <td class="ref-code queue-info">${displayId}</td>
-          <td class="queue-info">${req.client?.name || 'N/A'}</td>
-          <td class="queue-info">${req.location?.city || 'N/A'}</td>
-          <td class="queue-info">${req.workspaces?.length || 0} Units</td>
-          <td class="queue-info"><span class="mode-badge ${modeClass}">${modeLabel}</span></td>
+          <td class="ref-code">${displayId}</td>
+          <td>${req.client?.name || 'N/A'}</td>
+          <td>${req.location?.city || 'N/A'}</td>
+          <td>${req.workspaces?.length || 0} Units</td>
+          <td><span class="mode-badge ${modeClass}">${modeLabel}</span></td>
           <td>
             <div class="action-cell">
               <button class="btn-action activate-btn" onclick="activateItem('${req.request_id}')">Activate</button>
@@ -425,11 +517,9 @@
           </td>`;
         tbody.appendChild(tr);
       });
-      
-      console.log("✅ Rendering complete");
     }
 
-    document.addEventListener('DOMContentLoaded', fetchAndRender);
+    document.addEventListener('DOMContentLoaded', window.fetchAndRender);
   })();
   </script>
 </body>
