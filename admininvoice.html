@@ -652,16 +652,17 @@ async function generateInvoice() {
     currentInvoiceID = `IR ${String(Date.now() % 1000000).padStart(6, '0')}`;
   }
 
-  // 🔹 2. Save to invoices table for History Indicator (only if Supabase available)
+  // 🔹 2. Save to invoices table for History Indicator (only if Supabase available) - ✅ SURGICAL FIX APPLIED
   if (window.supabaseClient && typeof window.supabaseClient.from === 'function') {
     try {
       const invoiceRecord = {
         record_id: currentInvoiceID,
         client_name: document.getElementById("clientName").value,
-        client_phone: document.getElementById("clientContact").value,
+        client_contact: document.getElementById("clientContact").value, // ✅ FIXED: was client_phone
         client_email: document.getElementById("clientEmail").value,
         client_city: city,
         client_address: document.getElementById("clientAddress").value,
+        mode: isEntrepreneur ? 'entrepreneur' : 'client', // ✅ Added for profile filtering
         created_at: new Date().toISOString()
       };
       await window.supabaseClient.from('invoices').insert([invoiceRecord]);
