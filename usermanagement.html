@@ -9,7 +9,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; }
 body { background: #ffffff; padding: 20px 40px; color: #111827; line-height: 1.5; }
 
-/* 🔹 NAV CONTAINER - Identical to Interactions page */
+/* 🔹 NAV CONTAINER */
 .nav-container { 
     display: flex; 
     justify-content: center; 
@@ -37,7 +37,7 @@ body { background: #ffffff; padding: 20px 40px; color: #111827; line-height: 1.5
 .section { display: none; max-width: 1000px; margin: 0 auto; animation: fadeIn 0.25s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-/* 🔹 RETURN BUTTON - Top left positioning */
+/* 🔹 RETURN BUTTON */
 .back-btn { 
     width: 90px; 
     height: 34px; 
@@ -78,7 +78,7 @@ input:disabled, select:disabled { background: #f3f4f6; cursor: not-allowed; opac
 .save-btn { width: 120px; height: 36px; background: #111827; color: #ffffff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .save-btn:hover { background: #374151; }
 
-/* 🔹 PROFILE DETAIL VIEW */
+/* 🔹 PROFILE DETAIL VIEW - OLD STYLES (kept for compatibility) */
 .profile-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .header-left { display: flex; gap: 10px; }
 .header-right { display: flex; gap: 10px; }
@@ -90,6 +90,81 @@ input:disabled, select:disabled { background: #f3f4f6; cursor: not-allowed; opac
 .field-item { display: flex; flex-direction: column; }
 .field-label { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
 .field-value { font-size: 14px; font-weight: 500; color: #111827; }
+
+/* 🔹 NEW STYLISH PROFILE CSS */
+.profile-container { max-width: 800px; margin: 0 auto; background: #f3f4f6; padding: 20px; border-radius: 16px; }
+.profile-top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.profile-top-bar .btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: #e5e7eb; color: #374151; transition: all 0.2s; }
+.profile-top-bar .btn:hover { background: #d1d5db; }
+.profile-top-bar .btn-group { display: flex; gap: 8px; }
+.profile-top-bar .btn.btn-delete { background: #fee2e2; color: #dc2626; }
+.profile-top-bar .btn.btn-delete:hover { background: #fecaca; }
+
+.profile-main { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.profile-banner { background: #e9eaec; height: 80px; }
+.profile-content { padding: 0 32px 28px; position: relative; }
+
+.avatar-wrapper {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: white;
+  border: 5px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 700;
+  color: #046C4E;
+  margin-top: -55px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.avatar-wrapper:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.14); }
+.avatar-wrapper img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: none; }
+.avatar-wrapper.has-image img { display: block; }
+.avatar-wrapper.has-image .avatar-initials { display: none; }
+.avatar-initials { display: block; }
+.avatar-upload-overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; opacity: 0;
+  transition: opacity 0.2s; border-radius: 50%; color: white;
+}
+.avatar-wrapper:hover .avatar-upload-overlay { opacity: 1; }
+.avatar-upload-overlay span { font-size: 11px; font-weight: 600; margin-top: 4px; }
+.avatar-upload-overlay svg { width: 22px; height: 22px; }
+#avatar-input { display: none; }
+
+.profile-name { font-size: 20px; font-weight: 700; margin-bottom: 4px; color: #111827; }
+.profile-role { color: #6b7280; font-size: 13px; margin-bottom: 10px; }
+.profile-meta { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+.meta-item { font-size: 12px; color: #6b7280; }
+.meta-item strong { color: #111827; font-weight: 600; }
+.status-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #d1fae5; color: #065f46; padding: 4px 12px;
+  border-radius: 20px; font-size: 11px; font-weight: 600; margin-left: auto;
+}
+.status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #065f46; }
+
+.profile-section { padding: 20px 32px; border-top: 1px solid #e5e7eb; }
+.profile-section h3 { font-size: 13px; font-weight: 700; margin-bottom: 16px; color: #111827; }
+.info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.info-item { margin-bottom: 4px; }
+.info-item .label { font-size: 11px; font-weight: bold; color: #000; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.02em; font-family: 'Times New Roman', Times, serif; }
+.info-item .value { font-size: 13px; font-weight: 600; color: #111827; }
+
+@media (max-width: 768px) {
+  .info-grid { grid-template-columns: repeat(2, 1fr); }
+  .profile-content { padding: 0 20px 20px; }
+  .profile-section { padding: 16px 20px; }
+  .avatar-wrapper { width: 90px; height: 90px; margin-top: -45px; font-size: 28px; }
+}
 
 /* 🔹 MODAL */
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
@@ -105,7 +180,7 @@ input:disabled, select:disabled { background: #f3f4f6; cursor: not-allowed; opac
 </head>
 <body>
 
-<!-- 🔹 MAIN VIEW - Uses nav-container like Interactions -->
+<!-- 🔹 MAIN VIEW -->
 <div id="mainView" class="nav-container">
   <button class="main-btn" onclick="openNewProfile()">✨ New Profile</button>
   <button class="main-btn" onclick="openEmployeeList()">👥 Employee List</button>
@@ -139,172 +214,128 @@ input:disabled, select:disabled { background: #f3f4f6; cursor: not-allowed; opac
   <button class="back-btn" onclick="goToMainView()">← Return</button>
   <div class="form-card">
     <div class="input-grid">
-      <div>
-        <label>Full Name *</label>
-        <input type="text" id="empFullName" required>
-      </div>
-      <div>
-        <label>Email *</label>
-        <input type="email" id="empEmail" required>
-      </div>
-      <div>
-        <label>Phone *</label>
-        <input type="text" id="empPhone" required>
-      </div>
-      <div>
-        <label>Address *</label>
-        <input type="text" id="empAddress" required>
-      </div>
-      <div>
-        <label>City *</label>
-        <input type="text" id="empCity" required>
-      </div>
-      <div>
-        <label>CIN *</label>
-        <input type="text" id="empCIN" required>
-      </div>
-      <div>
-        <label>Employee ID</label>
-        <input type="text" id="empID" readonly style="background: #f3f4f6; cursor: not-allowed;">
-      </div>
-      <div>
-        <label>Start Date *</label>
-        <input type="date" id="empStartDate" required>
-      </div>
-      <div>
-        <label>End Date (Optional)</label>
-        <input type="date" id="empEndDate">
-      </div>
-      <div>
-        <label>Marital Status *</label>
-        <select id="empMarital" required>
-          <option value="">Select Status</option>
-          <option value="Single">Single</option>
-          <option value="Married">Married</option>
-          <option value="Divorced">Divorced</option>
-        </select>
-      </div>
-      <div>
-        <label>Role *</label>
-        <select id="empRole" required>
-          <option value="">Select Role</option>
-          <option value="Admin">Admin</option>
-          <option value="Technician">Technician</option>
-          <option value="Secretary">Secretary</option>
-          <option value="Assistant">Assistant</option>
-          <option value="Assistante">Assistante</option>
-        </select>
-      </div>
-      <div>
-        <label>Access Control *</label>
-        <select id="empAccess" required>
-          <option value="">Select Access</option>
-          <option value="Full Control">Full Control</option>
-          <option value="Limited">Limited</option>
-        </select>
-      </div>
+      <div><label>Full Name *</label><input type="text" id="empFullName" required></div>
+      <div><label>Email *</label><input type="email" id="empEmail" required></div>
+      <div><label>Phone *</label><input type="text" id="empPhone" required></div>
+      <div><label>Address *</label><input type="text" id="empAddress" required></div>
+      <div><label>City *</label><input type="text" id="empCity" required></div>
+      <div><label>CIN *</label><input type="text" id="empCIN" required></div>
+      <div><label>Employee ID</label><input type="text" id="empID" readonly style="background: #f3f4f6; cursor: not-allowed;"></div>
+      <div><label>Start Date *</label><input type="date" id="empStartDate" required></div>
+      <div><label>End Date (Optional)</label><input type="date" id="empEndDate"></div>
+      <div><label>Marital Status *</label><select id="empMarital" required><option value="">Select Status</option><option value="Single">Single</option><option value="Married">Married</option><option value="Divorced">Divorced</option></select></div>
+      <div><label>Role *</label><select id="empRole" required><option value="">Select Role</option><option value="Admin">Admin</option><option value="Technician">Technician</option><option value="Secretary">Secretary</option><option value="Assistant">Assistant</option><option value="Assistante">Assistante</option></select></div>
+      <div><label>Access Control *</label><select id="empAccess" required><option value="">Select Access</option><option value="Full Control">Full Control</option><option value="Limited">Limited</option></select></div>
     </div>
-    <div class="save-wrapper">
-      <button class="save-btn" onclick="saveNewEmployee()">Save Profile</button>
-    </div>
+    <div class="save-wrapper"><button class="save-btn" onclick="saveNewEmployee()">Save Profile</button></div>
   </div>
 </div>
 
-<!-- 🔹 PROFILE DETAIL VIEW -->
+<!-- 🔹 PROFILE DETAIL VIEW - ✅ COMPLETE STYLISH DESIGN -->
 <div id="profileDetailView" class="section">
-  <div class="profile-header">
-    <div class="header-left">
-      <button class="back-btn" onclick="goToEmployeeList()" style="margin-bottom:0;">← Return</button>
-    </div>
-    <div class="header-right">
-      <button id="editSaveBtn" class="action-btn" onclick="toggleEditMode()">Edit</button>
-      <button id="blockUnblockBtn" class="action-btn" onclick="handleBlockUnblock()">Block</button>
-      <button class="action-btn danger" onclick="showDeleteModal()">Delete</button>
-    </div>
-  </div>
-  <div class="form-card">
-    <div class="field-row">
-      <div class="field-item">
-        <span class="field-label">Full Name</span>
-        <span class="field-value" id="viewFullName">-</span>
-        <input type="text" id="editFullName" style="display:none; margin-top:4px;">
-      </div>
-      <div class="field-item">
-        <span class="field-label">Email</span>
-        <span class="field-value" id="viewEmail">-</span>
-        <input type="email" id="editEmail" style="display:none; margin-top:4px;">
+  <div class="profile-container">
+    <!-- Top Bar -->
+    <div class="profile-top-bar">
+      <button class="btn" onclick="goToEmployeeList()">← Return</button>
+      <div class="btn-group">
+        <button class="btn" id="editSaveBtn" onclick="toggleEditMode()">Edit</button>
+        <button class="btn" id="blockUnblockBtn" onclick="handleBlockUnblock()">Block</button>
+        <button class="btn btn-delete" onclick="showDeleteModal()">Delete</button>
       </div>
     </div>
-    <div class="field-row">
-      <div class="field-item">
-        <span class="field-label">Phone</span>
-        <span class="field-value" id="viewPhone">-</span>
-        <input type="text" id="editPhone" style="display:none; margin-top:4px;">
+
+    <!-- Profile Card -->
+    <div class="profile-main">
+      <div class="profile-banner"></div>
+      <div class="profile-content">
+        
+        <!-- Avatar -->
+        <div class="avatar-wrapper" id="avatarWrapper" onclick="document.getElementById('avatar-input').click()">
+          <span class="avatar-initials" id="avatarInitials">HI</span>
+          <img id="avatarImage" src="" alt="Profile Photo">
+          <div class="avatar-upload-overlay">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span>Upload</span>
+          </div>
+          <input type="file" id="avatar-input" accept="image/*" onchange="handleAvatarUpload(event)">
+        </div>
+
+        <!-- Name & Meta -->
+        <h1 class="profile-name" id="viewFullName">Hicham IMAM</h1>
+        <div class="profile-role" id="viewRole">Admin</div>
+        <div class="profile-meta">
+          <span class="meta-item">ID: <strong id="viewEmpID">001</strong></span>
+          <span class="meta-item">CIN: <strong id="viewCIN">SJ19908</strong></span>
+          <span class="meta-item">Started: <strong id="viewStartDate">2026-04-13</strong></span>
+          <span class="status-badge" id="viewStatus">Active</span>
+        </div>
       </div>
-      <div class="field-item">
-        <span class="field-label">Address</span>
-        <span class="field-value" id="viewAddress">-</span>
-        <input type="text" id="editAddress" style="display:none; margin-top:4px;">
+
+      <!-- Contact & Personal Section -->
+      <div class="profile-section">
+        <h3>Contact & Personal</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="label">EMAIL</div>
+            <div class="value" id="viewEmail">imamhicham@outlook.com</div>
+            <input type="email" id="editEmail" style="display:none; margin-top:6px; width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:13px;">
+          </div>
+          <div class="info-item">
+            <div class="label">PHONE</div>
+            <div class="value" id="viewPhone">0667336303</div>
+            <input type="text" id="editPhone" style="display:none; margin-top:6px; width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:13px;">
+          </div>
+          <div class="info-item">
+            <div class="label">CITY</div>
+            <div class="value" id="viewCity">Sala Aljadida</div>
+            <input type="text" id="editCity" style="display:none; margin-top:6px; width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:13px;">
+          </div>
+          <div class="info-item">
+            <div class="label">ADDRESS</div>
+            <div class="value" id="viewAddress">Avenue Hassan II bis imm 06 appt 06</div>
+            <input type="text" id="editAddress" style="display:none; margin-top:6px; width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:13px;">
+          </div>
+          <div class="info-item">
+            <div class="label">MARITAL STATUS</div>
+            <div class="value" id="viewMarital">Divorced</div>
+            <select id="editMarital" style="display:none; margin-top:6px; width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:13px;">
+              <option value="Single">Single</option>
+              <option value="Married">Married</option>
+              <option value="Divorced">Divorced</option>
+            </select>
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="field-row">
-      <div class="field-item">
-        <span class="field-label">City</span>
-        <span class="field-value" id="viewCity">-</span>
-        <input type="text" id="editCity" style="display:none; margin-top:4px;">
-      </div>
-      <div class="field-item">
-        <span class="field-label">CIN</span>
-        <span class="field-value" id="viewCIN">-</span>
-        <input type="text" id="editCIN" style="display:none; margin-top:4px;">
-      </div>
-    </div>
-    <div class="field-row">
-      <div class="field-item">
-        <span class="field-label">Employee ID</span>
-        <span class="field-value" id="viewEmpID">-</span>
-      </div>
-      <div class="field-item">
-        <span class="field-label">Start Date</span>
-        <span class="field-value" id="viewStartDate">-</span>
-        <input type="date" id="editStartDate" style="display:none; margin-top:4px;">
-      </div>
-    </div>
-    <div class="field-row">
-      <div class="field-item">
-        <span class="field-label">End Date</span>
-        <span class="field-value" id="viewEndDate">-</span>
-        <input type="date" id="editEndDate" style="display:none; margin-top:4px;">
-      </div>
-      <div class="field-item">
-        <span class="field-label">Marital Status</span>
-        <span class="field-value" id="viewMarital">-</span>
-        <select id="editMarital" style="display:none; margin-top:4px;">
-          <option value="Single">Single</option>
-          <option value="Married">Married</option>
-          <option value="Divorced">Divorced</option>
-        </select>
-      </div>
-    </div>
-    <div class="field-row">
-      <div class="field-item">
-        <span class="field-label">Role</span>
-        <span class="field-value" id="viewRole">-</span>
-        <select id="editRole" style="display:none; margin-top:4px;">
-          <option value="Admin">Admin</option>
-          <option value="Technician">Technician</option>
-          <option value="Secretary">Secretary</option>
-          <option value="Assistant">Assistant</option>
-          <option value="Assistante">Assistante</option>
-        </select>
-      </div>
-      <div class="field-item">
-        <span class="field-label">Access Control</span>
-        <span class="field-value" id="viewAccess">-</span>
-        <select id="editAccess" style="display:none; margin-top:4px;">
-          <option value="Full Control">Full Control</option>
-          <option value="Limited">Limited</option>
-        </select>
+
+      <!-- Employment & Access Section -->
+      <div class="profile-section">
+        <h3>Employment & Access</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="label">ROLE</div>
+            <div class="value" id="viewRoleDetail">Admin</div>
+            <select id="editRole" style="display:none; margin-top:6px; width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:13px;">
+              <option value="Admin">Admin</option>
+              <option value="Technician">Technician</option>
+              <option value="Secretary">Secretary</option>
+              <option value="Assistant">Assistant</option>
+              <option value="Assistante">Assistante</option>
+            </select>
+          </div>
+          <div class="info-item">
+            <div class="label">ACCESS LEVEL</div>
+            <div class="value" id="viewAccess">Full Control</div>
+            <select id="editAccess" style="display:none; margin-top:6px; width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:13px;">
+              <option value="Full Control">Full Control</option>
+              <option value="Limited">Limited</option>
+            </select>
+          </div>
+          <div class="info-item">
+            <div class="label">STATUS</div>
+            <div class="value" id="viewEndDate">Active</div>
+            <input type="date" id="editEndDate" style="display:none; margin-top:6px; width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:13px;">
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -362,27 +393,22 @@ function openNewProfile() {
   generateEmployeeID();
 }
 
-function openEmployeeList() {
-  goToEmployeeList();
-}
+function openEmployeeList() { goToEmployeeList(); }
 
 function openProfileDetail(emp) {
   currentEmployeeId = emp.id;
   isEditMode = false;
-  
   document.getElementById('mainView').style.display = 'none';
   document.getElementById('employeeListView').style.display = 'none';
   document.getElementById('newProfileView').style.display = 'none';
   document.getElementById('profileDetailView').style.display = 'block';
-  
   renderProfileView(emp);
   updateBlockButton(emp.is_blocked);
 }
 
 function resetForm() {
   ['empFullName', 'empEmail', 'empPhone', 'empAddress', 'empCity', 'empCIN', 'empStartDate', 'empEndDate', 'empMarital', 'empRole', 'empAccess'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.value = '';
+    const el = document.getElementById(id); if(el) el.value = '';
   });
   document.getElementById('empID').value = '';
   currentEmployeeId = null;
@@ -417,39 +443,22 @@ async function saveNewEmployee() {
     role: document.getElementById('empRole').value,
     access: document.getElementById('empAccess').value
   };
-  
   for (const [key, value] of Object.entries(fields)) {
-    if (!value) {
-      alert(`Error: ${key.replace(/([A-Z])/g, ' $1').trim()} is required.`);
-      return;
-    }
+    if (!value) { alert(`Error: ${key.replace(/([A-Z])/g, ' $1').trim()} is required.`); return; }
   }
-  
   const employeeData = {
-    full_name: fields.fullName,
-    email: fields.email,
-    phone: fields.phone,
-    address: fields.address,
-    city: fields.city,
-    cin: fields.cin,
+    full_name: fields.fullName, email: fields.email, phone: fields.phone,
+    address: fields.address, city: fields.city, cin: fields.cin,
     employee_id: document.getElementById('empID').value,
-    start_date: fields.startDate,
-    end_date: document.getElementById('empEndDate').value || null,
-    marital_status: fields.marital,
-    role: fields.role,
-    access_control: fields.access,
-    is_blocked: false,
-    block_note: null
+    start_date: fields.startDate, end_date: document.getElementById('empEndDate').value || null,
+    marital_status: fields.marital, role: fields.role, access_control: fields.access,
+    is_blocked: false, block_note: null
   };
-  
   try {
     const btn = document.querySelector('.save-btn');
-    btn.textContent = 'Saving...';
-    btn.disabled = true;
-    
+    btn.textContent = 'Saving...'; btn.disabled = true;
     const { error } = await supabaseClient.from('employees').insert([employeeData]);
     if (error) throw error;
-    
     alert('Employee profile saved successfully!');
     goToEmployeeList();
   } catch (err) {
@@ -457,8 +466,7 @@ async function saveNewEmployee() {
     alert('Error saving profile: ' + err.message);
   } finally {
     const btn = document.querySelector('.save-btn');
-    btn.textContent = 'Save Profile';
-    btn.disabled = false;
+    btn.textContent = 'Save Profile'; btn.disabled = false;
   }
 }
 
@@ -467,29 +475,19 @@ async function loadEmployeeList() {
   const tbody = document.getElementById('employeeTableBody');
   const countEl = document.getElementById('employeeCount');
   tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px;">Loading...</td></tr>';
-  
   try {
     const { data, error } = await supabaseClient.from('employees').select('*').order('created_at', { ascending: false });
     if (error) throw error;
-    
     countEl.textContent = `${data ? data.length : 0} Employees`;
-    
     if (!data || data.length === 0) {
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:40px; color:#9ca3af;">No employees found</td></tr>';
       return;
     }
-    
     tbody.innerHTML = '';
     data.forEach(emp => {
       const tr = document.createElement('tr');
       const empStr = JSON.stringify(emp).replace(/'/g, "&#39;");
-      tr.innerHTML = `
-        <td><strong>${emp.full_name}</strong></td>
-        <td>${emp.phone}</td>
-        <td>${emp.email}</td>
-        <td>${emp.role}</td>
-        <td><button class="btn-action" onclick='openProfileDetail(${empStr})'>Open</button></td>
-      `;
+      tr.innerHTML = `<td><strong>${emp.full_name}</strong></td><td>${emp.phone}</td><td>${emp.email}</td><td>${emp.role}</td><td><button class="btn-action" onclick='openProfileDetail(${empStr})'>Open</button></td>`;
       tbody.appendChild(tr);
     });
   } catch (err) {
@@ -498,31 +496,42 @@ async function loadEmployeeList() {
   }
 }
 
+// ✅ UPDATED: Render profile with new stylish design
 function renderProfileView(emp) {
-  document.getElementById('viewFullName').textContent = emp.full_name;
-  document.getElementById('viewEmail').textContent = emp.email;
-  document.getElementById('viewPhone').textContent = emp.phone;
-  document.getElementById('viewAddress').textContent = emp.address;
-  document.getElementById('viewCity').textContent = emp.city;
-  document.getElementById('viewCIN').textContent = emp.cin;
-  document.getElementById('viewEmpID').textContent = emp.employee_id;
-  document.getElementById('viewStartDate').textContent = emp.start_date;
-  document.getElementById('viewEndDate').textContent = emp.end_date || 'Active';
-  document.getElementById('viewMarital').textContent = emp.marital_status;
-  document.getElementById('viewRole').textContent = emp.role;
-  document.getElementById('viewAccess').textContent = emp.access_control;
+  const initials = (emp.full_name || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('avatarInitials').textContent = initials || 'EMP';
+  document.getElementById('viewFullName').textContent = emp.full_name || '-';
+  document.getElementById('viewRole').textContent = emp.role || '-';
+  document.getElementById('viewEmpID').textContent = emp.employee_id || '-';
+  document.getElementById('viewCIN').textContent = emp.cin || '-';
+  document.getElementById('viewStartDate').textContent = emp.start_date || '-';
   
-  document.getElementById('editFullName').value = emp.full_name;
-  document.getElementById('editEmail').value = emp.email;
-  document.getElementById('editPhone').value = emp.phone;
-  document.getElementById('editAddress').value = emp.address;
-  document.getElementById('editCity').value = emp.city;
-  document.getElementById('editCIN').value = emp.cin;
-  document.getElementById('editStartDate').value = emp.start_date;
+  const statusEl = document.getElementById('viewStatus');
+  if (emp.is_blocked) {
+    statusEl.textContent = 'Blocked'; statusEl.style.background = '#fee2e2'; statusEl.style.color = '#dc2626';
+  } else if (emp.end_date && new Date(emp.end_date) < new Date()) {
+    statusEl.textContent = 'Inactive'; statusEl.style.background = '#fef3c7'; statusEl.style.color = '#92400e';
+  } else {
+    statusEl.textContent = 'Active'; statusEl.style.background = '#d1fae5'; statusEl.style.color = '#065f46';
+  }
+  
+  document.getElementById('viewEmail').textContent = emp.email || '-';
+  document.getElementById('viewPhone').textContent = emp.phone || '-';
+  document.getElementById('viewCity').textContent = emp.city || '-';
+  document.getElementById('viewAddress').textContent = emp.address || '-';
+  document.getElementById('viewMarital').textContent = emp.marital_status || '-';
+  document.getElementById('viewRoleDetail').textContent = emp.role || '-';
+  document.getElementById('viewAccess').textContent = emp.access_control || '-';
+  document.getElementById('viewEndDate').textContent = emp.end_date ? emp.end_date : 'Active';
+  
+  document.getElementById('editEmail').value = emp.email || '';
+  document.getElementById('editPhone').value = emp.phone || '';
+  document.getElementById('editCity').value = emp.city || '';
+  document.getElementById('editAddress').value = emp.address || '';
+  document.getElementById('editMarital').value = emp.marital_status || '';
+  document.getElementById('editRole').value = emp.role || '';
+  document.getElementById('editAccess').value = emp.access_control || '';
   document.getElementById('editEndDate').value = emp.end_date || '';
-  document.getElementById('editMarital').value = emp.marital_status;
-  document.getElementById('editRole').value = emp.role;
-  document.getElementById('editAccess').value = emp.access_control;
   
   isEditMode = false;
   document.getElementById('editSaveBtn').textContent = 'Edit';
@@ -531,62 +540,48 @@ function renderProfileView(emp) {
 }
 
 function toggleFieldVisibility(show) {
-  const fields = ['editFullName', 'editEmail', 'editPhone', 'editAddress', 'editCity', 'editCIN', 'editStartDate', 'editEndDate', 'editMarital', 'editRole', 'editAccess'];
-  const views = ['viewFullName', 'viewEmail', 'viewPhone', 'viewAddress', 'viewCity', 'viewCIN', 'viewStartDate', 'viewEndDate', 'viewMarital', 'viewRole', 'viewAccess'];
-  
-  fields.forEach(id => document.getElementById(id).style.display = show ? 'block' : 'none');
-  views.forEach(id => document.getElementById(id).style.display = show ? 'none' : 'block');
+  const editFields = ['editEmail', 'editPhone', 'editCity', 'editAddress', 'editMarital', 'editRole', 'editAccess', 'editEndDate'];
+  const viewFields = ['viewEmail', 'viewPhone', 'viewCity', 'viewAddress', 'viewMarital', 'viewRoleDetail', 'viewAccess', 'viewEndDate'];
+  editFields.forEach(id => document.getElementById(id).style.display = show ? 'block' : 'none');
+  viewFields.forEach(id => document.getElementById(id).style.display = show ? 'none' : 'block');
 }
 
 function toggleEditMode() {
   const btn = document.getElementById('editSaveBtn');
   if (!isEditMode) {
-    isEditMode = true;
-    btn.textContent = 'Save';
-    btn.classList.add('primary');
+    isEditMode = true; btn.textContent = 'Save'; btn.classList.add('primary');
     toggleFieldVisibility(true);
-  } else {
-    saveProfileChanges();
-  }
+  } else { saveProfileChanges(); }
 }
 
 async function saveProfileChanges() {
   if (!currentEmployeeId || !supabaseClient) return;
-  
   const btn = document.getElementById('editSaveBtn');
-  btn.textContent = 'Saving...';
-  btn.disabled = true;
-  
+  btn.textContent = 'Saving...'; btn.disabled = true;
   const updates = {
-    full_name: document.getElementById('editFullName').value,
+    full_name: document.getElementById('viewFullName').textContent,
     email: document.getElementById('editEmail').value,
     phone: document.getElementById('editPhone').value,
     address: document.getElementById('editAddress').value,
     city: document.getElementById('editCity').value,
-    cin: document.getElementById('editCIN').value,
-    start_date: document.getElementById('editStartDate').value,
+    cin: document.getElementById('viewCIN').textContent,
+    start_date: document.getElementById('viewStartDate').textContent,
     end_date: document.getElementById('editEndDate').value || null,
     marital_status: document.getElementById('editMarital').value,
     role: document.getElementById('editRole').value,
     access_control: document.getElementById('editAccess').value
   };
-  
   try {
     const { error } = await supabaseClient.from('employees').update(updates).eq('id', currentEmployeeId);
     if (error) throw error;
-    
     const { data } = await supabaseClient.from('employees').select('*').eq('id', currentEmployeeId).single();
     renderProfileView(data);
-    isEditMode = false;
-    btn.textContent = 'Edit';
-    btn.classList.remove('primary');
+    isEditMode = false; btn.textContent = 'Edit'; btn.classList.remove('primary');
     alert('Profile updated successfully!');
   } catch (err) {
     console.error('Update error:', err);
     alert('Error saving changes: ' + err.message);
-  } finally {
-    btn.disabled = false;
-  }
+  } finally { btn.disabled = false; }
 }
 
 function handleBlockUnblock() {
@@ -594,8 +589,7 @@ function handleBlockUnblock() {
   supabaseClient.from('employees').select('is_blocked').eq('id', currentEmployeeId).single().then(({ data }) => {
     if (data && data.is_blocked) {
       supabaseClient.from('employees').update({ is_blocked: false, block_note: null }).eq('id', currentEmployeeId).then(() => {
-        alert('Employee unblocked successfully!');
-        loadEmployeeList();
+        alert('Employee unblocked successfully!'); loadEmployeeList();
       });
     } else {
       pendingAction = 'block';
@@ -608,15 +602,8 @@ function handleBlockUnblock() {
 
 function updateBlockButton(isBlocked) {
   const btn = document.getElementById('blockUnblockBtn');
-  if (isBlocked) {
-    btn.textContent = 'Unblock';
-    btn.style.background = '#16a34a';
-    btn.style.color = '#fff';
-  } else {
-    btn.textContent = 'Block';
-    btn.style.background = '#e5e7eb';
-    btn.style.color = '#111827';
-  }
+  if (isBlocked) { btn.textContent = 'Unblock'; btn.style.background = '#16a34a'; btn.style.color = '#fff'; }
+  else { btn.textContent = 'Block'; btn.style.background = '#e5e7eb'; btn.style.color = '#111827'; }
 }
 
 function showDeleteModal() {
@@ -627,24 +614,14 @@ function showDeleteModal() {
   document.getElementById('noteModal').style.display = 'flex';
 }
 
-function closeModal() {
-  document.getElementById('noteModal').style.display = 'none';
-  pendingAction = null;
-}
+function closeModal() { document.getElementById('noteModal').style.display = 'none'; pendingAction = null; }
 
 async function confirmModalAction() {
   const note = document.getElementById('modalNote').value.trim();
-  if (!note) {
-    alert('Note is mandatory.');
-    return;
-  }
-  
+  if (!note) { alert('Note is mandatory.'); return; }
   if (!currentEmployeeId || !supabaseClient) return;
-  
   const btn = document.getElementById('modalConfirmBtn');
-  btn.textContent = 'Processing...';
-  btn.disabled = true;
-  
+  btn.textContent = 'Processing...'; btn.disabled = true;
   try {
     if (pendingAction === 'block') {
       const { error } = await supabaseClient.from('employees').update({ is_blocked: true, block_note: note }).eq('id', currentEmployeeId);
@@ -655,20 +632,28 @@ async function confirmModalAction() {
       if (error) throw error;
       alert('Employee deleted permanently.');
     }
-    closeModal();
-    goToEmployeeList();
+    closeModal(); goToEmployeeList();
   } catch (err) {
     console.error('Action error:', err);
     alert('Error: ' + err.message);
-  } finally {
-    btn.textContent = 'Confirm';
-    btn.disabled = false;
+  } finally { btn.textContent = 'Confirm'; btn.disabled = false; }
+}
+
+function handleAvatarUpload(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = document.getElementById('avatarImage');
+      const wrapper = document.getElementById('avatarWrapper');
+      img.src = e.target.result;
+      wrapper.classList.add('has-image');
+    };
+    reader.readAsDataURL(file);
   }
 }
 
-window.addEventListener('beforeunload', function() {
-  goToMainView();
-});
+window.addEventListener('beforeunload', function() { goToMainView(); });
 </script>
 </body>
 </html>
