@@ -368,6 +368,64 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+// ✅ SURGICAL ADDITION: Upload avatar to Supabase Storage
+async function uploadAvatarToSupabase(file, employeeId) {
+  if (!supabaseClient) return null;
+  
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${employeeId}_${Date.now()}.${fileExt}`;
+    const filePath = `avatars/${fileName}`;
+    
+    const { data, error } = await supabaseClient.storage
+      .from('employee-photos')
+      .upload(filePath, file, { upsert: true });
+    
+    if (error) throw error;
+    
+    const { data: { publicUrl } } = supabaseClient.storage
+      .from('employee-photos')
+      .getPublicUrl(filePath);
+    
+    return publicUrl;
+  } catch (err) {
+    console.error('Avatar upload error:', err);
+    alert('Error uploading avatar: ' + err.message);
+    return null;
+  }
+}
+
+// ✅ UPDATED: handleAvatarUpload now saves to Supabase
+async function handleAvatarUpload(event) {
+  const file = event.target.files[0];
+  if (!file || !currentEmployeeId) return;
+  
+  const wrapper = document.getElementById('avatarWrapper');
+  const img = document.getElementById('avatarImage');
+  
+  // Show preview immediately
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    img.src = e.target.result;
+    wrapper.classList.add('has-image');
+  };
+  reader.readAsDataURL(file);
+  
+  // Upload to Supabase and save URL to database
+  const avatarUrl = await uploadAvatarToSupabase(file, currentEmployeeId);
+  if (avatarUrl) {
+    const { error } = await supabaseClient
+      .from('employees')
+      .update({ avatar_url: avatarUrl })
+      .eq('id', currentEmployeeId);
+    
+    if (error) {
+      console.error('Error saving avatar URL:', error);
+      alert('Avatar uploaded but could not save to database');
+    }
+  }
+}
+
 function goToMainView() {
   document.getElementById('mainView').style.display = 'flex';
   document.getElementById('employeeListView').style.display = 'none';
@@ -496,10 +554,19 @@ async function loadEmployeeList() {
   }
 }
 
-// ✅ UPDATED: Render profile with new stylish design
+// ✅ UPDATED: Render profile with new stylish design + avatar loading
 function renderProfileView(emp) {
   const initials = (emp.full_name || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('avatarInitials').textContent = initials || 'EMP';
+  
+  // ✅ Load saved avatar if exists
+  if (emp.avatar_url) {
+    const img = document.getElementById('avatarImage');
+    const wrapper = document.getElementById('avatarWrapper');
+    img.src = emp.avatar_url;
+    wrapper.classList.add('has-image');
+  }
+  
   document.getElementById('viewFullName').textContent = emp.full_name || '-';
   document.getElementById('viewRole').textContent = emp.role || '-';
   document.getElementById('viewEmpID').textContent = emp.employee_id || '-';
@@ -637,20 +704,6 @@ async function confirmModalAction() {
     console.error('Action error:', err);
     alert('Error: ' + err.message);
   } finally { btn.textContent = 'Confirm'; btn.disabled = false; }
-}
-
-function handleAvatarUpload(event) {
-  const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const img = document.getElementById('avatarImage');
-      const wrapper = document.getElementById('avatarWrapper');
-      img.src = e.target.result;
-      wrapper.classList.add('has-image');
-    };
-    reader.readAsDataURL(file);
-  }
 }
 
 window.addEventListener('beforeunload', function() { goToMainView(); });
