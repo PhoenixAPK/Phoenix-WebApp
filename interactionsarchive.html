@@ -147,8 +147,53 @@
        .month-card.empty { opacity: 0.6; cursor: default; }
        .month-card.empty:hover { transform: none; background: #f8f9fa; border-color: #e5e7eb; box-shadow: none; }
        
-       /* 🔹 QUEUE TABLE */
-       .inc-table-wrap { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-top: 32px; }
+       /* 🔹 QUEUE TABLE - IDENTICAL FOR BOTH SEARCH AND MONTHLY */
+       .queue-container { 
+           background: #fff; 
+           border: 1px solid #e5e7eb; 
+           border-radius: 12px; 
+           overflow: hidden; 
+           box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+           margin-top: 32px; 
+       }
+       .queue-header-box { 
+           background: #f9fafb; 
+           padding: 16px 20px; 
+           display: flex; 
+           justify-content: space-between; 
+           align-items: center; 
+           border-bottom: 1px solid #e5e7eb; 
+       }
+       .header-left {
+           display: flex;
+           align-items: center;
+           gap: 16px;
+       }
+       .return-btn {
+           width: 90px;
+           height: 34px;
+           background: #e5e7eb;
+           border: none;
+           border-radius: 6px;
+           font-size: 13px;
+           font-weight: 600;
+           cursor: pointer;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           gap: 4px;
+       }
+       .return-btn:hover { background: #d1d5db; }
+       .header-title {
+           font-weight: 700;
+           font-size: 1rem;
+           color: #111827;
+       }
+       .stats-count {
+           font-size: 0.875rem;
+           font-weight: 500;
+           color: #6b7280;
+       }
        table { width: 100%; border-collapse: collapse; }
        thead { background: #fafafa; border-bottom: 2px solid #e5e7eb; }
        th { padding: 16px 24px; font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.06em; text-align: center; }
@@ -233,13 +278,13 @@
        
        <!-- 🔹 SEARCH RESULTS (Hidden by default) -->
        <div id="search-results" style="display:none;">
-           <div class="inc-table-wrap">
-               <div class="queue-header-box" style="background:#f9fafb; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e5e7eb;">
-                   <div style="display:flex; align-items:center; gap:16px;">
-                       <button class="back-btn" onclick="resetToMainView()">← Return</button>
-                       <div class="header-title" style="font-weight:700; font-size:1rem; color:#111827;">ARCHIVED ITEMS</div>
+           <div class="queue-container">
+               <div class="queue-header-box">
+                   <div class="header-left">
+                       <button class="return-btn" onclick="resetToMainView()">← Return</button>
+                       <div class="header-title">ARCHIVED ITEMS</div>
                    </div>
-                   <div class="stats-count" id="search-count" style="font-size:0.875rem; font-weight:500; color:#6b7280;">0 Items</div>
+                   <div class="stats-count" id="search-count">0 Items</div>
                </div>
                <table>
                    <thead>
@@ -271,9 +316,9 @@
        const MIN_YEAR = 2026;
        const MAX_YEAR = 2036;
        const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-       let searchRequestId = 0; // ✅ FIX: Prevents async race conditions
+       let searchRequestId = 0;
        
-       // 🔹 ROW MAP FOR ARCHIVE QUEUES (Same as incRowMap in interactions.html)
+       // 🔹 ROW MAP FOR ARCHIVE QUEUES
        const archiveRowMap = {};
        
        // 🔹 UTILITIES
@@ -300,20 +345,18 @@
            if (view === 'main') renderCalendar();
            else loadMonthQueue(currentArchiveYear, monthIndex);
        }
-       
-       function resetToMainView() {
+       function resetToMainView() { 
            document.getElementById('search-results').style.display = 'none';
            document.querySelector('.months-grid').style.display = 'grid';
            renderCalendar();
        }
-       
        function showMonth(monthIndex) { navigateTo('month', monthIndex); }
        window.addEventListener('popstate', (e) => {
            if (e.state) navigateTo(e.state.view, e.state.monthIndex);
            else navigateTo('main');
        });
        
-       // 🔹 ✅ FIXED SEARCH LOGIC (Race Condition Safe)
+       // 🔹 SEARCH LOGIC
        async function performSearch() {
            searchRequestId++;
            const currentRequestId = searchRequestId;
@@ -323,7 +366,6 @@
            const email = document.getElementById('s-email').value.trim().toLowerCase();
            const address = document.getElementById('s-address').value.trim().toLowerCase();
            
-           // If empty, immediately reset to cards and stop
            if (!name && !phone && !email && !address) {
                resetToMainView();
                return;
@@ -339,7 +381,6 @@
                const { data, error } = await query.order('created_at', { ascending: false }).limit(100);
                if (error) throw error;
                
-               // ✅ CRITICAL FIX: Ignore this response if a newer search has been triggered
                if (currentRequestId !== searchRequestId) return;
                
                const tbody = document.getElementById('search-table-body');
@@ -369,7 +410,6 @@
                        </tr>`;
                    }).join('');
                } else {
-                   // No results found, but inputs are not empty
                    if (currentRequestId !== searchRequestId) return;
                    resetToMainView();
                }
@@ -436,7 +476,7 @@
            renderCalendar();
        }
        
-       // 🔹 MONTH QUEUE GENERATION
+       // 🔹 MONTH QUEUE GENERATION - ✅ FIXED RETURN BUTTON HERE
        function initMonthSections() {
            const container = document.getElementById('month-views-container');
            MONTHS.forEach((monthName, i) => {
@@ -444,11 +484,14 @@
                section.id = `month-${i}`;
                section.className = 'view-section month-view';
                section.innerHTML = `
-                   <div class="section-header">
-                       <button class="back-btn" onclick="resetToMainView()">← Return</button>
-                       <h2 class="page-title">${monthName} Archive</h2>
-                   </div>
-                   <div class="inc-table-wrap">
+                   <div class="queue-container">
+                       <div class="queue-header-box">
+                           <div class="header-left">
+                               <button class="return-btn" onclick="navigateTo('main')">← Return</button>
+                               <div class="header-title">${monthName.toUpperCase()} ARCHIVE</div>
+                           </div>
+                           <div class="stats-count" id="month-count-${i}">0 Items</div>
+                       </div>
                        <table>
                            <thead>
                                <tr><th>ID</th><th>NAME / BUSINESS</th><th>CITY</th><th>PICS</th><th>ACTION</th></tr>
@@ -463,6 +506,7 @@
        
        async function loadMonthQueue(year, monthIndex) {
            const tbody = document.getElementById(`queue-list-${monthIndex}`);
+           const countLabel = document.getElementById(`month-count-${monthIndex}`);
            tbody.innerHTML = '<tr><td colspan="5" class="inc-empty">🔄 Loading archived items…</td></tr>';
            const start = new Date(Date.UTC(year, monthIndex, 1, 0, 0, 0));
            const end = new Date(Date.UTC(year, monthIndex + 1, 0, 23, 59, 59, 999));
@@ -472,10 +516,12 @@
                if (error) throw error;
                if (!data || data.length === 0) { 
                    tbody.innerHTML = `<tr><td colspan="5" class="inc-empty">✅ No archived items found</td></tr>`; 
+                   countLabel.innerText = '0 Items';
                    return; 
                }
                
-               // ✅ CACHE ROWS IN archiveRowMap (Same as incRowMap in interactions.html)
+               countLabel.innerText = `${data.length} Items`;
+               
                archiveRowMap[`month-${monthIndex}`] = {};
                data.forEach(r => { archiveRowMap[`month-${monthIndex}`][String(r.id)] = r; });
                
@@ -502,10 +548,8 @@
            }
        }
        
-       // 🔹 ✅ EXACT COPY OF incOpenFromIncomplete FROM interactions.html
+       // 🔹 OPEN/INVOICE FUNCTIONS
        function archiveOpen(id, action = 'open') {
-           // ✅ Get record from cached map (same as incRowMap strategy)
-           // Find the record in any month's cache
            let r = null;
            for (const key in archiveRowMap) {
                if (archiveRowMap[key][id]) {
@@ -517,7 +561,6 @@
            if (!r) { showToast('❌ Request data not found', 'error'); return; }
            
            if (action === 'invoice') {
-               // 🔹 INVOICE: Detect mode and open admininvoice accordingly (EXACT COPY FROM interactions.html)
                const mode = (r.mode || '').toLowerCase();
                const modeParam = mode === 'client' ? 'client' : 'entrepreneur';
                const params = new URLSearchParams({ 
@@ -533,7 +576,6 @@
                    note: r.note || '' 
                });
                
-               // Try to open in parent frame if embedded (same logic as interactions.html)
                if (window.parent && window.parent !== window) {
                    const frame = window.parent.document.getElementById('content-frame');
                    if (frame) { 
@@ -542,18 +584,15 @@
                        return; 
                    }
                }
-               // Fallback to direct navigation
                window.location.href = `admininvoice.html?${params}`;
                return;
            }
            
-           // 🔹 OPEN: EXACT COPY OF loadOriginal FROM interactions.html
-           // This redirects to interactions.html with the data encoded in URL
            const encodedData = encodeURIComponent(JSON.stringify(r));
            window.location.href = `interactions.html?load=${encodedData}`;
        }
        
-       // 🔹 AUTO-ARCHIVE ROLLOVER
+       // 🔹 AUTO-ARCHIVE
        async function autoArchivePreviousMonth() {
            const now = new Date();
            let prevMonth = now.getMonth() - 1;
